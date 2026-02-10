@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Burger Flow - Accueil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <!-- Icon similar to ChefHat in the app -->
+                    <div class="bg-red-600 p-2 rounded-lg text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 9.08 0A5.11 5.11 0 0 1 18.59 6 4 4 0 0 1 20 13.87V21H6Z"/><path d="M6 17h14"/></svg>
+                    </div>
+                    <span class="text-xl font-extrabold tracking-tight text-slate-800">BURGER FLOW</span>
+                </div>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#" class="text-slate-600 hover:text-red-600 font-medium transition-colors">Accueil</a>
+                    <a href="#concept" class="text-slate-600 hover:text-red-600 font-medium transition-colors">Le Concept</a>
+                    <a href="#features" class="text-slate-600 hover:text-red-600 font-medium transition-colors">Fonctionnalités</a>
+                    <a href="old.html" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-full font-bold shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
+                        Jouer
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative bg-white overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32 pt-20 px-4 sm:px-6 lg:px-8">
+                <main class="mt-10 mx-auto max-w-7xl sm:mt-12 md:mt-16 lg:mt-20 xl:mt-28">
+                    <div class="sm:text-center lg:text-left">
+                        <h1 class="text-4xl tracking-tight font-extrabold text-slate-900 sm:text-5xl md:text-6xl mb-6">
+                            <span class="block">Optimisez votre</span>
+                            <span class="block text-red-600">Ligne de Production</span>
+                        </h1>
+                        <p class="mt-3 text-base text-slate-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                            Plongez dans une simulation interactive de gestion Lean Management. Maîtrisez les flux, gérez les stocks et servez vos clients en temps record dans <strong>Burger Factory</strong>.
+                        </p>
+                        <div class="mt-8 sm:mt-10 sm:flex sm:justify-center lg:justify-start gap-4">
+                            <div class="rounded-md shadow">
+                                <a href="old.html" class="w-full flex items-center justify-center px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white bg-red-600 hover:bg-red-700 md:py-4 md:text-xl md:px-10 transition-all shadow-lg hover:shadow-red-500/30">
+                                    Lancer Burger Factory
+                                </a>
+                            </div>
+                            <div class="mt-3 sm:mt-0">
+                                <a href="#concept" class="w-full flex items-center justify-center px-8 py-4 border border-slate-200 text-lg font-bold rounded-xl text-slate-700 bg-slate-50 hover:bg-slate-100 md:py-4 md:text-xl md:px-10 transition-all">
+                                    En savoir plus
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+        <div class="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 bg-slate-100 flex items-center justify-center border-l border-slate-200">
+            <div class="relative w-full h-full flex items-center justify-center overflow-hidden">
+                <!-- Abstract representation of the factory -->
+                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                <div class="text-[150px] animate-bounce drop-shadow-2xl">🍔</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Concept Section -->
+    <section id="concept" class="py-20 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-base text-red-600 font-bold tracking-wide uppercase">Pédagogie</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                    Les 5M du Lean Management
+                </p>
+                <p class="mt-4 max-w-2xl text-xl text-slate-500 mx-auto">
+                    Apprenez à identifier et classer les ressources de production.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Matière & Stocks</h3>
+                    <p class="text-slate-600">Gestion des ingrédients, rotation FIFO et approvisionnement en flux tendu.</p>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center text-yellow-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Méthode & Temps</h3>
+                    <p class="text-slate-600">Optimisation des processus de cuisson et d'assemblage pour réduire l'attente.</p>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">Milieu & Flux</h3>
+                    <p class="text-slate-600">Organisation spatiale de la cuisine pour éviter les croisements et garantir l'hygiène.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <span class="text-2xl font-bold text-white">Burger Flow</span>
+                <p class="text-sm mt-1">Simulation pédagogique de production.</p>
+            </div>
+            <div class="flex space-x-6">
+                <a href="#" class="hover:text-white transition-colors">Mentions légales</a>
+                <a href="#" class="hover:text-white transition-colors">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
