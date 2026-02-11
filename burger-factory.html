@@ -110,7 +110,7 @@
         /* Runner -> Counter */
         @keyframes trayToCounter { 
             0% { left: 82%; top: 40%; opacity: 1; transform: scale(1); } 
-            100% { left: 93%; top: 40%; opacity: 0; transform: scale(0.6); } 
+            100% { left: 98%; top: 15%; opacity: 0; transform: scale(0.6); } 
         }
         
         .animate-stock-to-grill { animation: stockColdToGrill 1s forwards ease-in-out; }
@@ -129,6 +129,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
+        // Raccourci clavier pour la documentation : ALT + D
         const { useState, useEffect, useRef } = React;
 
         // --- BIBLIOTHÈQUE D'ICÔNES SVG ---
@@ -188,29 +189,25 @@
             layout_general: {
                 title: "Organisation Optimale d'une Cuisine",
                 content: [
-                    "Principe du 'Speedee Service' : Minimiser les pas.",
-                    "Zonage : Zone Chaude (Grill/Frites) vs Zone Froide (Assemblage).",
-                    "Flux : De l'arrière (Stock) vers l'avant (Comptoir) sans croisement.",
-                    "Ergonomie : Postes 'clamshell' et 'MFY' pour réduire les gestes.",
-                    "La clé : Le produit avance toujours vers le client."
+                    "Principe du 'Speedee Service' : minimiser les pas.",
+                    "Zonage : zone chaude (grill/frites) vs zone froide (assemblage).",
+                    "Flux : de l'arrière (stock) vers l'avant (comptoir) sans croisement."
                 ]
             },
             stock_cold: { 
                 title: "Chambre Froide / Congélateur", 
                 content: [
                     "Rotation FIFO (First In, First Out) stricte.",
-                    "Traçabilité : Dates limites affichées.",
-                    "Surgelé (-18°C) pour Steaks (100% bœuf) et Frites.",
-                    "Frais (+4°C) pour Salades/Fromage.",
-                    "Organisation visuelle (Étiquettes couleur)."
+                    "Traçabilité : dates limites affichées.",
+                    "Surgelé (-18°C) pour steaks (100% bœuf) et frites.",
+                    "Organisation visuelle (étiquettes couleur)."
                 ] 
             },
             stock_dry: {
                 title: "Stockage Sec (Réserve)",
                 content: [
-                    "Gestion 5S (Une place pour chaque chose).",
-                    "Stockage Pains, Sauces, Emballages.",
-                    "Flux tendu (Just-In-Time) : Livraisons fréquentes.",
+                    "Gestion 5S (une place pour chaque chose).",
+                    "Stockage pains, sauces, emballages.",
                     "Contrôle stocks hebdomadaire.",
                     "Proximité zone de livraison."
                 ]
@@ -218,19 +215,18 @@
             grill: { 
                 title: "Grill Clamshell (Double-Face)", 
                 content: [
-                    "Technologie : Cuisson bilatérale (haut/bas).",
-                    "Temps Standard : ~38-42 sec (Steak 45g) à ~200°C.",
-                    "Sécurité : Température interne > 69°C (anti-bactérie).",
-                    "Process : Aucun ajout de gras, Salage/Poivrage après cuisson.",
-                    "Nettoyage : Raclage après chaque tournée."
+                    "Technologie : cuisson bilatérale (haut/bas).",
+                    "Temps standard : ~38-42 sec (steak 45g) à ~200°C.",
+                    "Sécurité : température interne > 69°C (anti-bactérie).",
+                    "Nettoyage : raclage après chaque tournée."
                 ] 
             },
             toaster: { 
                 title: "Toaster Vertical Rapide", 
                 content: [
                     "Temps de passage : 15 à 22 secondes.",
-                    "Caramélisation : Rend la mie imperméable aux sauces.",
-                    "Tri automatique : Couronne (haut) et Talon (bas).",
+                    "Caramélisation : rend la mie imperméable aux sauces.",
+                    "Tri automatique : couronne (haut) et talon (bas).",
                     "Réglage température fixe pour dorure constante.",
                     "Maintien au chaud (buffer) limité."
                 ] 
@@ -238,41 +234,41 @@
             frites: { 
                 title: "Station Frites Automatisée", 
                 content: [
-                    "Standardisation : Partenariat J.R. Simplot (1967) pour frites calibrées surgelées.",
-                    "Cuisson : Automatique (3 min à 175°C) avec relevage panier auto.",
-                    "Qualité : Salage en 'W' pour répartition homogène.",
-                    "Hold Time : Jetées si > 7 min en bac (garantie fraîcheur).",
+                    "Standardisation : partenariat J.R. Simplot (1967) pour frites calibrées surgelées.",
+                    "Cuisson : automatique (3 min à 175°C) avec relevage panier auto.",
+                    "Qualité : salage en 'W' pour répartition homogène.",
+                    "Hold Time : jetées si > 7 min en bac (garantie fraîcheur).",
                     "Filtrage huile quotidien."
                 ] 
             },
             assembly: { 
                 title: "Table de Préparation (MFY)", 
                 content: [
-                    "Système 'Made For You' (1998) : Assemblage à la commande (Flux tiré).",
-                    "Ergonomie : Tous ingrédients à portée de main.",
-                    "Poka-Yoke : Pistolets à sauce délivrant la dose exacte (10ml/5ml).",
-                    "Standard : Ordre d'empilage strict (Pain > Sauce > Oignon > Cornichon > Fromage > Viande).",
-                    "KDS (Kitchen Display System) : Écrans remplaçant les tickets papier."
+                    "Système 'Made For You' (1998) : assemblage à la commande (flux tiré).",
+                    "Ergonomie : tous ingrédients à portée de main.",
+                    "Poka-Yoke : pistolets à sauce délivrant la dose exacte (10ml/5ml).",
+                    "Standard : ordre d'empilage strict (pain > sauce > oignon > cornichon > fromage > viande).",
+                    "KDS (Kitchen Display System) : écrans remplaçant les tickets papier."
                 ] 
             },
             menu: { 
                 title: "Runner / Expéditeur", 
                 content: [
-                    "Rôle : Consolidation finale (Burger + Frites + Boisson).",
-                    "Contrôle : Vérification visuelle de la commande (Accuracy).",
-                    "Précision : Balances connectées (IA) pour poids sacs.",
-                    "Priorisation : Commandes sur place vs Livraison.",
-                    "Objectif : Service complet < 90s."
+                    "Rôle : consolidation finale (burger + frites + boisson).",
+                    "Contrôle : vérification visuelle de la commande (Accuracy).",
+                    "Précision : balances connectées (IA) pour poids sacs.",
+                    "Priorisation : commandes sur place vs livraison.",
+                    "Objectif : service complet < 90s."
                 ] 
             },
             counter: {
                 title: "Comptoir & Service",
                 content: [
-                    "Philosophie QSC&V : Qualité, Service, Propreté, Valeur.",
-                    "Accueil : Standardisé (Sourire, 'Bonjour', Prise de congé).",
-                    "Gestion Flux : Séparation Prise commande / Retrait.",
-                    "Omnicanal : Gestion fluide des bornes et du comptoir.",
-                    "Satisfaction : Mesure continue via enquêtes clients."
+                    "Philosophie QSC&V : qualité, service, propreté, valeur.",
+                    "Accueil : standardisé (sourire, 'Bonjour', prise de congé).",
+                    "Gestion flux : séparation prise commande / retrait.",
+                    "Omnicanal : gestion fluide des bornes et du comptoir.",
+                    "Satisfaction : mesure continue via enquêtes clients."
                 ]
             }
         };
@@ -315,7 +311,6 @@
 
         function BurgerFactoryApp() {
           const [gameState, setGameState] = useState('intro'); 
-          const [isPaused, setIsPaused] = useState(false);
           const [score, setScore] = useState(0);
           const [feedback, setFeedback] = useState(null);
           
@@ -336,6 +331,20 @@
           const timerRef = useRef(null);
           const gameLoopRef = useRef(null);
           const clientGenRef = useRef(null);
+
+          useEffect(() => {
+            const handleKeyDown = (e) => {
+                if (e.altKey && e.key.toLowerCase() === 'd') {
+                    setGameState(prev => {
+                        if (prev === 'intro') return 'docs';
+                        if (prev === 'docs') return 'intro';
+                        return prev;
+                    });
+                }
+            };
+            window.addEventListener('keydown', handleKeyDown);
+            return () => window.removeEventListener('keydown', handleKeyDown);
+          }, []);
 
           const spawnMovingItem = (type) => {
               const id = Date.now() + Math.random();
@@ -380,7 +389,7 @@
           };
 
           useEffect(() => {
-            if ((gameState === 'simulation') && !showHelp && !explanationTarget && !isPaused) {
+            if ((gameState === 'simulation') && !showHelp && !explanationTarget) {
               clientGenRef.current = setInterval(() => setClients(c => c < 8 ? c + 1 : c), 6000); 
 
               gameLoopRef.current = setInterval(() => {
@@ -409,14 +418,14 @@
               }, 100);
             }
             return () => { clearInterval(clientGenRef.current); clearInterval(gameLoopRef.current); };
-          }, [gameState, grillStatus, toasterStatus, fritesStatus, prepStatus, menuStatus, showHelp, explanationTarget, isPaused, clients]);
+          }, [gameState, grillStatus, toasterStatus, fritesStatus, prepStatus, menuStatus, showHelp, explanationTarget, clients]);
 
           const startGrill = () => { if (grillStatus.state === 'empty') { spawnMovingItem('steak_raw'); setTimeout(() => setGrillStatus({ state: 'cooking', progress: 0 }), 800); }};
           const startToaster = () => { if (toasterStatus.state === 'empty') { spawnMovingItem('bun_raw'); setTimeout(() => setToasterStatus({ state: 'cooking', progress: 0 }), 800); }};
           const startFrites = () => { if (fritesStatus.state === 'empty') { spawnMovingItem('fries_raw'); setTimeout(() => setFritesStatus({ state: 'cooking', progress: 0 }), 800); }};
 
           const resetGame = (target) => {
-            setGameState(target); setIsPaused(false); setScore(0); setBurgersMade(0);
+            setGameState(target); setScore(0); setBurgersMade(0);
             setGrillStatus({ state: 'empty', progress: 0 }); setToasterStatus({ state: 'empty', progress: 0 });
             setFritesStatus({ state: 'empty', progress: 0 }); setPrepStatus({ state: 'empty', progress: 0 });
             setMenuStatus({ state: 'empty', progress: 0 }); setClients(3); setMovingItems([]);
@@ -454,19 +463,6 @@
                   </div>
               )}
 
-              {/* HUD (Sans Timer) */}
-              <div className="flex justify-between items-center mb-4 bg-slate-800 text-white p-3 rounded-xl shadow-lg border border-slate-700">
-                <div className="flex gap-4 items-center">
-                    <div className="bg-slate-700 px-4 py-2 rounded-lg flex gap-2 items-center border border-slate-600">
-                        <Icon name="Tray" size={18} className="text-green-300"/> 
-                        <span className="font-mono text-xl font-bold">{burgersMade}</span>
-                    </div>
-                </div>
-                <div className="flex gap-4 items-center">
-                     <span className="font-bold text-yellow-400 text-2xl drop-shadow-md">{score} pts</span>
-                     <button onClick={() => setShowHelp(true)} className="p-2 hover:bg-slate-700 rounded-full transition-colors"><Icon name="HelpCircle" size={24} className="text-slate-400 hover:text-white"/></button>
-                </div>
-              </div>
 
               {feedback && (
                   <div className="absolute top-24 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
@@ -475,21 +471,13 @@
               )}
 
               {/* PLAN DE MASSE */}
-              <div className={`relative w-full h-[600px] border-4 border-slate-700 rounded-xl overflow-hidden shadow-2xl flex bg-slate-900 ${isPaused ? 'grayscale blur-sm' : ''}`}>
-                 
-                 {isPaused && (
-                     <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/40">
-                         <button onClick={() => setIsPaused(false)} className="bg-yellow-500 text-white px-8 py-3 rounded-full font-bold shadow-xl flex items-center gap-2 hover:scale-105 transition transform border-4 border-white">
-                             <Icon name="Play" size={24} fill="currentColor"/> REPRENDRE
-                         </button>
-                     </div>
-                 )}
+              <div className="relative w-full h-[600px] border-4 border-slate-700 rounded-xl overflow-hidden shadow-2xl flex bg-slate-900">
 
                  {/* ZONE CUISINE (80%) */}
                  <div className="w-[80%] h-full bg-floor-kitchen relative border-r-4 border-slate-600">
                     <div className="absolute inset-0 bg-pattern-kitchen pointer-events-none"></div>
                     <div className="absolute top-2 left-2 text-slate-400 font-bold text-xs tracking-widest uppercase border border-slate-300 px-2 py-0.5 rounded bg-white/50 backdrop-blur-sm">
-                        Cuisine (Back of House)
+                        Cuisine 
                         <button onClick={() => setExplanationTarget('layout_general')} className="ml-2 bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-[10px] hover:bg-blue-200 transition-colors inline-flex items-center gap-1 border border-blue-200">
                             <Icon name="Layout" size={10}/> Organisation
                         </button>
@@ -521,7 +509,7 @@
                         <path d="M662,250 L750,240" fill="none" stroke="#333" strokeWidth="2" markerEnd="url(#arrow)" />
 
                          {/* 8. Runner (Right) -> Counter (Far Right) */}
-                        <path d="M885,240 L935,240" fill="none" stroke="#333" strokeWidth="2" markerEnd="url(#arrow)" />
+                        <path d="M890,275 C940,275 940,75 990,75" fill="none" stroke="#333" strokeWidth="2" markerEnd="url(#arrow)" />
                     </svg>
 
                     {/* --- ZONES STOCKAGE SÉPARÉES (Alignement Gauche) --- */}
@@ -546,7 +534,7 @@
                     
                     {/* 1. Toaster (Haut - Aligné avec Stock Sec) */}
                     <div className="absolute top-[10%] left-[22%] w-32 h-24 bg-white border border-gray-400 shadow-xl flex flex-col z-20 rounded-md overflow-hidden">
-                        <div className="bg-slate-100 border-b border-gray-300 p-1 text-[9px] font-bold text-center uppercase tracking-wider text-slate-600">Toaster Vertical</div>
+                        <div className="bg-slate-100 border-b border-gray-300 p-1 text-[9px] font-bold text-center uppercase tracking-wider text-slate-600">2. Toaster Vertical</div>
                         <div className="flex-1 p-1">
                              <SimulationStation name="Toasting Pain" iconName="Box" color="bg-yellow-500" type="toaster" className="w-full h-full" status={toasterStatus.state} progress={toasterStatus.progress} onClick={startToaster} onShowStandard={() => setExplanationTarget('toaster')} showInfoButton={true}/>
                         </div>
@@ -554,7 +542,7 @@
 
                     {/* 2. Grill (Milieu - Aligné avec Chambre Froide Haut) */}
                     <div className="absolute top-[40%] left-[22%] w-32 h-24 bg-white border border-gray-400 shadow-xl flex flex-col z-20 rounded-md overflow-hidden">
-                        <div className="bg-slate-100 border-b border-gray-300 p-1 text-[9px] font-bold text-center uppercase tracking-wider text-slate-600">Grill Clamshell</div>
+                        <div className="bg-slate-100 border-b border-gray-300 p-1 text-[9px] font-bold text-center uppercase tracking-wider text-slate-600">1. Grill Clamshell</div>
                         <div className="flex-1 p-1">
                              <SimulationStation name="Cuisson Viande" iconName="Flame" color="bg-red-500" type="grill" className="w-full h-full" status={grillStatus.state} progress={grillStatus.progress} onClick={startGrill} onShowStandard={() => setExplanationTarget('grill')} showInfoButton={true}/>
                         </div>
@@ -562,7 +550,7 @@
 
                     {/* 3. Frites (Bas - Aligné avec Chambre Froide Bas) */}
                     <div className="absolute top-[75%] left-[22%] w-32 h-24 bg-white border-2 border-yellow-200 shadow-lg flex flex-col z-20 rounded-lg overflow-hidden">
-                         <div className="bg-yellow-50 border-b border-yellow-200 p-1 text-[9px] font-bold text-center uppercase text-yellow-800">Station Frites</div>
+                         <div className="bg-yellow-50 border-b border-yellow-200 p-1 text-[9px] font-bold text-center uppercase text-yellow-800">3. Station Frites</div>
                          <div className="flex-1 p-1">
                             <SimulationStation name="Cuisson Frites" iconName="Waves" color="bg-yellow-400" type="frites" className="w-full h-full" status={fritesStatus.state} progress={fritesStatus.progress} onClick={startFrites} onShowStandard={() => setExplanationTarget('frites')} showInfoButton={true}/>
                         </div>
@@ -572,7 +560,7 @@
 
                     {/* Table de Préparation (Centrée) */}
                     <div className="absolute top-[35%] left-[48%] w-44 h-32 bg-white border border-gray-400 shadow-2xl flex flex-col z-20 rounded-md overflow-hidden">
-                        <div className="bg-slate-100 border-b border-gray-300 p-1 text-[9px] font-bold text-center uppercase tracking-wider text-slate-600">Table de Préparation</div>
+                        <div className="bg-slate-100 border-b border-gray-300 p-1 text-[9px] font-bold text-center uppercase tracking-wider text-slate-600">4. Table de Préparation</div>
                         <div className="flex-1 p-1">
                              <SimulationStation name="Assemblage Burger" iconName="Sandwich" color="bg-green-500" type="assembly" className="w-full h-full" status={prepStatus.state} progress={prepStatus.progress} onClick={handlePrepAssembly} onShowStandard={() => setExplanationTarget('assembly')} showInfoButton={true}/>
                         </div>
@@ -582,7 +570,7 @@
 
                     {/* Constitution Menu / Runner */}
                     <div className="absolute top-[35%] left-[75%] w-36 h-32 bg-white border border-gray-400 shadow-2xl flex flex-col z-20 rounded-md overflow-hidden">
-                        <div className="bg-slate-100 border-b border-gray-300 p-1 text-[9px] font-bold text-center uppercase tracking-wider text-slate-600">Constitution Menu</div>
+                        <div className="bg-slate-100 border-b border-gray-300 p-1 text-[9px] font-bold text-center uppercase tracking-wider text-slate-600">5. Constitution Menu</div>
                         <div className="flex-1 p-1">
                              <SimulationStation name="Runner / Plateau" iconName="Tray" color="bg-purple-500" type="menu" className="w-full h-full" status={menuStatus.state} progress={menuStatus.progress} onClick={handleRunnerAssembly} onShowStandard={() => setExplanationTarget('menu')} showInfoButton={true}/>
                         </div>
@@ -600,7 +588,7 @@
                         {/* Point de connexion GAUCHE (Arrivée depuis Runner) */}
                         <div className="absolute left-[-4px] top-1/2 transform -translate-y-1/2 w-2 h-2 bg-slate-400 rounded-full border border-white z-0"></div>
 
-                        <h4 className="font-bold text-slate-700 text-xs uppercase mb-2 border-b-2 border-slate-200 pb-1">Comptoir</h4>
+                        <h4 className="font-bold text-slate-700 text-xs uppercase mb-2 border-b-2 border-slate-200 pb-1">6. Comptoir</h4>
                         <div className="w-16 h-12 border-2 border-dashed border-slate-300 rounded bg-slate-50 flex items-center justify-center text-[8px] text-slate-400 text-center leading-tight">
                             Remise
                         </div>
@@ -703,7 +691,7 @@
                         </div>
                     </div>
                     <h1 className="text-5xl font-extrabold tracking-tight mb-2">BURGER FLOW</h1>
-                    <p className="text-xl text-yellow-400 font-medium">Simulation de Production Lean Management</p>
+                    <p className="text-xl text-yellow-400 font-medium">Simulation de production </p>
                 </div>
                 
                 <div className="flex justify-center">
@@ -718,6 +706,27 @@
              </div>
           );
 
+          const renderDocs = () => (
+            <div className="max-w-5xl mx-auto mt-10 animate-fade-in-up pb-10">
+                <h2 className="text-3xl font-bold mb-8 text-slate-800 text-center">Guide des Standards Opérationnels</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {Object.entries(STATION_STANDARDS).map(([key, std]) => (
+                        <div key={key} className="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500">
+                            <h3 className="font-bold text-xl mb-3 text-slate-800 flex items-center gap-2"><Icon name="Info" size={20} className="text-blue-500"/> {std.title}</h3>
+                            <ul className="list-disc pl-5 space-y-1 text-sm text-slate-600">
+                                {std.content.map((line, i) => <li key={i}>{line}</li>)}
+                            </ul>
+                        </div>
+                    ))}
+                </div>
+                <div className="text-center mt-10">
+                    <button onClick={() => setGameState('intro')} className="bg-slate-800 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-slate-700 transition-colors flex items-center gap-2 mx-auto">
+                        <Icon name="Home" size={20}/> Retour à l'accueil
+                    </button>
+                </div>
+            </div>
+          );
+
           const renderHeader = () => (
              <header className="max-w-6xl mx-auto mb-6 flex justify-between items-center bg-white px-6 py-3 rounded-xl shadow-sm border border-slate-100">
                  <div className="font-extrabold text-slate-800 flex items-center gap-3 text-lg tracking-tight">
@@ -727,12 +736,6 @@
                     BURGER FLOW
                  </div>
                  <div className="flex gap-3">
-                     {gameState === 'simulation' && (
-                         <button onClick={() => setIsPaused(!isPaused)} className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors flex items-center gap-2 ${isPaused ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
-                            {isPaused ? <Icon name="Play" size={16}/> : <Icon name="Pause" size={16}/>} 
-                            {isPaused ? 'Reprendre' : 'Pause'}
-                         </button>
-                     )}
                      <button onClick={() => resetGame('intro')} className="px-4 py-2 bg-slate-100 rounded-lg hover:bg-slate-200 flex gap-2 items-center text-sm font-bold text-slate-600 transition-colors">
                         <Icon name="Home" size={16}/> Accueil
                      </button>
@@ -744,6 +747,7 @@
             <div className="min-h-screen p-4 font-sans text-slate-800 bg-slate-50 pb-20">
               {renderHeader()}
               {gameState === 'intro' && renderIntro()}
+              {gameState === 'docs' && renderDocs()}
               {gameState === 'simulation' && renderSimulationBoard()}
               {gameState === 'end' && (
                   <div className="text-center mt-20 animate-fade-in-up">
