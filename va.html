@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse VA/NVA - Excellence Opérationnelle</title>
+    <!-- 
+        INSTRUCTIONS DE CORRECTION : 
+        Le bouton de correction est masqué pour les élèves.
+        RACCOURCI CLAVIER (ADMIN) : Appuyez sur "Maj + Alt + L" (Shift + Alt + L) 
+        pour classer automatiquement toutes les cartes.
+    -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a1a1a;
+            --accent: #cfa346;
+            --accent-text: #856404;
+            --accent-light: #f4e8cb;
+            --bg-color: #f8f9fa;
+            --panel-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --text-color: #2d3436;
+            --danger: #e74c3c;
+            --success: #27ae60;
+            --warning: #f39c12;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .step-card {
+            cursor: grab;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s;
+            z-index: 10;
+        }
+        .step-card:active {
+            cursor: grabbing;
+        }
+
+        .drop-zone {
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            border-radius: 0.75rem;
+            background-color: rgba(0,0,0,0.02);
+        }
+        .drop-zone.drag-over {
+            background-color: var(--accent-light);
+            border-color: var(--accent);
+        }
+        
+        /* Styles de cartes par type */
+        .va-color { background-color: #f0fdf4; border-color: var(--success); color: #14532d; }
+        .nvan-color { background-color: #fff7ed; border-color: var(--warning); color: #7c2d12; }
+        .nvap-color { background-color: #fef2f2; border-color: var(--danger); color: #7f1d1d; }
+        .default-color { background-color: var(--panel-bg); border-color: var(--border-color); color: var(--text-color); }
+
+        .va-bg { background-color: var(--success); }
+        .nvan-bg { background-color: var(--warning); }
+        .nvap-bg { background-color: var(--danger); }
+
+        #svg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes success-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); box-shadow: 0 0 15px rgba(207, 163, 70, 0.4); }
+            100% { transform: scale(1); }
+        }
+        .correct-anim { animation: success-pulse 0.5s ease-out; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+    </style>
+</head>
+<body class="p-4 md:p-6">
+
+    <div class="max-w-7xl mx-auto relative">
+        <!-- Header -->
+        <header class="mb-6 relative z-20">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6">
+                <div class="flex items-center gap-4">
+                    <div class="p-3 rounded-xl shadow-lg" style="background-color: var(--primary);">
+                        <svg class="w-8 h-8 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold tracking-tight" style="color: var(--primary);">Analyse de la Valeur Ajoutée</h1>
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em]" style="color: var(--accent);">Excellence Opérationnelle</p>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap gap-3 items-center">
+                    <button onclick="checkAnswers()" class="flex items-center gap-2 px-6 py-2.5 text-white font-bold rounded-lg shadow-md transition-all active:scale-95" style="background-color: var(--primary);">
+                        <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Valider l'analyse
+                    </button>
+                    <button onclick="resetScenario()" class="flex items-center gap-2 px-4 py-2.5 bg-white border font-semibold rounded-lg hover:bg-slate-50 transition-all" style="border-color: var(--border-color); color: var(--text-color);">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        Réinitialiser
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Accordion Théorie -->
+            <div class="rounded-xl shadow-sm border overflow-hidden" style="background-color: var(--panel-bg); border-color: var(--border-color);">
+                <button id="theoryToggle" class="flex items-center justify-between w-full p-4 font-bold transition-colors hover:bg-gray-50" style="color: var(--primary);">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-5 h-5" style="color: var(--accent);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.582.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        Rappel des concepts stratégiques
+                    </span>
+                    <svg id="theoryIcon" class="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div id="theoryContent" class="hidden p-5 text-sm grid md:grid-cols-3 gap-6 border-t" style="border-color: var(--border-color); background-color: var(--bg-color);">
+                    <div class="p-4 bg-white rounded-lg border-l-4" style="border-left-color: var(--success);">
+                        <h3 class="font-bold mb-1 italic" style="color: var(--success);">Valeur Ajoutée (VA)</h3>
+                        <p class="text-xs">Transformation réelle du produit attendue par le client final.</p>
+                    </div>
+                    <div class="p-4 bg-white rounded-lg border-l-4" style="border-left-color: var(--warning);">
+                        <h3 class="font-bold mb-1 italic" style="color: var(--warning);">NVA Nécessaire (NVAN)</h3>
+                        <p class="text-xs">Tâches sans valeur directe mais obligatoires (qualité, sécurité).</p>
+                    </div>
+                    <div class="p-4 bg-white rounded-lg border-l-4" style="border-left-color: var(--danger);">
+                        <h3 class="font-bold mb-1 italic" style="color: var(--danger);">NVA Pure (NVAP)</h3>
+                        <p class="text-xs">NVA Pure (NVAP) à éliminer pour gagner en efficience.</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sélecteur de Scénario -->
+        <div class="mb-6 flex flex-wrap gap-3 items-center relative z-20">
+            <span class="text-[10px] font-black uppercase tracking-widest mr-2" style="color: var(--accent);">Processus :</span>
+            <button onclick="loadScenario('bike')" class="px-4 py-2 bg-white border text-xs rounded-lg hover:border-[var(--accent)] transition-all font-bold shadow-sm flex items-center gap-2" style="border-color: var(--border-color); color: var(--primary);">
+                <span>🚲</span> Industrie
+            </button>
+            <button onclick="loadScenario('order')" class="px-4 py-2 bg-white border text-xs rounded-lg hover:border-[var(--accent)] transition-all font-bold shadow-sm flex items-center gap-2" style="border-color: var(--border-color); color: var(--primary);">
+                <span>📄</span> Administratif
+            </button>
+            <button onclick="loadScenario('pizza')" class="px-4 py-2 bg-white border text-xs rounded-lg hover:border-[var(--accent)] transition-all font-bold shadow-sm flex items-center gap-2" style="border-color: var(--border-color); color: var(--primary);">
+                <span>🍕</span> Services
+            </button>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 relative z-20">
+            <div class="p-5 rounded-2xl border shadow-sm flex flex-col justify-center text-center" style="background-color: var(--panel-bg); border-color: var(--border-color);">
+                <p class="text-[10px] font-black uppercase tracking-wider mb-2" style="color: var(--accent);">Efficience globale</p>
+                <p id="efficiencyVal" class="text-4xl font-black" style="color: var(--primary);">0%</p>
+                <p class="text-[10px] uppercase font-bold opacity-40 mt-1">Ratio VA / Total</p>
+            </div>
+
+            <div class="p-5 rounded-2xl border shadow-sm md:col-span-2" style="background-color: var(--panel-bg); border-color: var(--border-color);">
+                <div class="flex justify-between items-center mb-4">
+                    <p class="text-[10px] font-black uppercase tracking-wider" style="color: var(--accent);">Analyse temporelle des flux</p>
+                    <p id="statTotal" class="text-xs font-bold" style="color: var(--primary);">Temps : 0 min</p>
+                </div>
+                
+                <div class="w-full bg-gray-100 h-10 rounded-xl flex overflow-hidden shadow-inner border mb-4" style="border-color: var(--border-color);">
+                    <div id="barVA" class="va-bg h-full transition-all duration-700 flex items-center justify-center text-[10px] text-white font-bold" style="width: 0%"></div>
+                    <div id="barNVAN" class="nvan-bg h-full transition-all duration-700 flex items-center justify-center text-[10px] text-white font-bold" style="width: 0%"></div>
+                    <div id="barNVAP" class="nvap-bg h-full transition-all duration-700 flex items-center justify-center text-[10px] text-white font-bold" style="width: 0%"></div>
+                </div>
+
+                <div class="flex flex-wrap justify-center gap-8 text-[9px] font-black uppercase">
+                    <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 va-bg rounded-full"></div> Valeur Ajoutée</div>
+                    <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 nvan-bg rounded-full"></div> NVA Nécessaire</div>
+                    <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 nvap-bg rounded-full"></div> NVA Pure</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zone de travail -->
+        <div class="relative rounded-2xl border shadow-xl p-6 overflow-hidden min-h-[700px]" style="background-color: var(--panel-bg); border-color: var(--border-color);">
+            <svg id="svg-canvas">
+                <defs>
+                    <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orientation="auto">
+                        <path d="M0,0 L6,3 L0,6 Z" fill="#cbd5e1" />
+                    </marker>
+                </defs>
+            </svg>
+
+            <div class="grid grid-cols-4 gap-6 mb-6 font-black text-[10px] text-center uppercase tracking-[0.2em] sticky top-0 backdrop-blur-sm py-4 z-30 border-b" style="background-color: rgba(255,255,255,0.9); border-color: var(--border-color);">
+                <div class="text-gray-400">Flux de départ</div>
+                <div style="color: var(--success);">Valeur Ajoutée</div>
+                <div style="color: var(--warning);">NVA Nécessaire (NVAN)</div>
+                <div style="color: var(--danger);">NVA Pure (NVAP)</div>
+            </div>
+
+            <div id="process-grid" class="space-y-4 relative z-10 pb-12">
+                <!-- Lignes injectées ici -->
+            </div>
+        </div>
+
+        <!-- Feedback Modal -->
+        <div id="feedbackModal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center z-50 p-4 backdrop-blur-md">
+            <div class="bg-white rounded-3xl p-10 max-w-sm w-full shadow-2xl text-center border-t-8" id="modalBorder" style="border-top-color: var(--accent);">
+                <div id="feedbackIcon" class="text-5xl mb-4"></div>
+                <h2 id="feedbackTitle" class="text-xl font-bold mb-2" style="color: var(--primary);"></h2>
+                <p id="feedbackText" class="text-sm text-gray-500 mb-8"></p>
+                <button onclick="closeModal()" class="w-full py-4 text-white font-black uppercase text-xs tracking-widest rounded-xl transition active:scale-95 shadow-lg" style="background-color: var(--primary);">
+                    Continuer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scenarios = {
+            bike: {
+                steps: [
+                    { id: 'b1', text: "Réception commande", time: 10, type: 'nvan' },
+                    { id: 'b2', text: "Attente livraison tubes", time: 120, type: 'nvap' },
+                    { id: 'b3', text: "Découpe des tubes", time: 15, type: 'va' },
+                    { id: 'b4', text: "Soudure du cadre", time: 45, type: 'va' },
+                    { id: 'b5', text: "Contrôle qualité", time: 15, type: 'nvan' },
+                    { id: 'b6', text: "Retouche soudure", time: 30, type: 'nvap' },
+                    { id: 'b7', text: "Peinture", time: 60, type: 'va' },
+                    { id: 'b8', text: "Séchage cabine", time: 90, type: 'nvan' },
+                    { id: 'b9', text: "Stockage expédition", time: 480, type: 'nvap' }
+                ]
+            },
+            order: {
+                steps: [
+                    { id: 'o1', text: "Ouverture mail client", time: 2, type: 'nvan' },
+                    { id: 'o2', text: "Recherche facture", time: 15, type: 'nvap' },
+                    { id: 'o3', text: "Vérification conditions", time: 5, type: 'nvan' },
+                    { id: 'o4', text: "Saisie validation", time: 2, type: 'va' },
+                    { id: 'o5', text: "Panne logiciel", time: 45, type: 'nvap' },
+                    { id: 'o6', text: "Envoi confirmation", time: 3, type: 'va' }
+                ]
+            },
+            pizza: {
+                steps: [
+                    { id: 'p1', text: "Prise de commande", time: 3, type: 'nvan' },
+                    { id: 'p2', text: "Préparation pâte", time: 5, type: 'va' },
+                    { id: 'p3', text: "Cuisson four bois", time: 8, type: 'va' },
+                    { id: 'p4', text: "Attente livreur", time: 10, type: 'nvap' },
+                    { id: 'p5', text: "Trajet livraison", time: 15, type: 'nvan' },
+                    { id: 'p6', text: "Erreur adresse GPS", time: 10, type: 'nvap' }
+                ]
+            }
+        };
+
+        let currentSteps = [];
+
+        function loadScenario(key) {
+            currentSteps = scenarios[key].steps;
+            const container = document.getElementById('process-grid');
+            container.innerHTML = '';
+
+            currentSteps.forEach((step, index) => {
+                const row = document.createElement('div');
+                row.className = 'grid grid-cols-4 gap-6 items-center h-24';
+                row.dataset.rowIndex = index;
+
+                for (let i = 0; i < 4; i++) {
+                    const zone = document.createElement('div');
+                    zone.className = 'drop-zone border-2 border-dashed p-2 h-full w-full';
+                    zone.style.borderColor = 'rgba(0,0,0,0.05)';
+                    zone.dataset.rowIndex = index;
+                    zone.dataset.colIndex = i;
+                    zone.dataset.type = ['flux', 'va', 'nvan', 'nvap'][i];
+                    
+                    zone.ondragover = e => { e.preventDefault(); zone.classList.add('drag-over'); };
+                    zone.ondragleave = () => zone.classList.remove('drag-over');
+                    zone.ondrop = e => handleDrop(e, zone);
+
+                    if (i === 0) {
+                        const card = createCard(step, index);
+                        zone.appendChild(card);
+                    }
+                    row.appendChild(zone);
+                }
+                container.appendChild(row);
+            });
+
+            setTimeout(drawLinks, 100);
+            updateStats();
+        }
+
+        function createCard(step, index) {
+            const card = document.createElement('div');
+            card.id = `card-${step.id}`;
+            card.className = 'step-card default-color p-3 rounded-xl border-2 w-full text-[10px] font-bold shadow-sm select-none';
+            card.draggable = true;
+            card.dataset.rowIndex = index;
+            card.innerHTML = `
+                <div class="flex justify-between items-center mb-1.5 opacity-40">
+                    <span class="uppercase text-[7px] tracking-widest">Opération ${index + 1}</span>
+                    <span class="px-1.5 py-0.5 rounded-md text-[8px] bg-black text-white">${step.time}m</span>
+                </div>
+                <div class="leading-tight">${step.text}</div>
+            `;
+            card.ondragstart = e => { e.dataTransfer.setData("text", card.id); card.style.opacity = "0.4"; };
+            card.ondragend = () => { card.style.opacity = "1"; };
+            return card;
+        }
+
+        function handleDrop(e, zone) {
+            e.preventDefault();
+            zone.classList.remove('drag-over');
+            const cardId = e.dataTransfer.getData("text");
+            const card = document.getElementById(cardId);
+            
+            if (card.dataset.rowIndex !== zone.dataset.rowIndex) return;
+
+            zone.appendChild(card);
+            updateCardAppearance(card, zone.dataset.type);
+            updateStats();
+            drawLinks();
+        }
+
+        function updateCardAppearance(card, type) {
+            card.classList.remove('va-color', 'nvan-color', 'nvap-color', 'default-color');
+            if (type === 'va') card.classList.add('va-color');
+            else if (type === 'nvan') card.classList.add('nvan-color');
+            else if (type === 'nvap') card.classList.add('nvap-color');
+            else card.classList.add('default-color');
+        }
+
+        function updateStats() {
+            let total = 0, va = 0, nvan = 0, nvap = 0;
+
+            currentSteps.forEach(step => {
+                total += step.time;
+                const card = document.getElementById(`card-${step.id}`);
+                const type = card.parentElement.dataset.type;
+                if (type === 'va') va += step.time;
+                else if (type === 'nvan') nvan += step.time;
+                else if (type === 'nvap') nvap += step.time;
+            });
+
+            document.getElementById('statTotal').innerText = `Temps Process : ${total} min`;
+            const eff = total > 0 ? Math.round((va / total) * 100) : 0;
+            document.getElementById('efficiencyVal').innerText = eff + "%";
+
+            const barVA = document.getElementById('barVA');
+            const barNVAN = document.getElementById('barNVAN');
+            const barNVAP = document.getElementById('barNVAP');
+
+            const pVA = total > 0 ? (va / total) * 100 : 0;
+            const pNVAN = total > 0 ? (nvan / total) * 100 : 0;
+            const pNVAP = total > 0 ? (nvap / total) * 100 : 0;
+
+            barVA.style.width = pVA + "%";
+            barVA.innerText = pVA > 8 ? Math.round(pVA) + "%" : "";
+            barNVAN.style.width = pNVAN + "%";
+            barNVAN.innerText = pNVAN > 8 ? Math.round(pNVAN) + "%" : "";
+            barNVAP.style.width = pNVAP + "%";
+            barNVAP.innerText = pNVAP > 8 ? Math.round(pNVAP) + "%" : "";
+        }
+
+        function drawLinks() {
+            const svg = document.getElementById('svg-canvas');
+            svg.querySelectorAll('path').forEach(p => p.remove());
+            const cards = document.querySelectorAll('.step-card');
+            const rect = svg.getBoundingClientRect();
+
+            for (let i = 0; i < cards.length - 1; i++) {
+                const r1 = cards[i].getBoundingClientRect();
+                const r2 = cards[i+1].getBoundingClientRect();
+
+                const x1 = r1.left + r1.width / 2 - rect.left;
+                const y1 = r1.bottom - rect.top + 5;
+                const x2 = r2.left + r2.width / 2 - rect.left;
+                const y2 = r2.top - rect.top - 10;
+
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const cpY1 = y1 + (y2 - y1) / 2;
+                const cpY2 = y2 - (y2 - y1) / 4;
+                const d = `M ${x1} ${y1} C ${x1} ${cpY1}, ${x2} ${cpY2}, ${x2} ${y2}`;
+                
+                path.setAttribute("d", d);
+                path.setAttribute("stroke", "#cbd5e1");
+                path.setAttribute("stroke-width", "1.5");
+                path.setAttribute("fill", "none");
+                path.setAttribute("marker-end", "url(#arrowhead)");
+                svg.appendChild(path);
+            }
+        }
+
+        function showCorrection() {
+            currentSteps.forEach((step, idx) => {
+                const card = document.getElementById(`card-${step.id}`);
+                const zone = document.querySelector(`[data-row-index="${idx}"] [data-type="${step.type}"]`);
+                if (zone) {
+                    zone.appendChild(card);
+                    updateCardAppearance(card, step.type);
+                    card.classList.add('correct-anim');
+                    setTimeout(() => card.classList.remove('correct-anim'), 500);
+                }
+            });
+            updateStats();
+            drawLinks();
+        }
+
+        function checkAnswers() {
+            let correct = 0, total = 0;
+            currentSteps.forEach(step => {
+                const card = document.getElementById(`card-${step.id}`);
+                const type = card.parentElement.dataset.type;
+                if (type !== 'flux') {
+                    total++;
+                    if (type === step.type) correct++;
+                }
+            });
+
+            const modal = document.getElementById('feedbackModal');
+            if (total < currentSteps.length) {
+                document.getElementById('feedbackIcon').innerText = "⏳";
+                document.getElementById('feedbackTitle').innerText = "Analyse en cours";
+                document.getElementById('feedbackText').innerText = "Veuillez classer toutes les opérations pour finaliser le bilan.";
+            } else if (correct === currentSteps.length) {
+                document.getElementById('feedbackIcon').innerText = "🌟";
+                document.getElementById('feedbackTitle').innerText = "Analyse Validée";
+                document.getElementById('feedbackText').innerText = "Félicitations. Votre diagnostic de performance est parfaitement rigoureux.";
+            } else {
+                document.getElementById('feedbackIcon').innerText = "🧐";
+                document.getElementById('feedbackTitle').innerText = "Diagnostic à affiner";
+                document.getElementById('feedbackText').innerText = `Vous avez identifié ${correct} étapes sur ${currentSteps.length}. Revoyez la définition de la valeur client.`;
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('feedbackModal').classList.add('hidden'); }
+        function resetScenario() { loadScenario(Object.keys(scenarios).find(k => scenarios[k].steps[0].id === currentSteps[0].id)); }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.shiftKey && e.altKey && e.code === 'KeyL') showCorrection();
+        });
+
+        document.getElementById('theoryToggle').onclick = () => {
+            const content = document.getElementById('theoryContent');
+            const icon = document.getElementById('theoryIcon');
+            content.classList.toggle('hidden');
+            icon.style.transform = content.classList.contains('hidden') ? '' : 'rotate(180deg)';
+            setTimeout(drawLinks, 310);
+        };
+
+        window.onresize = drawLinks;
+        window.onload = () => loadScenario('bike');
+    </script>
+</body>
+</html>
