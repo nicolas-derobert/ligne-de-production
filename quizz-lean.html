@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Toyota Production System & Lean</title>
+    <!-- Chargement de Tailwind CSS pour le style (responsive par défaut) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Animation fluide pour l'apparition des explications */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4 font-sans text-gray-800">
+
+    <div class="max-w-2xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100" id="app">
+        
+        <!-- Header commun -->
+        <div class="bg-red-600 p-6 text-center">
+            <h1 class="text-2xl font-bold text-white tracking-wide">
+                Quiz Toyota Production System & Lean
+            </h1>
+            <p class="text-red-100 mt-2 text-sm">Testez vos connaissances sur l'amélioration continue</p>
+        </div>
+
+        <!-- Zone du Quiz (Questions) -->
+        <div id="quiz-screen" class="p-8">
+            
+            <!-- Barre de progression -->
+            <div class="mb-6">
+                <div class="flex justify-between text-xs font-semibold text-gray-500 mb-2">
+                    <span id="progress-text">Question 1 sur 16</span>
+                    <span id="progress-percentage">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progress-bar" class="bg-red-600 h-2 rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Question -->
+            <div class="mb-8">
+                <h2 id="question-text" class="text-xl font-semibold text-gray-800 leading-relaxed">
+                    <!-- Texte de la question injecté ici -->
+                </h2>
+            </div>
+
+            <!-- Options de réponse -->
+            <div id="options-container" class="space-y-3 mb-8">
+                <!-- Boutons injectés ici -->
+            </div>
+
+            <!-- Explication & Bouton Suivant (Caché par défaut) -->
+            <div id="explanation-container" class="mt-6 fade-in hidden">
+                <div id="explanation-box" class="p-4 rounded-lg mb-6">
+                    <p id="explanation-title" class="font-bold mb-1"></p>
+                    <p id="explanation-text" class="text-sm leading-relaxed"></p>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button id="next-btn" onclick="handleNextQuestion()" class="px-6 py-3 bg-gray-900 text-white rounded-lg font-semibold hover:bg-black transition-colors">
+                        Question suivante ➔
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- Zone du Score final (Cachée par défaut) -->
+        <div id="score-screen" class="p-8 text-center flex-col items-center hidden">
+            <div class="w-32 h-32 rounded-full flex items-center justify-center mx-auto bg-gray-50 border-4 border-red-500 mb-6">
+                <span id="final-score-text" class="text-4xl font-bold text-gray-800">0/16</span>
+            </div>
+            <h2 class="text-2xl font-bold mb-4">Quiz terminé !</h2>
+            <p id="score-message" class="text-gray-600 mb-8 max-w-md mx-auto"></p>
+            <button onclick="restartQuiz()" class="px-8 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors shadow-md hover:shadow-lg">
+                Recommencer le quiz
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // Données du Quiz
+        const quizData = [
+            {
+                question: "Qui est à l'origine de la philosophie du système en inventant le premier métier à tisser automatique en 1918 ?",
+                options: ["Taiichi Ohno", "Kiichiro Toyoda", "Henry Ford", "Sakichi Toyoda"],
+                correctAnswer: 3,
+                explanation: "L'origine remonte à Sakichi Toyoda. Son métier à tisser était doté d'un système d'arrêt automatique en cas de rupture de fil, assurant la qualité."
+            },
+            {
+                question: "En quelle année le véritable créateur du TPS, Taiichi Ohno, s'est-il inspiré des supermarchés américains ?",
+                options: ["1918", "1930", "1953", "1975"],
+                correctAnswer: 2,
+                explanation: "C'est au début des années 1950 (1953) que Taiichi Ohno a développé le véritable TPS, impressionné par le réapprovisionnement rapide des supermarchés."
+            },
+            {
+                question: "Que signifie concrètement le mot anglais « Lean » ?",
+                options: ["Rapide ou véloce", "Maigre ou sans superflu", "Robuste et lourd", "Qualité totale"],
+                correctAnswer: 1,
+                explanation: "Le terme « Lean » signifie littéralement « maigre » ou « sans superflu »."
+            },
+            {
+                question: "Quel est l'objectif résumé de la méthode Lean ?",
+                options: ["Faire plus de quantité, plus lentement, avec plus d'efforts", "Faire mieux, plus vite, avec moins", "Réduire les effectifs pour augmenter les marges", "Automatiser 100% des lignes de production"],
+                correctAnswer: 1,
+                explanation: "L'objectif résumé du Lean est de : Faire mieux, plus vite, avec moins."
+            },
+            {
+                question: "Selon le document, dans quel domaine le Lean N'EST-IL PAS explicitement cité comme étant utilisé aujourd'hui ?",
+                options: ["L'agriculture", "L'horlogerie", "La santé", "La restauration"],
+                correctAnswer: 0,
+                explanation: "L'agriculture n'est pas citée. Le document mentionne l'horlogerie, les transports, la santé, la restauration et les services."
+            },
+            {
+                question: "Combien y a-t-il d'« ennemis » majeurs identifiés dans le Lean (les fameux M) ?",
+                options: ["2 (Muda, Muri)", "3 (Muda, Muri, Mura)", "4 (Muda, Muri, Mura, Muto)", "5 (Muda, Muri, Mura, Kaisen, Kanban)"],
+                correctAnswer: 1,
+                explanation: "Il y en a 3 : Muda (gaspillage), Mura (irrégularités) et Muri (surcharge)."
+            },
+            {
+                question: "Que désigne le terme japonais « Muda » ?",
+                options: ["Les irrégularités", "Le gaspillage", "La surcharge", "La qualité"],
+                correctAnswer: 1,
+                explanation: "Le Muda désigne le gaspillage (surproduction, stock, transport, attentes, mouvements inutiles, défauts)."
+            },
+            {
+                question: "Un flux inconstant, des pics d'activités et des plannings mal ajustés sont des exemples de :",
+                options: ["Mura", "Muri", "Muda", "Kaizen"],
+                correctAnswer: 0,
+                explanation: "Mura correspond aux irrégularités, comme les changements de priorité de dernière minute et les flux inconstants."
+            },
+            {
+                question: "À quoi correspond le « Muri » dans un processus de production ?",
+                options: ["Les processus inutiles", "Les temps d'attente", "La surcharge", "La surproduction"],
+                correctAnswer: 2,
+                explanation: "Le Muri désigne la surcharge : des personnes ou des machines surchargées, un rythme insoutenable ou des objectifs inatteignables."
+            },
+            {
+                question: "Quelle est la finalité principale du Lean pour le client ?",
+                options: ["Augmenter les prix de vente", "Allonger les délais pour garantir l'exclusivité", "Créer de la valeur avec moins de gaspillage et moins de délais", "Lui proposer uniquement des produits standardisés"],
+                correctAnswer: 2,
+                explanation: "L'objectif est de créer de la valeur pour le client avec moins de gaspillage, moins de délais et plus de qualité."
+            },
+            {
+                question: "Que permettait le système d'arrêt automatique du premier métier à tisser inventé par Sakichi Toyoda en 1918 ?",
+                options: ["Augmenter la vitesse de production", "Assurer la qualité des produits", "Réduire la consommation d'électricité", "Remplacer les ouvriers"],
+                correctAnswer: 1,
+                explanation: "Le système arrêtait la machine en cas de rupture de fil, ce qui assurait la qualité."
+            },
+            {
+                question: "Quelle caractéristique des supermarchés américains a particulièrement inspiré Taiichi Ohno ?",
+                options: ["Les promotions de fin d'année", "Les étagères jamais vides et rapidement réapprovisionnées", "Le design des chariots", "Les campagnes publicitaires"],
+                correctAnswer: 1,
+                explanation: "Il a été surpris de voir que les clients pouvaient choisir les produits en quantité souhaitée avec un réapprovisionnement rapide."
+            },
+            {
+                question: "Comment appelle-t-on le concept inspiré des supermarchés permettant aux clients de choisir la quantité souhaitée au bon moment ?",
+                options: ["Production de masse", "Production à la demande (ou au plus juste)", "Production automatisée", "Production délocalisée"],
+                correctAnswer: 1,
+                explanation: "Ce système est aujourd'hui appelé production à la demande ou production au plus juste."
+            },
+            {
+                question: "Parmi ces éléments, lequel est un exemple de « Muda » (gaspillage) cité dans le document ?",
+                options: ["L'écoute du terrain", "Le stock", "Les objectifs inatteignables", "Les flux inconstants"],
+                correctAnswer: 1,
+                explanation: "Le stock, tout comme la surproduction ou les temps d'attente, est considéré comme un Muda (gaspillage)."
+            },
+            {
+                question: "Parmi ces éléments, lequel est un exemple de « Muri » (surcharge) cité dans le document ?",
+                options: ["La surproduction", "Les mouvements inutiles", "Le rythme de travail insoutenable", "Les plannings mal ajustés"],
+                correctAnswer: 2,
+                explanation: "Le Muri correspond à la surcharge, illustrée par un rythme de travail insoutenable, des pannes ou des objectifs inatteignables."
+            },
+            {
+                question: "L'horlogerie, la santé, et la restauration ont un point commun selon le document, lequel ?",
+                options: ["Ce sont des secteurs qui n'utilisent pas le TPS", "Ce sont des domaines où le Lean est utilisé aujourd'hui", "Ils ont été créés par l'entreprise Toyota", "Ils n'ont par nature aucun problème de Muda"],
+                correctAnswer: 1,
+                explanation: "Le document précise que bien qu'issu de l'industrie, le Lean est aujourd'hui utilisé partout, y compris dans ces secteurs de service et d'artisanat."
+            }
+        ];
+
+        // Variables d'état
+        let currentQuestion = 0;
+        let score = 0;
+        let isAnswered = false;
+
+        // Elements du DOM
+        const domElements = {
+            quizScreen: document.getElementById('quiz-screen'),
+            scoreScreen: document.getElementById('score-screen'),
+            progressText: document.getElementById('progress-text'),
+            progressPercentage: document.getElementById('progress-percentage'),
+            progressBar: document.getElementById('progress-bar'),
+            questionText: document.getElementById('question-text'),
+            optionsContainer: document.getElementById('options-container'),
+            explanationContainer: document.getElementById('explanation-container'),
+            explanationBox: document.getElementById('explanation-box'),
+            explanationTitle: document.getElementById('explanation-title'),
+            explanationText: document.getElementById('explanation-text'),
+            nextBtn: document.getElementById('next-btn'),
+            finalScoreText: document.getElementById('final-score-text'),
+            scoreMessage: document.getElementById('score-message')
+        };
+
+        // Initialisation
+        function init() {
+            renderQuestion();
+        }
+
+        // Affichage de la question actuelle
+        function renderQuestion() {
+            isAnswered = false;
+            const currentQuizData = quizData[currentQuestion];
+
+            // Mise à jour de la barre de progression
+            const progressPercentage = ((currentQuestion + 1) / quizData.length) * 100;
+            domElements.progressText.innerText = `Question ${currentQuestion + 1} sur ${quizData.length}`;
+            domElements.progressPercentage.innerText = `${Math.round(progressPercentage)}%`;
+            domElements.progressBar.style.width = `${progressPercentage}%`;
+
+            // Injection de la question
+            domElements.questionText.innerText = currentQuizData.question;
+
+            // Injection des options
+            domElements.optionsContainer.innerHTML = ''; // Clear précédent
+            currentQuizData.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-4 rounded-xl border-2 transition-all duration-200 font-medium flex items-center bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-red-400';
+                btn.onclick = () => handleAnswerOptionClick(index);
+                
+                // Lettrage des options (A, B, C, D)
+                const letterSpan = document.createElement('span');
+                letterSpan.className = 'w-8 h-8 rounded-full border border-current flex items-center justify-center mr-4 flex-shrink-0';
+                letterSpan.innerText = String.fromCharCode(65 + index);
+                
+                // Texte de l'option
+                const textNode = document.createTextNode(option);
+                
+                btn.appendChild(letterSpan);
+                btn.appendChild(textNode);
+                
+                // Sauvegarde de l'index dans un attribut pour le retrouver facilement plus tard
+                btn.setAttribute('data-index', index);
+                domElements.optionsContainer.appendChild(btn);
+            });
+
+            // Cacher la section explication
+            domElements.explanationContainer.classList.add('hidden');
+        }
+
+        // Gestion du clic sur une réponse
+        function handleAnswerOptionClick(selectedIndex) {
+            if (isAnswered) return;
+            isAnswered = true;
+            
+            const currentQuizData = quizData[currentQuestion];
+            const isCorrect = selectedIndex === currentQuizData.correctAnswer;
+            
+            if (isCorrect) {
+                score++;
+            }
+
+            // Mettre à jour l'affichage de tous les boutons
+            const buttons = domElements.optionsContainer.children;
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = true; // Désactiver le clic
+                buttons[i].classList.remove('hover:bg-gray-50', 'hover:border-red-400', 'cursor-pointer');
+                buttons[i].classList.add('cursor-default');
+
+                if (i === currentQuizData.correctAnswer) {
+                    // Bonne réponse
+                    buttons[i].classList.replace('bg-white', 'bg-green-100');
+                    buttons[i].classList.replace('border-gray-300', 'border-green-500');
+                    buttons[i].classList.replace('text-gray-700', 'text-green-800');
+                    buttons[i].classList.add('ring-2', 'ring-green-200');
+                } else if (i === selectedIndex) {
+                    // Mauvaise réponse sélectionnée par l'utilisateur
+                    buttons[i].classList.replace('bg-white', 'bg-red-50');
+                    buttons[i].classList.replace('border-gray-300', 'border-red-500');
+                    buttons[i].classList.replace('text-gray-700', 'text-red-800');
+                } else {
+                    // Autres réponses
+                    buttons[i].classList.replace('bg-white', 'bg-gray-50');
+                    buttons[i].classList.replace('border-gray-300', 'border-gray-200');
+                    buttons[i].classList.replace('text-gray-700', 'text-gray-400');
+                    buttons[i].classList.add('opacity-60');
+                }
+            }
+
+            // Afficher l'explication
+            domElements.explanationContainer.classList.remove('hidden');
+            domElements.explanationText.innerText = currentQuizData.explanation;
+            
+            if (isCorrect) {
+                domElements.explanationBox.className = 'p-4 rounded-lg mb-6 bg-green-50 text-green-800';
+                domElements.explanationTitle.innerText = '✨ Correct !';
+            } else {
+                domElements.explanationBox.className = 'p-4 rounded-lg mb-6 bg-orange-50 text-orange-800';
+                domElements.explanationTitle.innerText = '❌ Incorrect';
+            }
+
+            // Modifier le bouton "Suivant" s'il s'agit de la dernière question
+            if (currentQuestion === quizData.length - 1) {
+                domElements.nextBtn.innerText = 'Voir le score final';
+            } else {
+                domElements.nextBtn.innerText = 'Question suivante ➔';
+            }
+        }
+
+        // Passage à la question suivante
+        function handleNextQuestion() {
+            if (currentQuestion < quizData.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showFinalScore();
+            }
+        }
+
+        // Affichage de l'écran des scores
+        function showFinalScore() {
+            domElements.quizScreen.classList.add('hidden');
+            domElements.scoreScreen.classList.remove('hidden');
+            domElements.scoreScreen.classList.add('flex'); // Pour flex-col
+
+            domElements.finalScoreText.innerText = `${score}/${quizData.length}`;
+
+            const ratio = score / quizData.length;
+            if (ratio >= 0.8) {
+                domElements.scoreMessage.innerText = "Excellent travail ! Vous maîtrisez parfaitement les concepts de base du TPS et du Lean.";
+            } else if (ratio >= 0.5) {
+                domElements.scoreMessage.innerText = "Bon résultat ! Vous avez de bonnes bases, mais quelques révisions pourraient vous être utiles.";
+            } else {
+                domElements.scoreMessage.innerText = "C'est un bon début. N'hésitez pas à relire le document pour mieux ancrer ces concepts.";
+            }
+        }
+
+        // Recommencer le quiz
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            domElements.scoreScreen.classList.add('hidden');
+            domElements.scoreScreen.classList.remove('flex');
+            domElements.quizScreen.classList.remove('hidden');
+            renderQuestion();
+        }
+
+        // Démarrage de l'application
+        init();
+    </script>
+</body>
+</html>
