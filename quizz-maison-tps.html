@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Maison TPS & Objectifs</title>
+    <!-- Chargement de Tailwind CSS pour le style (responsive par défaut) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Animation fluide pour l'apparition des explications */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4 font-sans text-gray-800">
+
+    <div class="max-w-2xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100" id="app">
+        
+        <!-- Header commun -->
+        <div class="bg-blue-600 p-6 text-center">
+            <h1 class="text-2xl font-bold text-white tracking-wide">
+                Quiz La Maison TPS & Les 5 Zéros
+            </h1>
+            <p class="text-blue-100 mt-2 text-sm">Testez vos connaissances sur la structure et les objectifs du TPS</p>
+        </div>
+
+        <!-- Zone du Quiz (Questions) -->
+        <div id="quiz-screen" class="p-8">
+            
+            <!-- Barre de progression -->
+            <div class="mb-6">
+                <div class="flex justify-between text-xs font-semibold text-gray-500 mb-2">
+                    <span id="progress-text">Question 1 sur 12</span>
+                    <span id="progress-percentage">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Question -->
+            <div class="mb-8">
+                <h2 id="question-text" class="text-xl font-semibold text-gray-800 leading-relaxed">
+                    <!-- Texte de la question injecté ici -->
+                </h2>
+            </div>
+
+            <!-- Options de réponse -->
+            <div id="options-container" class="space-y-3 mb-8">
+                <!-- Boutons injectés ici -->
+            </div>
+
+            <!-- Explication & Bouton Suivant (Caché par défaut) -->
+            <div id="explanation-container" class="mt-6 fade-in hidden">
+                <div id="explanation-box" class="p-4 rounded-lg mb-6">
+                    <p id="explanation-title" class="font-bold mb-1"></p>
+                    <p id="explanation-text" class="text-sm leading-relaxed"></p>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button id="next-btn" onclick="handleNextQuestion()" class="px-6 py-3 bg-gray-900 text-white rounded-lg font-semibold hover:bg-black transition-colors">
+                        Question suivante ➔
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- Zone du Score final (Cachée par défaut) -->
+        <div id="score-screen" class="p-8 text-center flex-col items-center hidden">
+            <div class="w-32 h-32 rounded-full flex items-center justify-center mx-auto bg-gray-50 border-4 border-blue-500 mb-6">
+                <span id="final-score-text" class="text-4xl font-bold text-gray-800">0/12</span>
+            </div>
+            <h2 class="text-2xl font-bold mb-4">Quiz terminé !</h2>
+            <p id="score-message" class="text-gray-600 mb-8 max-w-md mx-auto"></p>
+            <button onclick="restartQuiz()" class="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg">
+                Recommencer le quiz
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // Nouvelles données du Quiz basées sur le nouveau document
+        const quizData = [
+            {
+                question: "Comment le Système de Production Toyota (TPS) est-il souvent représenté pour illustrer la cohérence de ses principes ?",
+                options: ["Comme un arbre", "Comme une maison", "Comme une pyramide", "Comme une roue"],
+                correctAnswer: 1,
+                explanation: "Le TPS est souvent représenté comme une maison pour illustrer l'ensemble cohérent de ses principes et outils."
+            },
+            {
+                question: "Dans la structure de la maison TPS, que représente le toit ?",
+                options: ["Les outils d'amélioration continue", "La finalité et les objectifs du système", "La base de la stabilité de l'entreprise", "Les ressources humaines"],
+                correctAnswer: 1,
+                explanation: "Le toit de la maison TPS représente la finalité du système, c'est-à-dire offrir au client le meilleur produit, au moindre coût, dans les meilleurs délais."
+            },
+            {
+                question: "Quels sont les deux grands principes qui constituent les piliers de la maison TPS ?",
+                options: ["Le Kanban et le Kaizen", "Le Muda et le Muri", "Le Juste-à-Temps et le Jidoka", "Le QCD et les 5 Zéros"],
+                correctAnswer: 2,
+                explanation: "Les deux piliers de la maison TPS sont le Juste-à-Temps et le Jidoka."
+            },
+            {
+                question: "À quoi servent les fondations dans la représentation de la maison TPS ?",
+                options: ["Elles assurent la stabilité et l'amélioration", "Elles définissent la stratégie de vente", "Elles servent à stocker les pièces détachées", "Elles représentent les clients"],
+                correctAnswer: 0,
+                explanation: "Les fondations représentent les démarches qui assurent la stabilité et l'amélioration du système."
+            },
+            {
+                question: "Que signifie l'acronyme QCD qui résume les objectifs du toit de la maison TPS ?",
+                options: ["Quantité, Créativité, Dynamisme", "Qualité, Coût, Délai", "Qualification, Certification, Document", "Quotient, Coût, Distribution"],
+                correctAnswer: 1,
+                explanation: "Le trio QCD signifie : Qualité, Coût, Délai."
+            },
+            {
+                question: "Comment le TPS cherche-t-il à atteindre « le plus bas coût » selon le document ?",
+                options: ["En baissant systématiquement les salaires", "En utilisant des matériaux bas de gamme", "En éliminant les gaspillages et en étant efficient", "En délocalisant massivement la production"],
+                correctAnswer: 2,
+                explanation: "Le coût de revient est réduit en éliminant les gaspillages et en étant efficient, ce qui permet d'être compétitif."
+            },
+            {
+                question: "Le concept des « 5 zéros » représente :",
+                options: ["Les 5 niveaux hiérarchiques chez Toyota", "Cinq objectifs idéaux pour tendre vers une production parfaite", "Le nombre de jours de repos par semaine visés pour les employés", "Les 5 usines principales de Toyota dans le monde"],
+                correctAnswer: 1,
+                explanation: "Les 5 zéros sont cinq objectifs idéaux (défaut, stock, délai, panne, papier) à atteindre simultanément pour tendre vers une production parfaite."
+            },
+            {
+                question: "Quel « zéro » a pour justification le fait qu'il « cache les problèmes (qualité, organisation) » ?",
+                options: ["Le Zéro panne", "Le Zéro défaut", "Le Zéro papier", "Le Zéro stock"],
+                correctAnswer: 3,
+                explanation: "C'est le stock qui cache les problèmes. L'objectif du Zéro stock est de produire en flux tiré (juste ce qu'il faut, quand il le faut)."
+            },
+            {
+                question: "Quel est l'objectif principal visé par le « Zéro défaut » ?",
+                options: ["Avoir des machines toujours disponibles", "Une qualité intégrée dès le premier geste avec un contrôle au poste", "Réduire les temps d'attente à la livraison", "Digitaliser toutes les informations"],
+                correctAnswer: 1,
+                explanation: "Un défaut coûte cher s'il est détecté à la fin. L'objectif est donc d'intégrer la qualité dès le premier geste."
+            },
+            {
+                question: "Comment atteindre le « Zéro panne » selon la philosophie TPS ?",
+                options: ["En achetant de nouvelles machines chaque année", "Par la maintenance préventive et autonome gérée par les opérateurs", "En évitant d'utiliser les machines à pleine capacité", "En réparant uniquement lorsque la machine casse"],
+                correctAnswer: 1,
+                explanation: "Le Zéro panne s'atteint grâce à la maintenance préventive associée à une maintenance gérée en autonomie par les opérateurs, garantissant des machines fiables."
+            },
+            {
+                question: "Pour atteindre le « Zéro papier » (ou zéro gaspillage d'information), quelles actions sont recommandées ?",
+                options: ["Ne plus communiquer entre les différents services", "Se fier uniquement à la mémoire des employés", "Digitaliser, standardiser et afficher visuellement", "Interdire toutes les réunions d'équipe"],
+                correctAnswer: 2,
+                explanation: "Pour que l'information circule vite et sans erreur (Zéro papier), l'objectif est de digitaliser, standardiser et afficher visuellement."
+            },
+            {
+                question: "Quel est le gain principal associé à l'objectif du « Zéro délai » ?",
+                options: ["Moins de rebuts et de retouches", "Des machines toujours disponibles et fiables", "Moins d'encombrement et d'argent bloqué", "Une livraison plus rapide et une meilleure réactivité"],
+                correctAnswer: 3,
+                explanation: "En réduisant les temps d'attente et les goulots (Zéro délai), on obtient une livraison plus rapide et une meilleure réactivité pour le client."
+            }
+        ];
+
+        // Variables d'état
+        let currentQuestion = 0;
+        let score = 0;
+        let isAnswered = false;
+
+        // Elements du DOM
+        const domElements = {
+            quizScreen: document.getElementById('quiz-screen'),
+            scoreScreen: document.getElementById('score-screen'),
+            progressText: document.getElementById('progress-text'),
+            progressPercentage: document.getElementById('progress-percentage'),
+            progressBar: document.getElementById('progress-bar'),
+            questionText: document.getElementById('question-text'),
+            optionsContainer: document.getElementById('options-container'),
+            explanationContainer: document.getElementById('explanation-container'),
+            explanationBox: document.getElementById('explanation-box'),
+            explanationTitle: document.getElementById('explanation-title'),
+            explanationText: document.getElementById('explanation-text'),
+            nextBtn: document.getElementById('next-btn'),
+            finalScoreText: document.getElementById('final-score-text'),
+            scoreMessage: document.getElementById('score-message')
+        };
+
+        // Initialisation
+        function init() {
+            renderQuestion();
+        }
+
+        // Affichage de la question actuelle
+        function renderQuestion() {
+            isAnswered = false;
+            const currentQuizData = quizData[currentQuestion];
+
+            // Mise à jour de la barre de progression
+            const progressPercentage = ((currentQuestion + 1) / quizData.length) * 100;
+            domElements.progressText.innerText = `Question ${currentQuestion + 1} sur ${quizData.length}`;
+            domElements.progressPercentage.innerText = `${Math.round(progressPercentage)}%`;
+            domElements.progressBar.style.width = `${progressPercentage}%`;
+
+            // Injection de la question
+            domElements.questionText.innerText = currentQuizData.question;
+
+            // Injection des options
+            domElements.optionsContainer.innerHTML = ''; // Clear précédent
+            currentQuizData.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left p-4 rounded-xl border-2 transition-all duration-200 font-medium flex items-center bg-white border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-400';
+                btn.onclick = () => handleAnswerOptionClick(index);
+                
+                // Lettrage des options (A, B, C, D)
+                const letterSpan = document.createElement('span');
+                letterSpan.className = 'w-8 h-8 rounded-full border border-current flex items-center justify-center mr-4 flex-shrink-0';
+                letterSpan.innerText = String.fromCharCode(65 + index);
+                
+                // Texte de l'option
+                const textNode = document.createTextNode(option);
+                
+                btn.appendChild(letterSpan);
+                btn.appendChild(textNode);
+                
+                // Sauvegarde de l'index dans un attribut pour le retrouver facilement plus tard
+                btn.setAttribute('data-index', index);
+                domElements.optionsContainer.appendChild(btn);
+            });
+
+            // Cacher la section explication
+            domElements.explanationContainer.classList.add('hidden');
+        }
+
+        // Gestion du clic sur une réponse
+        function handleAnswerOptionClick(selectedIndex) {
+            if (isAnswered) return;
+            isAnswered = true;
+            
+            const currentQuizData = quizData[currentQuestion];
+            const isCorrect = selectedIndex === currentQuizData.correctAnswer;
+            
+            if (isCorrect) {
+                score++;
+            }
+
+            // Mettre à jour l'affichage de tous les boutons
+            const buttons = domElements.optionsContainer.children;
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].disabled = true; // Désactiver le clic
+                buttons[i].classList.remove('hover:bg-blue-50', 'hover:border-blue-400', 'cursor-pointer');
+                buttons[i].classList.add('cursor-default');
+
+                if (i === currentQuizData.correctAnswer) {
+                    // Bonne réponse
+                    buttons[i].classList.replace('bg-white', 'bg-green-100');
+                    buttons[i].classList.replace('border-gray-300', 'border-green-500');
+                    buttons[i].classList.replace('text-gray-700', 'text-green-800');
+                    buttons[i].classList.add('ring-2', 'ring-green-200');
+                } else if (i === selectedIndex) {
+                    // Mauvaise réponse sélectionnée par l'utilisateur
+                    buttons[i].classList.replace('bg-white', 'bg-red-50');
+                    buttons[i].classList.replace('border-gray-300', 'border-red-500');
+                    buttons[i].classList.replace('text-gray-700', 'text-red-800');
+                } else {
+                    // Autres réponses
+                    buttons[i].classList.replace('bg-white', 'bg-gray-50');
+                    buttons[i].classList.replace('border-gray-300', 'border-gray-200');
+                    buttons[i].classList.replace('text-gray-700', 'text-gray-400');
+                    buttons[i].classList.add('opacity-60');
+                }
+            }
+
+            // Afficher l'explication
+            domElements.explanationContainer.classList.remove('hidden');
+            domElements.explanationText.innerText = currentQuizData.explanation;
+            
+            if (isCorrect) {
+                domElements.explanationBox.className = 'p-4 rounded-lg mb-6 bg-green-50 text-green-800';
+                domElements.explanationTitle.innerText = '✨ Correct !';
+            } else {
+                domElements.explanationBox.className = 'p-4 rounded-lg mb-6 bg-orange-50 text-orange-800';
+                domElements.explanationTitle.innerText = '❌ Incorrect';
+            }
+
+            // Modifier le bouton "Suivant" s'il s'agit de la dernière question
+            if (currentQuestion === quizData.length - 1) {
+                domElements.nextBtn.innerText = 'Voir le score final';
+            } else {
+                domElements.nextBtn.innerText = 'Question suivante ➔';
+            }
+        }
+
+        // Passage à la question suivante
+        function handleNextQuestion() {
+            if (currentQuestion < quizData.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showFinalScore();
+            }
+        }
+
+        // Affichage de l'écran des scores
+        function showFinalScore() {
+            domElements.quizScreen.classList.add('hidden');
+            domElements.scoreScreen.classList.remove('hidden');
+            domElements.scoreScreen.classList.add('flex'); // Pour flex-col
+
+            domElements.finalScoreText.innerText = `${score}/${quizData.length}`;
+
+            const ratio = score / quizData.length;
+            if (ratio >= 0.8) {
+                domElements.scoreMessage.innerText = "Excellent travail ! Vous avez parfaitement assimilé l'architecture de la maison TPS et ses objectifs.";
+            } else if (ratio >= 0.5) {
+                domElements.scoreMessage.innerText = "Bon résultat ! Vous avez de bonnes bases sur la maison TPS, mais quelques notions (QCD, 5 Zéros) pourraient être révisées.";
+            } else {
+                domElements.scoreMessage.innerText = "C'est un bon début. N'hésitez pas à relire le document sur la structure de la Maison TPS pour mieux mémoriser les piliers et les objectifs.";
+            }
+        }
+
+        // Recommencer le quiz
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            domElements.scoreScreen.classList.add('hidden');
+            domElements.scoreScreen.classList.remove('flex');
+            domElements.quizScreen.classList.remove('hidden');
+            renderQuestion();
+        }
+
+        // Démarrage de l'application
+        init();
+    </script>
+</body>
+</html>
