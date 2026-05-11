@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation Stock FIFO/LIFO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes rollIn {
+            0% { transform: translateX(-150%) rotate(-5deg); opacity: 0; }
+            100% { transform: translateX(0) rotate(0deg); opacity: 1; }
+        }
+        .animate-roll-in {
+            animation: rollIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 font-sans text-slate-800 p-4 flex flex-col items-center">
+
+    <!-- HEADER -->
+    <div class="w-full max-w-5xl bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                <span class="w-7 h-7 text-blue-600" id="icon-package-header"></span>
+                Gestion de Stock : <span class="text-blue-600">FIFO vs LIFO</span>
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">Simulateur pédagogique pour comprendre les flux physiques.</p>
+        </div>
+        
+        <div class="flex items-center gap-4 bg-slate-100 p-1.5 rounded-lg">
+            <button id="btn-mode-fifo" class="px-4 py-2 rounded-md font-semibold transition-colors bg-white shadow-sm text-blue-700">Mode FIFO</button>
+            <button id="btn-mode-lifo" class="px-4 py-2 rounded-md font-semibold transition-colors text-slate-500 hover:text-slate-700">Mode LIFO</button>
+        </div>
+
+        <button id="btn-reset" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+            <span class="w-4 h-4" id="icon-refresh"></span>
+            Zéro
+        </button>
+    </div>
+
+    <!-- MAIN ATELIER VIEW -->
+    <div class="w-full max-w-5xl bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+        
+        <!-- Message Pédagogique -->
+        <div id="message-banner" class="p-4 border-b flex items-start gap-3 transition-colors bg-blue-50 text-blue-800 border-blue-100">
+            <div class="mt-0.5 w-5 h-5" id="message-icon"></div>
+            <p id="message-text" class="text-sm font-medium leading-relaxed flex-1">Bienvenue ! Choisissez un mode (FIFO ou LIFO) et commencez par entrer un plateau de carrures.</p>
+        </div>
+
+        <!-- 3D-ish Atelier Stage -->
+        <div class="relative w-full h-[520px] bg-gradient-to-b from-slate-50 to-slate-200 p-6 flex justify-between items-end pb-12 border-b border-slate-300">
+            
+            <!-- Poste A (Gauche) -->
+            <div class="relative z-10 flex flex-col items-center w-48">
+                <div class="w-full bg-slate-300 h-32 rounded-t-lg border-2 border-slate-400 flex flex-col items-center justify-center shadow-lg relative">
+                    <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] rounded-t-lg overflow-hidden"></div>
+                    <div class="w-10 h-10 text-slate-500 mb-2 z-10" id="icon-settings"></div>
+                    <span class="font-bold text-slate-700 text-center leading-tight z-10">Polissage</span>
+                    <span class="text-[10px] text-slate-500 font-medium uppercase tracking-wider z-10">Poste A</span>
+                    
+                    <!-- Avatar Polisseur -->
+                    <div class="absolute -bottom-5 -right-3 z-20 flex flex-col items-center">
+                        <div class="bg-slate-700 text-slate-200 p-2 rounded-full shadow-lg border-2 border-white relative">
+                            <div class="w-6 h-6" id="icon-user-polisseur"></div>
+                            <div class="absolute -top-1 -right-2 bg-yellow-500 rounded-full p-0.5 border border-white">
+                                <div class="w-3 h-3 text-white" id="icon-sparkles"></div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold bg-white text-slate-700 px-1.5 py-0.5 mt-1 rounded shadow border border-slate-200">Polisseur</span>
+                    </div>
+                </div>
+                
+                <button id="btn-livrer" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white py-2 px-2 rounded-lg font-bold shadow-md transform transition hover:-translate-y-0.5 active:translate-y-0 flex flex-col items-center justify-center gap-0.5 text-center leading-tight cursor-pointer disabled:cursor-not-allowed">
+                    <span class="text-[13px]">Livrer les carrures</span>
+                    <span class="text-[10px] font-normal opacity-80">(20 carr.)</span>
+                </button>
+
+                <!-- Contrôles de Production -->
+                <div class="mt-2 w-full grid grid-cols-2 gap-1.5">
+                    <button id="btn-version" class="py-1.5 rounded text-[11px] font-bold flex items-center justify-center gap-1 border shadow-sm transition-colors bg-slate-100 text-slate-700 border-slate-300 cursor-pointer disabled:cursor-not-allowed" title="Changer la version de la carrure">
+                        <span class="w-3 h-3" id="icon-tags"></span>
+                        <span id="version-text">V1</span>
+                    </button>
+                    
+                    <button id="btn-defect" class="py-1.5 rounded text-[11px] font-bold flex items-center justify-center gap-1 border shadow-sm transition-colors bg-white text-slate-600 border-slate-300 hover:bg-slate-100 cursor-pointer disabled:cursor-not-allowed" title="Provoquer un défaut sur le prochain plateau">
+                        <span class="w-3 h-3" id="icon-bug"></span>
+                        <span id="defect-text">Défaut OFF</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Étagère Centrale (Stock) -->
+            <div class="relative z-0 flex flex-col items-center flex-1 mx-8 h-[400px]">
+                
+                <!-- PANNEAU D'AFFICHAGE DU STOCK (Écran LED suspendu) -->
+                <div class="w-full bg-slate-800 text-white rounded-lg shadow-xl border-4 border-slate-700 p-4 mb-4 z-30 relative overflow-hidden flex gap-4">
+                    <div class="absolute top-0 left-0 w-full h-1/2 bg-white/5 pointer-events-none"></div>
+
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-4 h-4 text-slate-400" id="icon-info-led"></span>
+                                <span class="text-xs font-bold text-slate-300 uppercase tracking-widest">Indicateurs Stock</span>
+                            </div>
+                            <span id="status-badge" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 border border-current bg-slate-900 text-blue-400">
+                                <span class="w-4 h-4" id="status-icon"></span>
+                                <span id="status-label">Stock élevé</span>
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between items-end mt-2">
+                            <div>
+                                <p class="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">Pièces en stock</p>
+                                <p class="text-3xl font-black leading-none"><span id="val-qty">0</span> <span class="text-sm font-normal text-slate-400">/ 160 max</span></p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[10px] text-red-400 uppercase tracking-wider mb-0.5">Niveau Sécurité</p>
+                                <p class="text-xl font-bold leading-none text-red-400">40 <span class="text-xs font-normal opacity-70">carr.</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Jauge Verticale -->
+                    <div class="relative w-24 h-[84px] shrink-0 border-l border-slate-600 pl-3 flex items-end justify-end">
+                        <div class="absolute bottom-0 left-3 right-1 h-full pointer-events-none z-0">
+                            <div class="absolute w-full border-b-[1.5px] border-red-500/70 border-dashed" style="bottom: 25%">
+                                <span class="absolute left-0 -top-2.5 text-[8px] font-black text-red-400">SÉCU</span>
+                            </div>
+                            <div class="absolute w-full border-b-[1.5px] border-green-500/70 border-dashed" style="bottom: 62.5%">
+                                <span class="absolute left-0 -top-2.5 text-[8px] font-black text-green-400">CIBLE</span>
+                            </div>
+                        </div>
+                        <div class="w-4 h-full bg-slate-900 rounded-full overflow-hidden border border-slate-600 flex flex-col justify-end relative z-10 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]">
+                            <div id="bar-fill" class="w-full transition-all duration-500 ease-out bg-red-500 shadow-[0_0_8px_#ef4444]" style="height: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VUE PHYSIQUE DU STOCK -->
+                <div id="stock-view" class="w-full flex-1 relative">
+                    <!-- Généré par JS -->
+                </div>
+                
+                <div class="absolute -bottom-6 w-[110%] h-6 bg-slate-300 rounded-[100%] opacity-50 blur-md z-[-1]"></div>
+            </div>
+
+            <!-- Poste B (Droite) -->
+            <div class="relative z-10 flex flex-col items-center w-48">
+                <div class="w-full bg-slate-300 h-32 rounded-t-lg border-2 border-slate-400 flex flex-col items-center justify-center shadow-lg relative">
+                    <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] rounded-t-lg overflow-hidden"></div>
+                    <div class="w-10 h-10 text-slate-500 mb-2 z-10" id="icon-package-posteB"></div>
+                    <span class="font-bold text-slate-700 text-center leading-tight z-10">Montage boîte</span>
+                    <span class="text-[10px] text-slate-500 font-medium uppercase tracking-wider z-10">Poste B</span>
+
+                    <!-- Avatar Horloger -->
+                    <div class="absolute -bottom-5 -left-3 z-20 flex flex-col items-center">
+                        <div class="bg-white text-slate-800 p-2 rounded-full shadow-lg border-2 border-slate-200 relative">
+                            <div class="w-6 h-6 text-slate-700" id="icon-user-horloger"></div>
+                            <div class="absolute -top-1 -left-2 bg-blue-500 rounded-full p-0.5 border border-white">
+                                <div class="w-3 h-3 text-white" id="icon-watch"></div>
+                            </div>
+                        </div>
+                        <span class="text-[10px] font-bold bg-white text-slate-700 px-1.5 py-0.5 mt-1 rounded shadow border border-slate-200">Horloger</span>
+                    </div>
+                </div>
+                <button id="btn-demander" class="mt-4 w-full bg-green-600 hover:bg-green-700 disabled:bg-slate-400 text-white py-2 px-2 rounded-lg font-bold shadow-md transform transition hover:-translate-y-0.5 active:translate-y-0 flex flex-col items-center justify-center gap-0.5 text-center leading-tight cursor-pointer disabled:cursor-not-allowed">
+                    <span class="text-[13px]">Demander des carrures polies</span>
+                    <span class="text-[10px] font-normal opacity-80">(20 carr.)</span>
+                </button>
+            </div>
+
+            <!-- Character / Manager Animé -->
+            <div id="manager-wrapper" class="absolute bottom-[40px] z-20 flex flex-col items-center transition-all duration-700 ease-in-out" style="left: 50%; transform: translateX(-50%);">
+                <!-- Plateau porté -->
+                <div id="manager-tray" class="transition-opacity duration-300 mb-1 w-[100px] h-[34px] rounded border shadow-xl flex items-center justify-center p-[1px] opacity-0 translate-y-4">
+                    <!-- Rempli par JS -->
+                </div>
+                
+                <!-- Avatar Gestionnaire Moderne -->
+                <div class="bg-gradient-to-b from-indigo-500 to-indigo-700 text-white p-3 rounded-full shadow-lg border-2 border-white relative">
+                    <div class="w-8 h-8" id="icon-usercog"></div>
+                    <div class="absolute -top-2 -right-2 bg-orange-500 text-white p-1 rounded-full shadow-md border border-white">
+                        <div class="w-4 h-4" id="icon-clipboard"></div>
+                    </div>
+                    <div class="absolute -bottom-2 bg-slate-800 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm whitespace-nowrap left-1/2 -translate-x-1/2">
+                        Gestionnaire
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HISTORIQUE (Pleine largeur) -->
+    <div class="w-full max-w-5xl bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col mb-8 h-[250px]">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <span class="w-5 h-5 text-slate-500" id="icon-history-title"></span>
+            Journal des mouvements
+        </h2>
+        
+        <div id="history-container" class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            <!-- Rempli par JS -->
+        </div>
+    </div>
+
+    <!-- CONTENU THÉORIQUE (Fiche Pédagogique) -->
+    <div class="w-full max-w-5xl bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col mb-12">
+        <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+            <span class="w-6 h-6 text-blue-600" id="icon-book"></span>
+            Fiche Pédagogique : Comparatif FIFO / LIFO
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Colonne FIFO -->
+            <div class="bg-blue-50/40 rounded-xl border border-blue-100 p-6">
+                <h3 class="text-2xl font-black text-blue-800 mb-4 border-b-2 border-blue-200 pb-3">FIFO <span class="text-sm font-bold text-blue-600 ml-2 uppercase tracking-widest">(First In, First Out)</span></h3>
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <h4 class="font-bold text-blue-900 uppercase text-xs tracking-wider mb-1">Principe</h4>
+                        <p class="text-slate-700 leading-relaxed">Le premier élément entré en stock est le premier à sortir. On utilise donc les pièces, lots ou plateaux les plus anciens en priorité.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-blue-900 uppercase text-xs tracking-wider mb-1">Avantages</h4>
+                        <ul class="text-slate-700 leading-relaxed list-disc list-inside space-y-1">
+                            <li>Bonne rotation du stock, limite le vieillissement.</li>
+                            <li>Réduit les risques d’obsolescence, de péremption ou d’oubli.</li>
+                            <li>Très adapté à la traçabilité.</li>
+                            <li>Méthode facile à expliquer aux élèves.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-blue-900 uppercase text-xs tracking-wider mb-1">Inconvénients</h4>
+                        <p class="text-slate-700 leading-relaxed">Demande une organisation rigoureuse et nécessite souvent plus de place. Les flux doivent être bien séparés entre l'entrée et la sortie. Il y a un risque d’erreur si les plateaux sont mélangés.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-blue-900 uppercase text-xs tracking-wider mb-1">Systèmes low-tech possibles</h4>
+                        <p class="text-slate-700 leading-relaxed">Étagère traversante, couloir FIFO au sol, file d’attente de bacs, étiquettes avec date/heure d’entrée, couleurs par ancienneté, cartes Kanban physiques, tableau blanc, fiches de lot.</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-blue-200 shadow-sm mt-6">
+                        <h4 class="font-bold text-blue-800 flex items-center gap-2 mb-2">
+                            <span class="w-4 h-4" id="icon-info-fifo"></span> Exemple concret
+                        </h4>
+                        <p class="text-slate-600 italic">Le poste de polissage termine un plateau à 8h00, puis un autre à 9h00. Si l'horloger demande des pièces, on lui sortira d’abord le plateau de 8h00.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne LIFO -->
+            <div class="bg-amber-50/40 rounded-xl border border-amber-100 p-6">
+                <h3 class="text-2xl font-black text-amber-800 mb-4 border-b-2 border-amber-200 pb-3">LIFO <span class="text-sm font-bold text-amber-600 ml-2 uppercase tracking-widest">(Last In, First Out)</span></h3>
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <h4 class="font-bold text-amber-900 uppercase text-xs tracking-wider mb-1">Principe</h4>
+                        <p class="text-slate-700 leading-relaxed">Le dernier élément entré en stock est le premier à sortir. On utilise donc les pièces, lots ou plateaux les plus récents en priorité.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-amber-900 uppercase text-xs tracking-wider mb-1">Avantages</h4>
+                        <ul class="text-slate-700 leading-relaxed list-disc list-inside space-y-1">
+                            <li>Très simple physiquement.</li>
+                            <li>Peu de manutention, adapté aux empilements.</li>
+                            <li>Facile à mettre en place pour des produits identiques, non périssables et sans traçabilité forte.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-amber-900 uppercase text-xs tracking-wider mb-1">Inconvénients</h4>
+                        <p class="text-slate-700 leading-relaxed">Les anciens stocks peuvent rester bloqués longtemps au fond. Risque d’oubli ou d’obsolescence. Peu adapté aux produits avec date, version, lot critique ou traçabilité stricte. Peut masquer un "stock dormant".</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-amber-900 uppercase text-xs tracking-wider mb-1">Systèmes low-tech possibles</h4>
+                        <p class="text-slate-700 leading-relaxed">Pile de bacs, stockage en profondeur, étagère à accès unique, bac unique rempli par le dessus, pile de cartons ou de dossiers, zone tampon de courte durée.</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-amber-200 shadow-sm mt-6">
+                        <h4 class="font-bold text-amber-800 flex items-center gap-2 mb-2">
+                            <span class="w-4 h-4" id="icon-info-lifo"></span> Exemple concret
+                        </h4>
+                        <p class="text-slate-600 italic">Le polisseur dépose trois plateaux l’un sur l’autre. Le dernier plateau posé se retrouve au-dessus : c’est lui qui sera repris en premier par l'horloger.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. ICONS SVG (Lucide-like) ---
+        const icons = {
+            package: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
+            refresh: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M21 12a9 9 0 1 0-9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>`,
+            settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>`,
+            user: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+            sparkles: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>`,
+            watch: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="6"/><polyline points="12 10 12 12 13 13"/><path d="m16.13 7.66-.81-4.05a2 2 0 0 0-2-1.61h-2.68a2 2 0 0 0-2 1.61l-.78 4.05"/><path d="m7.88 16.36.8 4a2 2 0 0 0 2 1.61h2.72a2 2 0 0 0 2-1.61l.81-4.05"/></svg>`,
+            usercog: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="15" r="3"/><circle cx="9" cy="7" r="4"/><path d="M10 15H6a4 4 0 0 0-4 4v2"/><path d="m21.7 16.4-.9-.3"/><path d="m15.2 13.9-.9-.3"/><path d="m16.6 18.7.3-.9"/><path d="m19.1 12.2.3-.9"/><path d="m19.6 18.7-.4-1"/><path d="m16.8 12.3-.4-1"/><path d="m14.3 16.6 1-.4"/><path d="m20.7 13.8 1-.4"/></svg>`,
+            clipboard: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>`,
+            tags: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 6.3 6.3a2.4 2.4 0 0 1 0 3.4L17 19"/><path d="M9.586 5.586A2 2 0 0 0 8.172 5H3v5.172a2 2 0 0 0 .586 1.414l8.204 8.204a2.426 2.426 0 0 0 3.42 0l3.584-3.584a2.426 2.426 0 0 0 0-3.42z"/><circle cx="6.5" cy="9.5" r=".5" fill="currentColor"/></svg>`,
+            bug: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>`,
+            info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
+            alert: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>`,
+            check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>`,
+            history: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>`,
+            book: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`
+        };
+
+        // Inject Static Icons
+        document.getElementById('icon-package-header').innerHTML = icons.package;
+        document.getElementById('icon-refresh').innerHTML = icons.refresh;
+        document.getElementById('icon-settings').innerHTML = icons.settings;
+        document.getElementById('icon-user-polisseur').innerHTML = icons.user;
+        document.getElementById('icon-sparkles').innerHTML = icons.sparkles;
+        document.getElementById('icon-tags').innerHTML = icons.tags;
+        document.getElementById('icon-bug').innerHTML = icons.bug;
+        document.getElementById('icon-info-led').innerHTML = icons.info;
+        document.getElementById('icon-package-posteB').innerHTML = icons.package;
+        document.getElementById('icon-user-horloger').innerHTML = icons.user;
+        document.getElementById('icon-watch').innerHTML = icons.watch;
+        document.getElementById('icon-usercog').innerHTML = icons.usercog;
+        document.getElementById('icon-clipboard').innerHTML = icons.clipboard;
+        document.getElementById('icon-history-title').innerHTML = icons.history;
+        document.getElementById('icon-book').innerHTML = icons.book;
+        document.getElementById('icon-info-fifo').innerHTML = icons.info;
+        document.getElementById('icon-info-lifo').innerHTML = icons.info;
+
+        // --- 2. CONSTANTES ET ÉTAT GLOBAL ---
+        const TRAY_QTY = 20;
+        const MAX_TRAYS = 8;
+        const MAX_STOCK = MAX_TRAYS * TRAY_QTY;
+        const TARGET_STOCK = 100;
+        const SAFETY_STOCK = 40;
+
+        const delay = ms => new Promise(res => setTimeout(res, ms));
+
+        let state = {
+            stock: [],
+            mode: 'FIFO',
+            history: [],
+            trayCounter: 1,
+            nextDefect: false,
+            currentVersion: 1,
+            animating: false,
+            manager: { position: 'CENTER', carrying: null },
+            message: { text: "Bienvenue ! Choisissez un mode (FIFO ou LIFO) et commencez par entrer un plateau de carrures.", type: "info" }
+        };
+
+        // --- 3. HELPERS VISUELS ---
+        const getTrayOuterClasses = (version) => {
+            switch(version) {
+                case 2: return 'bg-blue-100 border-blue-300 text-blue-900';
+                case 3: return 'bg-emerald-100 border-emerald-300 text-emerald-900';
+                default: return 'bg-slate-100 border-slate-300 text-slate-800'; // V1
+            }
+        };
+
+        const getTrayInnerClasses = (version) => {
+            switch(version) {
+                case 2: return 'bg-blue-200/80';
+                case 3: return 'bg-emerald-200/80';
+                default: return 'bg-slate-200/80'; // V1
+            }
+        };
+
+        const getStockStatus = () => {
+            const stockQty = state.stock.length * TRAY_QTY;
+            if (stockQty === 0) return { label: 'Rupture de stock', color: 'text-red-600', bg: 'bg-red-100', icon: 'alert' };
+            if (stockQty < SAFETY_STOCK) return { label: 'Risque de rupture', color: 'text-red-500', bg: 'bg-red-50', icon: 'alert' };
+            if (stockQty < TARGET_STOCK) return { label: 'Stock à surveiller', color: 'text-yellow-600', bg: 'bg-yellow-50', icon: 'info' };
+            if (stockQty === TARGET_STOCK) return { label: 'Stock équilibré', color: 'text-green-600', bg: 'bg-green-50', icon: 'check' };
+            return { label: 'Stock élevé', color: 'text-blue-600', bg: 'bg-blue-50', icon: 'info' };
+        };
+
+        const getNextOutIndex = () => state.stock.length === 0 ? -1 : (state.mode === 'FIFO' ? 0 : state.stock.length - 1);
+
+        const checkAlerts = (newQty) => {
+            if (newQty === 0) state.message = { text: "Rupture de stock : le montage boîte ne peut plus être alimenté !", type: "error" };
+            else if (newQty < SAFETY_STOCK) state.message = { text: "Attention : le stock est sous le niveau de sécurité. Le montage boîte risque de manquer de carrures.", type: "warning" };
+            else if (newQty === TARGET_STOCK) state.message = { text: "Parfait ! Le stock a atteint son niveau cible.", type: "success" };
+            renderMessage();
+        };
+
+        const getTrayHTML = (id, defect, version) => {
+            let cells = '';
+            for(let i=0; i<20; i++) {
+                let isDefect = defect && i === 12;
+                let circleClass = isDefect ? 'border-red-600 bg-red-500 shadow-[0_0_6px_#ef4444]' : 'border-amber-500 bg-gradient-to-br from-amber-100 to-amber-300 shadow-[0_1px_1px_rgba(0,0,0,0.3)]';
+                let title = isDefect ? "Carrure défectueuse !" : "Carrure conforme";
+                cells += `<div class="w-full h-full rounded-[2px] shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)] flex items-center justify-center ${getTrayInnerClasses(version)}"><div class="w-[70%] h-[70%] rounded-full border-[1.5px] ${circleClass}" title="${title}"></div></div>`;
+            }
+            
+            let baseColor = version === 2 ? 'bg-blue-50' : version === 3 ? 'bg-emerald-50' : 'bg-slate-50';
+            let vBadge = version > 1 ? `<span class="ml-0.5 text-[6px] font-bold px-0.5 rounded ${version === 2 ? 'bg-blue-200 text-blue-800' : 'bg-emerald-200 text-emerald-800'}">v${version}</span>` : '';
+
+            return `
+                <div class="relative w-full h-full flex flex-col items-center justify-center p-[2px] overflow-hidden rounded-sm ${baseColor}">
+                    <div class="absolute z-20 top-0.5 left-0.5 bg-white border border-slate-400 shadow-[0_1px_3px_rgba(0,0,0,0.3)] px-1.5 py-[2px] rounded-[2px] pointer-events-none flex items-center justify-center transform -rotate-3">
+                        <span class="text-[11px] font-black text-slate-800 leading-none tracking-tight">#${id}</span>
+                        ${vBadge}
+                    </div>
+                    <div class="grid grid-cols-10 grid-rows-2 gap-[1.5px] w-full h-full z-10">${cells}</div>
+                </div>`;
+        };
+
+        // --- 4. RENDER FONCTIONS (Vanilla JS DOM Updates) ---
+        const renderHeader = () => {
+            const btnFifo = document.getElementById('btn-mode-fifo');
+            const btnLifo = document.getElementById('btn-mode-lifo');
+            
+            if (state.mode === 'FIFO') {
+                btnFifo.className = 'px-4 py-2 rounded-md font-semibold transition-colors bg-white shadow-sm text-blue-700';
+                btnLifo.className = 'px-4 py-2 rounded-md font-semibold transition-colors text-slate-500 hover:text-slate-700';
+            } else {
+                btnLifo.className = 'px-4 py-2 rounded-md font-semibold transition-colors bg-white shadow-sm text-blue-700';
+                btnFifo.className = 'px-4 py-2 rounded-md font-semibold transition-colors text-slate-500 hover:text-slate-700';
+            }
+        };
+
+        const renderMessage = () => {
+            const banner = document.getElementById('message-banner');
+            const text = document.getElementById('message-text');
+            const icon = document.getElementById('message-icon');
+            
+            text.innerText = state.message.text;
+            
+            if (state.message.type === 'error') {
+                banner.className = 'p-4 border-b flex items-start gap-3 transition-colors bg-red-50 text-red-800 border-red-100';
+                icon.innerHTML = icons.alert;
+            } else if (state.message.type === 'warning') {
+                banner.className = 'p-4 border-b flex items-start gap-3 transition-colors bg-yellow-50 text-yellow-800 border-yellow-100';
+                icon.innerHTML = icons.alert;
+            } else if (state.message.type === 'success') {
+                banner.className = 'p-4 border-b flex items-start gap-3 transition-colors bg-green-50 text-green-800 border-green-100';
+                icon.innerHTML = icons.info; // Check icon? We used info for success in React by default or CheckCircle. Let's use check.
+                icon.innerHTML = icons.check;
+            } else {
+                banner.className = 'p-4 border-b flex items-start gap-3 transition-colors bg-blue-50 text-blue-800 border-blue-100';
+                icon.innerHTML = icons.info;
+            }
+        };
+
+        const renderControls = () => {
+            const btnLivrer = document.getElementById('btn-livrer');
+            const btnDemander = document.getElementById('btn-demander');
+            const btnVersion = document.getElementById('btn-version');
+            const btnDefect = document.getElementById('btn-defect');
+            const btnFifo = document.getElementById('btn-mode-fifo');
+            const btnLifo = document.getElementById('btn-mode-lifo');
+            const btnReset = document.getElementById('btn-reset');
+
+            const isFull = state.stock.length >= MAX_TRAYS;
+            
+            [btnFifo, btnLifo, btnReset, btnVersion, btnDefect].forEach(btn => btn.disabled = state.animating);
+            btnLivrer.disabled = state.animating || isFull;
+            btnDemander.disabled = state.animating; // Disabled removed for empty stock to show error alert
+
+            // Version button style
+            document.getElementById('version-text').innerText = `V${state.currentVersion}`;
+            btnVersion.className = `py-1.5 rounded text-[11px] font-bold flex items-center justify-center gap-1 border shadow-sm transition-colors cursor-pointer disabled:cursor-not-allowed ${
+                state.currentVersion === 1 ? 'bg-slate-100 text-slate-700 border-slate-300' :
+                state.currentVersion === 2 ? 'bg-blue-100 text-blue-800 border-blue-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+            }`;
+
+            // Defect button style
+            document.getElementById('defect-text').innerText = state.nextDefect ? 'Défaut ON' : 'Défaut OFF';
+            btnDefect.className = `py-1.5 rounded text-[11px] font-bold flex items-center justify-center gap-1 border shadow-sm transition-colors cursor-pointer disabled:cursor-not-allowed ${
+                state.nextDefect ? 'bg-red-500 text-white border-red-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'
+            }`;
+        };
+
+        const renderDashboard = () => {
+            const status = getStockStatus();
+            const stockQty = state.stock.length * TRAY_QTY;
+
+            document.getElementById('val-qty').innerText = stockQty;
+            
+            const badge = document.getElementById('status-badge');
+            badge.className = `px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 border border-current bg-slate-900 ${status.bg.replace('bg-', 'text-').replace('50', '400')}`;
+            document.getElementById('status-icon').innerHTML = icons[status.icon] || icons.info;
+            document.getElementById('status-label').innerText = status.label;
+
+            const barFill = document.getElementById('bar-fill');
+            barFill.style.height = `${(stockQty / MAX_STOCK) * 100}%`;
+            barFill.className = `w-full transition-all duration-500 ease-out ${
+                stockQty < SAFETY_STOCK ? 'bg-red-500 shadow-[0_0_8px_#ef4444]' : 
+                stockQty <= TARGET_STOCK ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : 'bg-blue-500 shadow-[0_0_8px_#3b82f6]'
+            }`;
+        };
+
+        const renderStockView = () => {
+            const container = document.getElementById('stock-view');
+            const nextOut = getNextOutIndex();
+
+            if (state.mode === 'FIFO') {
+                // Ensure layout exists
+                if (!document.getElementById('fifo-rack')) {
+                    let rollersHTML = '';
+                    for(let i=0; i<18; i++) rollersHTML += `<div class="w-[14px] h-[14px] bg-slate-400 rounded-full border border-slate-500 shadow-sm mt-[-4px]"></div>`;
+                    
+                    container.innerHTML = `
+                        <div class="absolute inset-0 bg-slate-200 rounded-md shadow-inner border-4 border-slate-400 flex flex-col justify-between p-2 overflow-hidden">
+                            <div class="absolute top-2 left-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest z-20 bg-slate-200/80 px-1 rounded">Rayonnage Dynamique (Gravité)</div>
+                            <div class="relative w-full h-full flex flex-col justify-center gap-8 mt-2 ml-1 transform rotate-[4deg] origin-top-left">
+                                <div class="w-[95%] h-[50px] relative border-b-[6px] border-slate-600 bg-slate-300 rounded-sm flex items-end px-2" id="fifo-rack">
+                                    <div class="absolute -bottom-[6px] left-0 w-full h-[6px] flex justify-around pointer-events-none">${rollersHTML}</div>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+                
+                const rack = document.getElementById('fifo-rack');
+                const currentIds = state.stock.map(t => String(t.id));
+                
+                // Cleanup removed
+                Array.from(rack.children).forEach(child => {
+                    if (child.dataset.id && !currentIds.includes(child.dataset.id)) {
+                        child.remove();
+                    }
+                });
+
+                // Update or Add
+                state.stock.forEach((tray, idx) => {
+                    let el = rack.querySelector(`[data-id="${tray.id}"]`);
+                    const isNextOut = (idx === nextOut && state.mode === 'FIFO');
+                    const rightVal = `${idx * 24 + 2}%`;
+                    
+                    let cls = `absolute bottom-[2px] w-[22%] h-[32px] rounded border shadow-md flex items-center justify-center transition-all duration-[800ms] ease-out animate-roll-in ${getTrayOuterClasses(tray.version)}`;
+                    if (isNextOut && !state.animating) cls += ' ring-2 ring-blue-500 animate-pulse shadow-[0_0_15px_rgba(59,130,246,0.6)]';
+
+                    if (!el) {
+                        el = document.createElement('div');
+                        el.dataset.id = tray.id;
+                        el.innerHTML = getTrayHTML(tray.id, tray.defect, tray.version);
+                        rack.appendChild(el);
+                    }
+                    el.className = cls;
+                    el.style.right = rightVal;
+                });
+
+            } else {
+                // LIFO Mode
+                let stackHTML = '';
+                [...state.stock].reverse().forEach((tray, i) => {
+                    const idx = state.stock.length - 1 - i;
+                    const isNextOut = (idx === nextOut && state.mode === 'LIFO');
+                    let cls = `w-[100px] h-[30px] rounded border shadow-md flex items-center justify-center transition-all ${getTrayOuterClasses(tray.version)}`;
+                    if (isNextOut && !state.animating) cls += ' ring-2 ring-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.6)]';
+                    
+                    stackHTML += `
+                        <div>
+                            <div class="${cls}">
+                                ${getTrayHTML(tray.id, tray.defect, tray.version)}
+                            </div>
+                        </div>`;
+                });
+
+                container.innerHTML = `
+                    <div class="absolute inset-0 flex flex-col items-center justify-end pb-2">
+                        <div class="absolute top-2 left-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Zone de stockage au sol</div>
+                        <div class="flex flex-col-reverse items-center justify-start gap-[2px] mb-[2px] z-10">${stackHTML}</div>
+                        <div class="w-32 h-4 bg-amber-700 rounded-sm border-b-2 border-amber-900 flex justify-around items-end px-2 shadow-lg z-0 relative">
+                            <div class="w-3 h-2 bg-amber-900 rounded-t-sm"></div>
+                            <div class="w-3 h-2 bg-amber-900 rounded-t-sm"></div>
+                            <div class="w-3 h-2 bg-amber-900 rounded-t-sm"></div>
+                        </div>
+                    </div>`;
+            }
+        };
+
+        const renderManager = () => {
+            const wrapper = document.getElementById('manager-wrapper');
+            const tray = document.getElementById('manager-tray');
+            
+            let left = '50%';
+            if (state.manager.position === 'A') left = '15%';
+            else if (state.manager.position === 'B') left = '85%';
+            else if (state.manager.position === 'STOCK') left = '50%';
+            
+            wrapper.style.left = left;
+
+            if (state.manager.carrying) {
+                tray.innerHTML = getTrayHTML(state.manager.carrying.id, state.manager.carrying.defect, state.manager.carrying.version);
+                tray.className = `transition-opacity duration-300 mb-1 w-[100px] h-[34px] rounded border shadow-xl flex items-center justify-center p-[1px] opacity-100 translate-y-0 ${getTrayOuterClasses(state.manager.carrying.version)}`;
+            } else {
+                tray.className = `transition-opacity duration-300 mb-1 w-[100px] h-[34px] rounded border shadow-xl flex items-center justify-center p-[1px] opacity-0 translate-y-4`;
+                tray.innerHTML = '';
+            }
+        };
+
+        const renderHistory = () => {
+            const container = document.getElementById('history-container');
+            if (state.history.length === 0) {
+                container.innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center text-slate-400 text-sm text-center">
+                        <div class="w-8 h-8 mb-2 opacity-30">${icons.history}</div>
+                        Aucun mouvement pour le moment.<br/>Entrez un plateau pour commencer la simulation.
+                    </div>`;
+                return;
+            }
+
+            let html = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">';
+            state.history.forEach(item => {
+                const borderClass = item.defect ? 'border-red-200 bg-red-50' : 'border-slate-100 bg-slate-50';
+                const dotClass = item.type === 'Entrée' ? 'bg-blue-500' : 'bg-green-500';
+                const textClass = item.defect ? 'text-red-700' : 'text-slate-700';
+                const modeText = item.type === 'Sortie' ? `<p class="text-[10px] text-slate-500 uppercase tracking-wide mt-0.5">Mode ${item.mode}</p>` : '';
+
+                html += `
+                    <div class="text-sm ${borderClass} border rounded-lg p-3 flex items-center justify-between shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <span class="w-2.5 h-2.5 rounded-full shadow-sm ${dotClass}"></span>
+                            <div>
+                                <p class="font-bold ${textClass}">${item.type} <span class="text-slate-500 font-normal ml-1">Lot #${item.trayId} (V${item.version})</span></p>
+                                ${modeText}
+                            </div>
+                        </div>
+                        <div class="text-right bg-white px-2 py-1 rounded border border-slate-100">
+                            <p class="font-bold text-slate-700 leading-none">${item.stockAfter} <span class="text-[10px] font-normal">pcs</span></p>
+                            <p class="text-[9px] text-slate-400 uppercase mt-0.5">Total</p>
+                        </div>
+                    </div>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        };
+
+        const renderAll = () => {
+            renderHeader();
+            renderMessage();
+            renderControls();
+            renderDashboard();
+            renderStockView();
+            renderManager();
+            renderHistory();
+        };
+
+        // --- 5. LOGIQUE DES ACTIONS ---
+        const handleAdd = async () => {
+            if (state.animating || state.stock.length >= MAX_TRAYS) return;
+            state.animating = true;
+            
+            if (state.nextDefect) {
+                state.message = { text: "Le poste de polissage a terminé un plateau contenant une NON-CONFORMITÉ. Le gestionnaire le prend.", type: "warning" };
+            } else {
+                state.message = { text: `Le poste de polissage a terminé un plateau V${state.currentVersion}. Le gestionnaire va le chercher.`, type: "info" };
+            }
+            renderAll();
+
+            // 1. Move to A
+            state.manager.position = 'A';
+            renderManager();
+            await delay(600);
+
+            // 2. Pickup
+            const newTray = { id: state.trayCounter, qty: TRAY_QTY, defect: state.nextDefect, version: state.currentVersion };
+            state.trayCounter++;
+            state.manager.carrying = newTray;
+            renderManager();
+            await delay(300);
+
+            // 3. Move to Stock
+            state.manager.position = 'STOCK';
+            state.message = { text: "Le gestionnaire range le plateau dans l'étagère.", type: "info" };
+            renderMessage();
+            renderManager();
+            await delay(600);
+
+            // 4. Drop
+            state.stock.push(newTray);
+            state.manager.carrying = null;
+            
+            state.history.unshift({
+                id: Date.now(), type: 'Entrée', trayId: newTray.id, mode: '-', stockAfter: state.stock.length * TRAY_QTY, defect: newTray.defect, version: newTray.version
+            });
+            
+            state.nextDefect = false; // reset
+            renderManager();
+            renderStockView();
+            renderDashboard();
+            renderHistory();
+            renderControls(); // to update defect text
+
+            // 5. Back to center
+            await delay(400);
+            state.manager.position = 'CENTER';
+            state.animating = false;
+            checkAlerts(state.stock.length * TRAY_QTY);
+            renderAll();
+        };
+
+        const handleRemove = async () => {
+            if (state.animating) return;
+            
+            if (state.stock.length === 0) {
+                state.message = { text: "Rupture de stock ! L'horloger demande des pièces, mais l'étagère est vide. Le montage est bloqué.", type: "error" };
+                renderAll();
+                return;
+            }
+            
+            state.animating = true;
+            renderAll(); // block buttons
+
+            const outIndex = state.mode === 'FIFO' ? 0 : state.stock.length - 1;
+            const trayToOut = state.stock[outIndex];
+
+            const modeText = state.mode === 'FIFO' ? "En FIFO, on sort le plateau le plus ancien." : "En LIFO, on sort le plateau le plus récent.";
+            state.message = { text: `Demande du montage boîte. ${modeText} Lot #${trayToOut.id} récupéré.`, type: "info" };
+            renderMessage();
+
+            // 1. Move to Stock
+            state.manager.position = 'STOCK';
+            renderManager();
+            await delay(600);
+
+            // 2. Pickup
+            state.stock.splice(outIndex, 1);
+            state.manager.carrying = trayToOut;
+            renderStockView();
+            renderManager();
+            renderDashboard();
+            await delay(300);
+
+            // 3. Move to B
+            state.manager.position = 'B';
+            renderManager();
+            await delay(600);
+
+            if (trayToOut.defect) {
+                state.message = { text: `NON-CONFORMITÉ DÉTECTÉE ! L'horloger a trouvé une pièce défectueuse dans le lot #${trayToOut.id}.`, type: "error" };
+            } else {
+                state.message = { text: `Le gestionnaire apporte le plateau V${trayToOut.version} au montage boîte. Pièces conformes.`, type: "success" };
+            }
+            renderMessage();
+
+            // 4. Drop
+            state.manager.carrying = null;
+            state.history.unshift({
+                id: Date.now(), type: 'Sortie', trayId: trayToOut.id, mode: state.mode, stockAfter: state.stock.length * TRAY_QTY, defect: trayToOut.defect, version: trayToOut.version
+            });
+            renderManager();
+            renderHistory();
+
+            // 5. Back to center
+            await delay(400);
+            state.manager.position = 'CENTER';
+            state.animating = false;
+            
+            if (!trayToOut.defect) {
+                checkAlerts(state.stock.length * TRAY_QTY);
+            }
+            renderAll();
+        };
+
+        const handleReset = () => {
+            if (state.animating) return;
+            state.stock = [];
+            state.history = [];
+            state.trayCounter = 1;
+            state.nextDefect = false;
+            state.currentVersion = 1;
+            state.message = { text: "Simulation réinitialisée.", type: "info" };
+            renderAll();
+        };
+
+        // --- 6. INITIALISATION ET ÉCOUTEURS D'ÉVÉNEMENTS ---
+        document.getElementById('btn-mode-fifo').addEventListener('click', () => { if(!state.animating){ state.mode = 'FIFO'; renderAll(); }});
+        document.getElementById('btn-mode-lifo').addEventListener('click', () => { if(!state.animating){ state.mode = 'LIFO'; renderAll(); }});
+        document.getElementById('btn-reset').addEventListener('click', handleReset);
+        
+        document.getElementById('btn-livrer').addEventListener('click', handleAdd);
+        document.getElementById('btn-demander').addEventListener('click', handleRemove);
+        
+        document.getElementById('btn-version').addEventListener('click', () => {
+            if(!state.animating) {
+                state.currentVersion = state.currentVersion === 3 ? 1 : state.currentVersion + 1;
+                renderControls();
+            }
+        });
+        
+        document.getElementById('btn-defect').addEventListener('click', () => {
+            if(!state.animating) {
+                state.nextDefect = !state.nextDefect;
+                renderControls();
+            }
+        });
+
+        // Premier rendu
+        renderAll();
+
+    </script>
+</body>
+</html>
