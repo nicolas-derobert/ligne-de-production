@@ -42,253 +42,331 @@
         </div>
         
         <div class="flex items-center gap-4 bg-slate-100 p-1.5 rounded-lg">
-            <button id="btn-mode-fifo" class="px-4 py-2 rounded-md font-semibold transition-colors bg-white shadow-sm text-blue-700">Mode FIFO</button>
-            <button id="btn-mode-lifo" class="px-4 py-2 rounded-md font-semibold transition-colors text-slate-500 hover:text-slate-700">Mode LIFO</button>
+            <button id="btn-mode-fifo" class="px-4 py-2 rounded-md font-semibold transition-colors bg-white shadow-sm text-blue-700" title="PEPS : Premier Entré, Premier Sorti">Mode FIFO</button>
+            <button id="btn-mode-lifo" class="px-4 py-2 rounded-md font-semibold transition-colors text-slate-500 hover:text-slate-700" title="DEPS : Dernier Entré, Premier Sorti">Mode LIFO</button>
         </div>
 
         <button id="btn-reset" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
             <span class="w-4 h-4" id="icon-refresh"></span>
-            Zéro
+            Réinitialiser
         </button>
     </div>
 
-    <!-- MAIN ATELIER VIEW -->
-    <div class="w-full max-w-5xl bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6">
+    <!-- MAIN APP CONTAINER -->
+    <div class="w-full max-w-5xl bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-12">
         
-        <!-- Message Pédagogique -->
-        <div id="message-banner" class="p-4 border-b flex items-start gap-3 transition-colors bg-blue-50 text-blue-800 border-blue-100">
-            <div class="mt-0.5 w-5 h-5" id="message-icon"></div>
-            <p id="message-text" class="text-sm font-medium leading-relaxed flex-1">Bienvenue ! Choisissez un mode (FIFO ou LIFO) et commencez par entrer un plateau de carrures.</p>
+        <!-- GLOBAL TABS -->
+        <div class="flex border-b border-slate-200 bg-slate-50">
+            <button id="tab-simu" class="flex-1 py-4 font-bold text-blue-700 bg-white border-b-2 border-blue-600 transition-colors flex justify-center items-center gap-2">
+                <span class="w-5 h-5" id="icon-simu-tab"></span> Simulateur
+            </button>
+            <button id="tab-cours" class="flex-1 py-4 font-bold text-slate-500 hover:bg-slate-100 border-b-2 border-transparent transition-colors flex justify-center items-center gap-2">
+                <span class="w-5 h-5" id="icon-book-tab"></span> Fiche Pédagogique
+            </button>
+            <button id="tab-quiz" class="flex-1 py-4 font-bold text-slate-500 hover:bg-slate-100 border-b-2 border-transparent transition-colors flex justify-center items-center gap-2">
+                <span class="w-5 h-5" id="icon-quiz-tab"></span> Quiz de validation
+            </button>
         </div>
 
-        <!-- 3D-ish Atelier Stage -->
-        <div class="relative w-full h-[520px] bg-gradient-to-b from-slate-50 to-slate-200 p-6 flex justify-between items-end pb-12 border-b border-slate-300">
-            
-            <!-- Poste A (Gauche) -->
-            <div class="relative z-10 flex flex-col items-center w-48">
-                <div class="w-full bg-slate-300 h-32 rounded-t-lg border-2 border-slate-400 flex flex-col items-center justify-center shadow-lg relative">
-                    <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] rounded-t-lg overflow-hidden"></div>
-                    <div class="w-10 h-10 text-slate-500 mb-2 z-10" id="icon-settings"></div>
-                    <span class="font-bold text-slate-700 text-center leading-tight z-10">Polissage</span>
-                    <span class="text-[10px] text-slate-500 font-medium uppercase tracking-wider z-10">Poste A</span>
+        <!-- TAB 1 : SIMULATEUR -->
+        <div id="view-simu" class="flex flex-col">
+            <!-- Message Pédagogique -->
+            <div id="message-banner" class="p-4 border-b flex items-start gap-3 transition-colors bg-blue-50 text-blue-800 border-blue-100">
+                <div class="mt-0.5 w-5 h-5" id="message-icon"></div>
+                <p id="message-text" class="text-sm font-medium leading-relaxed flex-1">Bienvenue ! La simulation commence avec un plateau en stock. Choisissez un mode (FIFO ou LIFO).</p>
+            </div>
+
+            <!-- 3D-ish Atelier Stage -->
+            <div class="relative w-full h-[520px] bg-gradient-to-b from-slate-50 to-slate-200 p-6 flex justify-between items-end pb-12 border-b border-slate-300">
+                
+                <!-- Poste A (Gauche) -->
+                <div class="relative z-10 flex flex-col items-center w-48">
+                    <div class="w-full bg-slate-300 h-32 rounded-t-lg border-2 border-slate-400 flex flex-col items-center justify-center shadow-lg relative">
+                        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] rounded-t-lg overflow-hidden"></div>
+                        <div class="w-10 h-10 text-slate-500 mb-2 z-10" id="icon-settings"></div>
+                        <span class="font-bold text-slate-700 text-center leading-tight z-10">Polissage</span>
+                        <span class="text-[10px] text-slate-500 font-medium uppercase tracking-wider z-10">Poste A</span>
+                        
+                        <!-- Avatar Polisseur -->
+                        <div class="absolute -bottom-5 -right-3 z-20 flex flex-col items-center">
+                            <div class="bg-slate-700 text-slate-200 p-2 rounded-full shadow-lg border-2 border-white relative">
+                                <div class="w-6 h-6" id="icon-user-polisseur"></div>
+                                <div class="absolute -top-1 -right-2 bg-yellow-500 rounded-full p-0.5 border border-white">
+                                    <div class="w-3 h-3 text-white" id="icon-sparkles"></div>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-bold bg-white text-slate-700 px-1.5 py-0.5 mt-1 rounded shadow border border-slate-200">Polisseur</span>
+                        </div>
+                    </div>
                     
-                    <!-- Avatar Polisseur -->
-                    <div class="absolute -bottom-5 -right-3 z-20 flex flex-col items-center">
-                        <div class="bg-slate-700 text-slate-200 p-2 rounded-full shadow-lg border-2 border-white relative">
-                            <div class="w-6 h-6" id="icon-user-polisseur"></div>
-                            <div class="absolute -top-1 -right-2 bg-yellow-500 rounded-full p-0.5 border border-white">
-                                <div class="w-3 h-3 text-white" id="icon-sparkles"></div>
-                            </div>
-                        </div>
-                        <span class="text-[10px] font-bold bg-white text-slate-700 px-1.5 py-0.5 mt-1 rounded shadow border border-slate-200">Polisseur</span>
+                    <button id="btn-livrer" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white py-2 px-2 rounded-lg font-bold shadow-md transform transition hover:-translate-y-0.5 active:translate-y-0 flex flex-col items-center justify-center gap-0.5 text-center leading-tight cursor-pointer disabled:cursor-not-allowed">
+                        <span class="text-[13px]">Livrer les carrures</span>
+                        <span class="text-[10px] font-normal opacity-80">(20 carr.)</span>
+                    </button>
+
+                    <!-- Contrôles de Production -->
+                    <div class="mt-2 w-full grid grid-cols-2 gap-1.5">
+                        <button id="btn-version" class="py-1.5 rounded text-[11px] font-bold flex items-center justify-center gap-1 border shadow-sm transition-colors bg-slate-100 text-slate-700 border-slate-300 cursor-pointer disabled:cursor-not-allowed" title="Changer la version de la carrure">
+                            <span class="w-3 h-3" id="icon-tags"></span>
+                            <span id="version-text">V1</span>
+                        </button>
+                        
+                        <button id="btn-defect" class="py-1.5 rounded text-[11px] font-bold flex items-center justify-center gap-1 border shadow-sm transition-colors bg-white text-slate-600 border-slate-300 hover:bg-slate-100 cursor-pointer disabled:cursor-not-allowed" title="Provoquer un défaut sur le prochain plateau">
+                            <span class="w-3 h-3" id="icon-bug"></span>
+                            <span id="defect-text">Défaut OFF</span>
+                        </button>
                     </div>
                 </div>
-                
-                <button id="btn-livrer" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white py-2 px-2 rounded-lg font-bold shadow-md transform transition hover:-translate-y-0.5 active:translate-y-0 flex flex-col items-center justify-center gap-0.5 text-center leading-tight cursor-pointer disabled:cursor-not-allowed">
-                    <span class="text-[13px]">Livrer les carrures</span>
-                    <span class="text-[10px] font-normal opacity-80">(20 carr.)</span>
-                </button>
 
-                <!-- Contrôles de Production -->
-                <div class="mt-2 w-full grid grid-cols-2 gap-1.5">
-                    <button id="btn-version" class="py-1.5 rounded text-[11px] font-bold flex items-center justify-center gap-1 border shadow-sm transition-colors bg-slate-100 text-slate-700 border-slate-300 cursor-pointer disabled:cursor-not-allowed" title="Changer la version de la carrure">
-                        <span class="w-3 h-3" id="icon-tags"></span>
-                        <span id="version-text">V1</span>
-                    </button>
+                <!-- Étagère Centrale (Stock) -->
+                <div class="relative z-0 flex flex-col items-center flex-1 mx-8 h-[400px]">
                     
-                    <button id="btn-defect" class="py-1.5 rounded text-[11px] font-bold flex items-center justify-center gap-1 border shadow-sm transition-colors bg-white text-slate-600 border-slate-300 hover:bg-slate-100 cursor-pointer disabled:cursor-not-allowed" title="Provoquer un défaut sur le prochain plateau">
-                        <span class="w-3 h-3" id="icon-bug"></span>
-                        <span id="defect-text">Défaut OFF</span>
+                    <!-- PANNEAU D'AFFICHAGE DU STOCK -->
+                    <div class="w-full bg-slate-800 text-white rounded-lg shadow-xl border-4 border-slate-700 p-4 mb-4 z-30 relative overflow-hidden flex gap-4">
+                        <div class="absolute top-0 left-0 w-full h-1/2 bg-white/5 pointer-events-none"></div>
+
+                        <div class="flex-1 flex flex-col justify-between">
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-4 h-4 text-slate-400" id="icon-info-led"></span>
+                                    <span class="text-xs font-bold text-slate-300 uppercase tracking-widest">Indicateurs Stock</span>
+                                </div>
+                                <span id="status-badge" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 border border-current bg-slate-900 text-blue-400">
+                                    <span class="w-4 h-4" id="status-icon"></span>
+                                    <span id="status-label">Stock élevé</span>
+                                </span>
+                            </div>
+
+                            <div class="flex justify-between items-end mt-2">
+                                <div>
+                                    <p class="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">Pièces en stock</p>
+                                    <p class="text-3xl font-black leading-none"><span id="val-qty">0</span> <span class="text-sm font-normal text-slate-400">/ 160 max</span></p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-[10px] text-red-400 uppercase tracking-wider mb-0.5">Niveau Sécurité</p>
+                                    <p class="text-xl font-bold leading-none text-red-400">40 <span class="text-xs font-normal opacity-70">carr.</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Jauge Verticale -->
+                        <div class="relative w-24 h-[84px] shrink-0 border-l border-slate-600 pl-3 flex items-end justify-end">
+                            <div class="absolute bottom-0 left-3 right-1 h-full pointer-events-none z-0">
+                                <div class="absolute w-full border-b-[1.5px] border-red-500/70 border-dashed" style="bottom: 25%">
+                                    <span class="absolute left-0 -top-2.5 text-[8px] font-black text-red-400">SÉCU</span>
+                                </div>
+                                <div class="absolute w-full border-b-[1.5px] border-green-500/70 border-dashed" style="bottom: 62.5%">
+                                    <span class="absolute left-0 -top-2.5 text-[8px] font-black text-green-400">CIBLE</span>
+                                </div>
+                            </div>
+                            <div class="w-4 h-full bg-slate-900 rounded-full overflow-hidden border border-slate-600 flex flex-col justify-end relative z-10 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]">
+                                <div id="bar-fill" class="w-full transition-all duration-500 ease-out bg-red-500 shadow-[0_0_8px_#ef4444]" style="height: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VUE PHYSIQUE DU STOCK -->
+                    <div id="stock-view" class="w-full flex-1 relative z-10">
+                        <!-- Généré par JS -->
+                    </div>
+                    
+                    <!-- Titre STOCK en filigrane sous le rayonnage -->
+                    <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 z-0 pointer-events-none">
+                        <h2 class="text-[54px] font-black text-slate-300 tracking-[0.2em] uppercase opacity-40 drop-shadow-sm select-none">Stock</h2>
+                    </div>
+
+                    <div class="absolute -bottom-6 w-[110%] h-6 bg-slate-300 rounded-[100%] opacity-50 blur-md z-[-1]"></div>
+                </div>
+
+                <!-- Poste B (Droite) -->
+                <div class="relative z-10 flex flex-col items-center w-48">
+                    <div class="w-full bg-slate-300 h-32 rounded-t-lg border-2 border-slate-400 flex flex-col items-center justify-center shadow-lg relative">
+                        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] rounded-t-lg overflow-hidden"></div>
+                        <div class="w-10 h-10 text-slate-500 mb-2 z-10" id="icon-package-posteB"></div>
+                        <span class="font-bold text-slate-700 text-center leading-tight z-10">Montage boîte</span>
+                        <span class="text-[10px] text-slate-500 font-medium uppercase tracking-wider z-10">Poste B</span>
+
+                        <!-- Avatar Horloger -->
+                        <div class="absolute -bottom-5 -left-3 z-20 flex flex-col items-center">
+                            <div class="bg-white text-slate-800 p-2 rounded-full shadow-lg border-2 border-slate-200 relative">
+                                <div class="w-6 h-6 text-slate-700" id="icon-user-horloger"></div>
+                                <div class="absolute -top-1 -left-2 bg-blue-500 rounded-full p-0.5 border border-white">
+                                    <div class="w-3 h-3 text-white" id="icon-watch"></div>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-bold bg-white text-slate-700 px-1.5 py-0.5 mt-1 rounded shadow border border-slate-200">Horloger</span>
+                        </div>
+                    </div>
+                    <button id="btn-demander" class="mt-4 w-full bg-green-600 hover:bg-green-700 disabled:bg-slate-400 text-white py-2 px-2 rounded-lg font-bold shadow-md transform transition hover:-translate-y-0.5 active:translate-y-0 flex flex-col items-center justify-center gap-0.5 text-center leading-tight cursor-pointer disabled:cursor-not-allowed">
+                        <span class="text-[13px]">Demander des carrures polies</span>
+                        <span class="text-[10px] font-normal opacity-80">(20 carr.)</span>
                     </button>
                 </div>
+
+                <!-- Character / Manager Animé -->
+                <div id="manager-wrapper" class="absolute bottom-[40px] z-20 flex flex-col items-center transition-all duration-700 ease-in-out" style="left: 50%; transform: translateX(-50%);">
+                    <!-- Plateau porté -->
+                    <div id="manager-tray" class="transition-opacity duration-300 mb-1 w-[100px] h-[34px] rounded border shadow-xl flex items-center justify-center p-[1px] opacity-0 translate-y-4">
+                        <!-- Rempli par JS -->
+                    </div>
+                    
+                    <!-- Avatar Gestionnaire Moderne -->
+                    <div class="bg-gradient-to-b from-indigo-500 to-indigo-700 text-white p-3 rounded-full shadow-lg border-2 border-white relative">
+                        <div class="w-8 h-8" id="icon-usercog"></div>
+                        <div class="absolute -top-2 -right-2 bg-orange-500 text-white p-1 rounded-full shadow-md border border-white">
+                            <div class="w-4 h-4" id="icon-clipboard"></div>
+                        </div>
+                        <div class="absolute -bottom-2 bg-slate-800 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm whitespace-nowrap left-1/2 -translate-x-1/2">
+                            Gestionnaire
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Étagère Centrale (Stock) -->
-            <div class="relative z-0 flex flex-col items-center flex-1 mx-8 h-[400px]">
+            <!-- HISTORIQUE (Intégré dans Simulator) -->
+            <div class="w-full bg-white border-t border-slate-200 p-6 flex flex-col h-[250px]">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <span class="w-5 h-5 text-slate-500" id="icon-history-title"></span>
+                    Journal des mouvements
+                </h2>
                 
-                <!-- PANNEAU D'AFFICHAGE DU STOCK (Écran LED suspendu) -->
-                <div class="w-full bg-slate-800 text-white rounded-lg shadow-xl border-4 border-slate-700 p-4 mb-4 z-30 relative overflow-hidden flex gap-4">
-                    <div class="absolute top-0 left-0 w-full h-1/2 bg-white/5 pointer-events-none"></div>
-
-                    <div class="flex-1 flex flex-col justify-between">
-                        <div class="flex justify-between items-center mb-2">
-                            <div class="flex items-center gap-2">
-                                <span class="w-4 h-4 text-slate-400" id="icon-info-led"></span>
-                                <span class="text-xs font-bold text-slate-300 uppercase tracking-widest">Indicateurs Stock</span>
-                            </div>
-                            <span id="status-badge" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 border border-current bg-slate-900 text-blue-400">
-                                <span class="w-4 h-4" id="status-icon"></span>
-                                <span id="status-label">Stock élevé</span>
-                            </span>
-                        </div>
-
-                        <div class="flex justify-between items-end mt-2">
-                            <div>
-                                <p class="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">Pièces en stock</p>
-                                <p class="text-3xl font-black leading-none"><span id="val-qty">0</span> <span class="text-sm font-normal text-slate-400">/ 160 max</span></p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-[10px] text-red-400 uppercase tracking-wider mb-0.5">Niveau Sécurité</p>
-                                <p class="text-xl font-bold leading-none text-red-400">40 <span class="text-xs font-normal opacity-70">carr.</span></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Jauge Verticale -->
-                    <div class="relative w-24 h-[84px] shrink-0 border-l border-slate-600 pl-3 flex items-end justify-end">
-                        <div class="absolute bottom-0 left-3 right-1 h-full pointer-events-none z-0">
-                            <div class="absolute w-full border-b-[1.5px] border-red-500/70 border-dashed" style="bottom: 25%">
-                                <span class="absolute left-0 -top-2.5 text-[8px] font-black text-red-400">SÉCU</span>
-                            </div>
-                            <div class="absolute w-full border-b-[1.5px] border-green-500/70 border-dashed" style="bottom: 62.5%">
-                                <span class="absolute left-0 -top-2.5 text-[8px] font-black text-green-400">CIBLE</span>
-                            </div>
-                        </div>
-                        <div class="w-4 h-full bg-slate-900 rounded-full overflow-hidden border border-slate-600 flex flex-col justify-end relative z-10 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]">
-                            <div id="bar-fill" class="w-full transition-all duration-500 ease-out bg-red-500 shadow-[0_0_8px_#ef4444]" style="height: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- VUE PHYSIQUE DU STOCK -->
-                <div id="stock-view" class="w-full flex-1 relative">
-                    <!-- Généré par JS -->
-                </div>
-                
-                <div class="absolute -bottom-6 w-[110%] h-6 bg-slate-300 rounded-[100%] opacity-50 blur-md z-[-1]"></div>
-            </div>
-
-            <!-- Poste B (Droite) -->
-            <div class="relative z-10 flex flex-col items-center w-48">
-                <div class="w-full bg-slate-300 h-32 rounded-t-lg border-2 border-slate-400 flex flex-col items-center justify-center shadow-lg relative">
-                    <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] rounded-t-lg overflow-hidden"></div>
-                    <div class="w-10 h-10 text-slate-500 mb-2 z-10" id="icon-package-posteB"></div>
-                    <span class="font-bold text-slate-700 text-center leading-tight z-10">Montage boîte</span>
-                    <span class="text-[10px] text-slate-500 font-medium uppercase tracking-wider z-10">Poste B</span>
-
-                    <!-- Avatar Horloger -->
-                    <div class="absolute -bottom-5 -left-3 z-20 flex flex-col items-center">
-                        <div class="bg-white text-slate-800 p-2 rounded-full shadow-lg border-2 border-slate-200 relative">
-                            <div class="w-6 h-6 text-slate-700" id="icon-user-horloger"></div>
-                            <div class="absolute -top-1 -left-2 bg-blue-500 rounded-full p-0.5 border border-white">
-                                <div class="w-3 h-3 text-white" id="icon-watch"></div>
-                            </div>
-                        </div>
-                        <span class="text-[10px] font-bold bg-white text-slate-700 px-1.5 py-0.5 mt-1 rounded shadow border border-slate-200">Horloger</span>
-                    </div>
-                </div>
-                <button id="btn-demander" class="mt-4 w-full bg-green-600 hover:bg-green-700 disabled:bg-slate-400 text-white py-2 px-2 rounded-lg font-bold shadow-md transform transition hover:-translate-y-0.5 active:translate-y-0 flex flex-col items-center justify-center gap-0.5 text-center leading-tight cursor-pointer disabled:cursor-not-allowed">
-                    <span class="text-[13px]">Demander des carrures polies</span>
-                    <span class="text-[10px] font-normal opacity-80">(20 carr.)</span>
-                </button>
-            </div>
-
-            <!-- Character / Manager Animé -->
-            <div id="manager-wrapper" class="absolute bottom-[40px] z-20 flex flex-col items-center transition-all duration-700 ease-in-out" style="left: 50%; transform: translateX(-50%);">
-                <!-- Plateau porté -->
-                <div id="manager-tray" class="transition-opacity duration-300 mb-1 w-[100px] h-[34px] rounded border shadow-xl flex items-center justify-center p-[1px] opacity-0 translate-y-4">
+                <div id="history-container" class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                     <!-- Rempli par JS -->
                 </div>
+            </div>
+        </div>
+
+        <!-- TAB 2 : CONTENU THÉORIQUE (Fiche Pédagogique) -->
+        <div id="view-cours" class="hidden p-6 flex flex-col">
+            <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <span class="w-6 h-6 text-blue-600" id="icon-book"></span>
+                Fiche Pédagogique : Comparatif FIFO / LIFO
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Colonne FIFO -->
+                <div class="bg-blue-50/40 rounded-xl border border-blue-100 p-6">
+                    <h3 class="text-2xl font-black text-blue-800 mb-4 border-b-2 border-blue-200 pb-3" title="PEPS : Premier Entré, Premier Sorti">
+                        FIFO 
+                        <span class="text-xs font-bold text-blue-600 ml-2 uppercase tracking-widest block xl:inline-block mt-1">(First In, First Out)</span>
+                        <div class="text-sm font-bold text-blue-700 mt-1">🇫🇷 PEPS : Premier Entré, Premier Sorti</div>
+                    </h3>
+                    <div class="space-y-4 text-sm">
+                        <div>
+                            <h4 class="font-bold text-blue-900 uppercase text-xs tracking-wider mb-1">Principe</h4>
+                            <p class="text-slate-700 leading-relaxed">Le premier élément entré en stock est le premier à sortir. On utilise donc les pièces, lots ou plateaux les plus anciens en priorité.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-blue-900 uppercase text-xs tracking-wider mb-1">Avantages</h4>
+                            <ul class="text-slate-700 leading-relaxed list-disc list-inside space-y-1">
+                                <li>Bonne rotation du stock, limite le vieillissement.</li>
+                                <li>Réduit les risques d’obsolescence, de péremption ou d’oubli.</li>
+                                <li>Très adapté à la traçabilité.</li>
+                                <li>Méthode facile à expliquer aux élèves.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-blue-900 uppercase text-xs tracking-wider mb-1">Inconvénients</h4>
+                            <p class="text-slate-700 leading-relaxed">Demande une organisation rigoureuse et nécessite souvent plus de place. Les flux doivent être bien séparés entre l'entrée et la sortie. Il y a un risque d’erreur si les plateaux sont mélangés.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-blue-900 uppercase text-xs tracking-wider mb-1">Systèmes low-tech possibles</h4>
+                            <p class="text-slate-700 leading-relaxed">Étagère traversante, couloir FIFO au sol, file d’attente de bacs, étiquettes avec date/heure d’entrée, couleurs par ancienneté, cartes Kanban physiques, tableau blanc, fiches de lot.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border border-blue-200 shadow-sm mt-6">
+                            <h4 class="font-bold text-blue-800 flex items-center gap-2 mb-2">
+                                <span class="w-4 h-4" id="icon-info-fifo"></span> Exemple concret
+                            </h4>
+                            <p class="text-slate-600 italic">Le poste de polissage termine un plateau à 8h00, puis un autre à 9h00. Si l'horloger demande des pièces, on lui sortira d’abord le plateau de 8h00.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Colonne LIFO -->
+                <div class="bg-amber-50/40 rounded-xl border border-amber-100 p-6">
+                    <h3 class="text-2xl font-black text-amber-800 mb-4 border-b-2 border-amber-200 pb-3" title="DEPS : Dernier Entré, Premier Sorti">
+                        LIFO 
+                        <span class="text-xs font-bold text-amber-600 ml-2 uppercase tracking-widest block xl:inline-block mt-1">(Last In, First Out)</span>
+                        <div class="text-sm font-bold text-amber-700 mt-1">🇫🇷 DEPS : Dernier Entré, Premier Sorti</div>
+                    </h3>
+                    <div class="space-y-4 text-sm">
+                        <div>
+                            <h4 class="font-bold text-amber-900 uppercase text-xs tracking-wider mb-1">Principe</h4>
+                            <p class="text-slate-700 leading-relaxed">Le dernier élément entré en stock est le premier à sortir. On utilise donc les pièces, lots ou plateaux les plus récents en priorité.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-amber-900 uppercase text-xs tracking-wider mb-1">Avantages</h4>
+                            <ul class="text-slate-700 leading-relaxed list-disc list-inside space-y-1">
+                                <li>Très simple physiquement.</li>
+                                <li>Peu de manutention, adapté aux empilements.</li>
+                                <li>Facile à mettre en place pour des produits identiques, non périssables et sans traçabilité forte.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-amber-900 uppercase text-xs tracking-wider mb-1">Inconvénients</h4>
+                            <p class="text-slate-700 leading-relaxed">Les anciens stocks peuvent rester bloqués longtemps au fond. Risque d’oubli ou d’obsolescence. Peu adapté aux produits avec date, version, lot critique ou traçabilité stricte. Peut masquer un "stock dormant".</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-amber-900 uppercase text-xs tracking-wider mb-1">Systèmes low-tech possibles</h4>
+                            <p class="text-slate-700 leading-relaxed">Pile de bacs, stockage en profondeur, étagère à accès unique, bac unique rempli par le dessus, pile de cartons ou de dossiers, zone tampon de courte durée.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border border-amber-200 shadow-sm mt-6">
+                            <h4 class="font-bold text-amber-800 flex items-center gap-2 mb-2">
+                                <span class="w-4 h-4" id="icon-info-lifo"></span> Exemple concret
+                            </h4>
+                            <p class="text-slate-600 italic">Le polisseur dépose trois plateaux l’un sur l’autre. Le dernier plateau posé se retrouve au-dessus : c’est lui qui sera repris en premier par l'horloger.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3 : CONTENU QUIZ -->
+        <div id="view-quiz" class="hidden p-6 flex flex-col bg-slate-50">
+            <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <span class="w-6 h-6 text-indigo-600" id="icon-quiz-title"></span>
+                Testez vos connaissances
+            </h2>
+            <div class="space-y-6">
                 
-                <!-- Avatar Gestionnaire Moderne -->
-                <div class="bg-gradient-to-b from-indigo-500 to-indigo-700 text-white p-3 rounded-full shadow-lg border-2 border-white relative">
-                    <div class="w-8 h-8" id="icon-usercog"></div>
-                    <div class="absolute -top-2 -right-2 bg-orange-500 text-white p-1 rounded-full shadow-md border border-white">
-                        <div class="w-4 h-4" id="icon-clipboard"></div>
+                <!-- Question 1 -->
+                <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+                    <h3 class="font-bold text-slate-800 mb-3 text-lg">Question 1 : Détection des défauts</h3>
+                    <p class="text-slate-700 mb-5 leading-relaxed">
+                        On a un lot de 20 pièces en stock avec un défaut. Le polisseur génère ensuite un lot sans non-conformité de 20 pièces, puis un autre lot sans non-conformité de 20 pièces. <br/><br/>
+                        Dans quelle situation est-ce que l'horloger va découvrir le plus tôt possible le défaut ?
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="checkQ1('FIFO')" class="flex-1 py-3 px-4 bg-slate-50 border border-slate-300 rounded-lg hover:bg-slate-100 font-semibold text-slate-700 transition">En mode FIFO</button>
+                        <button onclick="checkQ1('LIFO')" class="flex-1 py-3 px-4 bg-slate-50 border border-slate-300 rounded-lg hover:bg-slate-100 font-semibold text-slate-700 transition">En mode LIFO</button>
                     </div>
-                    <div class="absolute -bottom-2 bg-slate-800 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm whitespace-nowrap left-1/2 -translate-x-1/2">
-                        Gestionnaire
-                    </div>
+                    <div id="feedback-q1" class="hidden"></div>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- HISTORIQUE (Pleine largeur) -->
-    <div class="w-full max-w-5xl bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col mb-8 h-[250px]">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <span class="w-5 h-5 text-slate-500" id="icon-history-title"></span>
-            Journal des mouvements
-        </h2>
-        
-        <div id="history-container" class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            <!-- Rempli par JS -->
-        </div>
-    </div>
-
-    <!-- CONTENU THÉORIQUE (Fiche Pédagogique) -->
-    <div class="w-full max-w-5xl bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col mb-12">
-        <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <span class="w-6 h-6 text-blue-600" id="icon-book"></span>
-            Fiche Pédagogique : Comparatif FIFO / LIFO
-        </h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Colonne FIFO -->
-            <div class="bg-blue-50/40 rounded-xl border border-blue-100 p-6">
-                <h3 class="text-2xl font-black text-blue-800 mb-4 border-b-2 border-blue-200 pb-3">FIFO <span class="text-sm font-bold text-blue-600 ml-2 uppercase tracking-widest">(First In, First Out)</span></h3>
-                <div class="space-y-4 text-sm">
-                    <div>
-                        <h4 class="font-bold text-blue-900 uppercase text-xs tracking-wider mb-1">Principe</h4>
-                        <p class="text-slate-700 leading-relaxed">Le premier élément entré en stock est le premier à sortir. On utilise donc les pièces, lots ou plateaux les plus anciens en priorité.</p>
+                <!-- Question 2 -->
+                <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+                    <h3 class="font-bold text-slate-800 mb-3 text-lg">Question 2 : Gestion des versions et stock vieillissant</h3>
+                    <p class="text-slate-700 mb-5 leading-relaxed">
+                        L'atelier décide de passer d'une version V1 à une version V2 améliorée pour les carrures. Il reste encore plusieurs plateaux V1 en stock. Le polisseur commence à produire exclusivement la nouvelle version V2.<br/><br/>
+                        Pour éviter que les pièces V1 ne deviennent un "stock dormant" (stock vieillissant risquant l'obsolescence) au fond des étagères, quelle méthode de gestion est-il impératif d'utiliser ?
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <button onclick="checkQ2('FIFO')" class="py-3 px-4 bg-slate-50 border border-slate-300 rounded-lg hover:bg-slate-100 font-semibold text-slate-700 transition">Impérativement FIFO</button>
+                        <button onclick="checkQ2('LIFO')" class="py-3 px-4 bg-slate-50 border border-slate-300 rounded-lg hover:bg-slate-100 font-semibold text-slate-700 transition">Impérativement LIFO</button>
+                        <button onclick="checkQ2('BOTH')" class="py-3 px-4 bg-slate-50 border border-slate-300 rounded-lg hover:bg-slate-100 font-semibold text-slate-700 transition">Peu importe (Les deux fonctionnent)</button>
+                        <button onclick="checkQ2('NONE')" class="py-3 px-4 bg-slate-50 border border-slate-300 rounded-lg hover:bg-slate-100 font-semibold text-slate-700 transition">Aucune des deux</button>
                     </div>
-                    <div>
-                        <h4 class="font-bold text-blue-900 uppercase text-xs tracking-wider mb-1">Avantages</h4>
-                        <ul class="text-slate-700 leading-relaxed list-disc list-inside space-y-1">
-                            <li>Bonne rotation du stock, limite le vieillissement.</li>
-                            <li>Réduit les risques d’obsolescence, de péremption ou d’oubli.</li>
-                            <li>Très adapté à la traçabilité.</li>
-                            <li>Méthode facile à expliquer aux élèves.</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-blue-900 uppercase text-xs tracking-wider mb-1">Inconvénients</h4>
-                        <p class="text-slate-700 leading-relaxed">Demande une organisation rigoureuse et nécessite souvent plus de place. Les flux doivent être bien séparés entre l'entrée et la sortie. Il y a un risque d’erreur si les plateaux sont mélangés.</p>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-blue-900 uppercase text-xs tracking-wider mb-1">Systèmes low-tech possibles</h4>
-                        <p class="text-slate-700 leading-relaxed">Étagère traversante, couloir FIFO au sol, file d’attente de bacs, étiquettes avec date/heure d’entrée, couleurs par ancienneté, cartes Kanban physiques, tableau blanc, fiches de lot.</p>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg border border-blue-200 shadow-sm mt-6">
-                        <h4 class="font-bold text-blue-800 flex items-center gap-2 mb-2">
-                            <span class="w-4 h-4" id="icon-info-fifo"></span> Exemple concret
-                        </h4>
-                        <p class="text-slate-600 italic">Le poste de polissage termine un plateau à 8h00, puis un autre à 9h00. Si l'horloger demande des pièces, on lui sortira d’abord le plateau de 8h00.</p>
-                    </div>
+                    <div id="feedback-q2" class="hidden"></div>
                 </div>
-            </div>
 
-            <!-- Colonne LIFO -->
-            <div class="bg-amber-50/40 rounded-xl border border-amber-100 p-6">
-                <h3 class="text-2xl font-black text-amber-800 mb-4 border-b-2 border-amber-200 pb-3">LIFO <span class="text-sm font-bold text-amber-600 ml-2 uppercase tracking-widest">(Last In, First Out)</span></h3>
-                <div class="space-y-4 text-sm">
-                    <div>
-                        <h4 class="font-bold text-amber-900 uppercase text-xs tracking-wider mb-1">Principe</h4>
-                        <p class="text-slate-700 leading-relaxed">Le dernier élément entré en stock est le premier à sortir. On utilise donc les pièces, lots ou plateaux les plus récents en priorité.</p>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-amber-900 uppercase text-xs tracking-wider mb-1">Avantages</h4>
-                        <ul class="text-slate-700 leading-relaxed list-disc list-inside space-y-1">
-                            <li>Très simple physiquement.</li>
-                            <li>Peu de manutention, adapté aux empilements.</li>
-                            <li>Facile à mettre en place pour des produits identiques, non périssables et sans traçabilité forte.</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-amber-900 uppercase text-xs tracking-wider mb-1">Inconvénients</h4>
-                        <p class="text-slate-700 leading-relaxed">Les anciens stocks peuvent rester bloqués longtemps au fond. Risque d’oubli ou d’obsolescence. Peu adapté aux produits avec date, version, lot critique ou traçabilité stricte. Peut masquer un "stock dormant".</p>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-amber-900 uppercase text-xs tracking-wider mb-1">Systèmes low-tech possibles</h4>
-                        <p class="text-slate-700 leading-relaxed">Pile de bacs, stockage en profondeur, étagère à accès unique, bac unique rempli par le dessus, pile de cartons ou de dossiers, zone tampon de courte durée.</p>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg border border-amber-200 shadow-sm mt-6">
-                        <h4 class="font-bold text-amber-800 flex items-center gap-2 mb-2">
-                            <span class="w-4 h-4" id="icon-info-lifo"></span> Exemple concret
-                        </h4>
-                        <p class="text-slate-600 italic">Le polisseur dépose trois plateaux l’un sur l’autre. Le dernier plateau posé se retrouve au-dessus : c’est lui qui sera repris en premier par l'horloger.</p>
-                    </div>
+                <!-- Bouton Réinitialisation Quiz -->
+                <div class="mt-8 pt-6 border-t border-slate-200 flex justify-end">
+                    <button onclick="resetQuiz()" class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 bg-white border border-slate-300 hover:bg-slate-100 rounded-lg transition shadow-sm">
+                        <span class="w-4 h-4" id="icon-refresh-quiz"></span>
+                        Réinitialiser le quiz
+                    </button>
                 </div>
+
             </div>
         </div>
     </div>
@@ -296,6 +374,7 @@
     <script>
         // --- 1. ICONS SVG (Lucide-like) ---
         const icons = {
+            layout: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>`,
             package: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
             refresh: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M21 12a9 9 0 1 0-9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>`,
             settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>`,
@@ -310,7 +389,8 @@
             alert: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>`,
             check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>`,
             history: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>`,
-            book: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`
+            book: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
+            quiz: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`
         };
 
         // Inject Static Icons
@@ -331,6 +411,11 @@
         document.getElementById('icon-book').innerHTML = icons.book;
         document.getElementById('icon-info-fifo').innerHTML = icons.info;
         document.getElementById('icon-info-lifo').innerHTML = icons.info;
+        document.getElementById('icon-book-tab').innerHTML = icons.book;
+        document.getElementById('icon-quiz-tab').innerHTML = icons.quiz;
+        document.getElementById('icon-quiz-title').innerHTML = icons.quiz;
+        document.getElementById('icon-simu-tab').innerHTML = icons.layout;
+        document.getElementById('icon-refresh-quiz').innerHTML = icons.refresh;
 
         // --- 2. CONSTANTES ET ÉTAT GLOBAL ---
         const TRAY_QTY = 20;
@@ -342,22 +427,23 @@
         const delay = ms => new Promise(res => setTimeout(res, ms));
 
         let state = {
-            stock: [],
+            stock: [{ id: 1, qty: TRAY_QTY, defect: false, version: 1 }],
             mode: 'FIFO',
-            history: [],
-            trayCounter: 1,
+            history: [{
+                id: Date.now(), type: 'Entrée', trayId: 1, mode: '-', stockAfter: TRAY_QTY, defect: false, version: 1
+            }],
+            trayCounter: 2,
             nextDefect: false,
             currentVersion: 1,
             animating: false,
             manager: { position: 'CENTER', carrying: null },
-            message: { text: "Bienvenue ! Choisissez un mode (FIFO ou LIFO) et commencez par entrer un plateau de carrures.", type: "info" }
+            message: { text: "Bienvenue ! La simulation commence avec un plateau en stock. Choisissez un mode (FIFO ou LIFO).", type: "info" }
         };
 
         // --- 3. HELPERS VISUELS ---
         const getTrayOuterClasses = (version) => {
             switch(version) {
                 case 2: return 'bg-blue-100 border-blue-300 text-blue-900';
-                case 3: return 'bg-emerald-100 border-emerald-300 text-emerald-900';
                 default: return 'bg-slate-100 border-slate-300 text-slate-800'; // V1
             }
         };
@@ -365,7 +451,6 @@
         const getTrayInnerClasses = (version) => {
             switch(version) {
                 case 2: return 'bg-blue-200/80';
-                case 3: return 'bg-emerald-200/80';
                 default: return 'bg-slate-200/80'; // V1
             }
         };
@@ -397,8 +482,8 @@
                 cells += `<div class="w-full h-full rounded-[2px] shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)] flex items-center justify-center ${getTrayInnerClasses(version)}"><div class="w-[70%] h-[70%] rounded-full border-[1.5px] ${circleClass}" title="${title}"></div></div>`;
             }
             
-            let baseColor = version === 2 ? 'bg-blue-50' : version === 3 ? 'bg-emerald-50' : 'bg-slate-50';
-            let vBadge = version > 1 ? `<span class="ml-0.5 text-[6px] font-bold px-0.5 rounded ${version === 2 ? 'bg-blue-200 text-blue-800' : 'bg-emerald-200 text-emerald-800'}">v${version}</span>` : '';
+            let baseColor = version === 2 ? 'bg-blue-50' : 'bg-slate-50';
+            let vBadge = version > 1 ? `<span class="ml-0.5 text-[6px] font-bold px-0.5 rounded bg-blue-200 text-blue-800">v${version}</span>` : '';
 
             return `
                 <div class="relative w-full h-full flex flex-col items-center justify-center p-[2px] overflow-hidden rounded-sm ${baseColor}">
@@ -439,7 +524,6 @@
                 icon.innerHTML = icons.alert;
             } else if (state.message.type === 'success') {
                 banner.className = 'p-4 border-b flex items-start gap-3 transition-colors bg-green-50 text-green-800 border-green-100';
-                icon.innerHTML = icons.info; // Check icon? We used info for success in React by default or CheckCircle. Let's use check.
                 icon.innerHTML = icons.check;
             } else {
                 banner.className = 'p-4 border-b flex items-start gap-3 transition-colors bg-blue-50 text-blue-800 border-blue-100';
@@ -465,8 +549,7 @@
             // Version button style
             document.getElementById('version-text').innerText = `V${state.currentVersion}`;
             btnVersion.className = `py-1.5 rounded text-[11px] font-bold flex items-center justify-center gap-1 border shadow-sm transition-colors cursor-pointer disabled:cursor-not-allowed ${
-                state.currentVersion === 1 ? 'bg-slate-100 text-slate-700 border-slate-300' :
-                state.currentVersion === 2 ? 'bg-blue-100 text-blue-800 border-blue-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                state.currentVersion === 1 ? 'bg-slate-100 text-slate-700 border-slate-300' : 'bg-blue-100 text-blue-800 border-blue-300'
             }`;
 
             // Defect button style
@@ -766,7 +849,15 @@
             state.trayCounter = 1;
             state.nextDefect = false;
             state.currentVersion = 1;
-            state.message = { text: "Simulation réinitialisée.", type: "info" };
+            state.message = { text: "Simulation réinitialisée avec un plateau initial.", type: "info" };
+            
+            // Re-ajouter un plateau automatiquement après le "Zéro"
+            state.stock.push({ id: state.trayCounter, qty: TRAY_QTY, defect: false, version: 1 });
+            state.trayCounter++;
+            state.history.unshift({
+                id: Date.now(), type: 'Entrée', trayId: 1, mode: '-', stockAfter: TRAY_QTY, defect: false, version: 1
+            });
+            
             renderAll();
         };
 
@@ -780,7 +871,8 @@
         
         document.getElementById('btn-version').addEventListener('click', () => {
             if(!state.animating) {
-                state.currentVersion = state.currentVersion === 3 ? 1 : state.currentVersion + 1;
+                // Alternance entre V1 et V2
+                state.currentVersion = state.currentVersion === 2 ? 1 : 2;
                 renderControls();
             }
         });
@@ -794,6 +886,75 @@
 
         // Premier rendu
         renderAll();
+
+        // --- 7. LOGIQUE DES ONGLETS ET DU QUIZ ---
+        const tabSimu = document.getElementById('tab-simu');
+        const tabCours = document.getElementById('tab-cours');
+        const tabQuiz = document.getElementById('tab-quiz');
+        const viewSimu = document.getElementById('view-simu');
+        const viewCours = document.getElementById('view-cours');
+        const viewQuiz = document.getElementById('view-quiz');
+        
+        const activeClass = "flex-1 py-4 font-bold text-blue-700 bg-white border-b-2 border-blue-600 transition-colors flex justify-center items-center gap-2";
+        const inactiveClass = "flex-1 py-4 font-bold text-slate-500 hover:bg-slate-100 border-b-2 border-transparent transition-colors flex justify-center items-center gap-2";
+
+        tabSimu.addEventListener('click', () => {
+            viewSimu.classList.remove('hidden');
+            viewCours.classList.add('hidden');
+            viewQuiz.classList.add('hidden');
+            tabSimu.className = activeClass;
+            tabCours.className = inactiveClass;
+            tabQuiz.className = inactiveClass;
+        });
+
+        tabCours.addEventListener('click', () => {
+            viewCours.classList.remove('hidden');
+            viewSimu.classList.add('hidden');
+            viewQuiz.classList.add('hidden');
+            tabCours.className = activeClass;
+            tabSimu.className = inactiveClass;
+            tabQuiz.className = inactiveClass;
+        });
+
+        tabQuiz.addEventListener('click', () => {
+            viewQuiz.classList.remove('hidden');
+            viewSimu.classList.add('hidden');
+            viewCours.classList.add('hidden');
+            tabQuiz.className = activeClass;
+            tabSimu.className = inactiveClass;
+            tabCours.className = inactiveClass;
+        });
+
+        window.resetQuiz = () => {
+            document.getElementById('feedback-q1').classList.add('hidden');
+            document.getElementById('feedback-q2').classList.add('hidden');
+            document.getElementById('feedback-q1').innerHTML = '';
+            document.getElementById('feedback-q2').innerHTML = '';
+        };
+
+        window.checkQ1 = (answer) => {
+            const feedback = document.getElementById('feedback-q1');
+            feedback.classList.remove('hidden');
+            if(answer === 'FIFO') {
+                feedback.className = "mt-5 p-4 rounded-lg text-sm bg-green-50 text-green-800 border border-green-200 animate-roll-in";
+                feedback.innerHTML = "<strong>✅ Bonne réponse !</strong> Le lot défectueux étant le plus ancien (il était déjà en stock), la méthode FIFO (Premier entré, premier sorti) garantit que l'horloger le prélèvera lors de sa première demande. Le défaut est détecté immédiatement !";
+            } else {
+                feedback.className = "mt-5 p-4 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200 animate-roll-in";
+                feedback.innerHTML = "<strong>❌ Mauvaise réponse.</strong> En LIFO (Dernier entré, premier sorti), l'horloger prendra d'abord les nouveaux lots fraîchement produits (qui n'ont pas de défaut). Le lot défectueux restera au fond du stock et l'anomalie sera découverte très tardivement.";
+            }
+        };
+
+        window.checkQ2 = (answer) => {
+            const feedback = document.getElementById('feedback-q2');
+            feedback.classList.remove('hidden');
+            if(answer === 'FIFO') {
+                feedback.className = "mt-5 p-4 rounded-lg text-sm bg-green-50 text-green-800 border border-green-200 animate-roll-in";
+                feedback.innerHTML = "<strong>✅ Bonne réponse !</strong> Le FIFO oblige à consommer les anciens lots V1 avant de toucher aux nouveaux lots V2. Cela permet d'écouler l'ancien stock proprement et évite totalement l'effet de \"stock dormant\".";
+            } else {
+                feedback.className = "mt-5 p-4 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200 animate-roll-in";
+                feedback.innerHTML = "<strong>❌ Mauvaise réponse.</strong> En LIFO, l'horloger va consommer en priorité les lots V2 fraîchement produits. Les plateaux V1 vont donc rester bloqués au fond de l'étagère de manière indéfinie, créant un stock vieillissant qui risque l'obsolescence totale.";
+            }
+        };
 
     </script>
 </body>
