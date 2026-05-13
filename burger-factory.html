@@ -736,8 +736,10 @@
                     BURGER FLOW
                  </div>
                  <div className="flex gap-3">
-                     <button onClick={() => resetGame('intro')} className="px-4 py-2 bg-slate-100 rounded-lg hover:bg-slate-200 flex gap-2 items-center text-sm font-bold text-slate-600 transition-colors">
-                        <Icon name="Home" size={16}/> Accueil
+                    <a href="index.html" className="px-4 py-2 border border-slate-200 bg-white rounded-lg hover:bg-slate-50 flex gap-2 items-center text-sm font-bold text-slate-600 transition-colors" title="Retour au Portail">
+                       <Icon name="ArrowLeft" size={16}/> Portail
+                    </a>
+                    <button onClick={() => resetGame('intro')} className="px-4 py-2 bg-slate-100 rounded-lg hover:bg-slate-200 flex gap-2 items-center text-sm font-bold text-slate-600 transition-colors">                        <Icon name="Home" size={16}/> Accueil
                      </button>
                  </div>
              </header>
