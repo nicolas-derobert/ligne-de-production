@@ -27,6 +27,11 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+        /* Modal Backdrop styling for cross-browser support */
+        dialog::backdrop {
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(2px);
+        }
     </style>
 </head>
 <body class="min-h-screen bg-slate-50 font-sans text-slate-800 p-4 flex flex-col items-center">
@@ -40,13 +45,8 @@
             </h1>
             <p class="text-sm text-slate-500 mt-1">Simulateur pédagogique pour comprendre les flux physiques.</p>
         </div>
-        
-        <div class="flex items-center gap-4 bg-slate-100 p-1.5 rounded-lg">
-            <button id="btn-mode-fifo" class="px-4 py-2 rounded-md font-semibold transition-colors bg-white shadow-sm text-blue-700" title="PEPS : Premier Entré, Premier Sorti">Mode FIFO</button>
-            <button id="btn-mode-lifo" class="px-4 py-2 rounded-md font-semibold transition-colors text-slate-500 hover:text-slate-700" title="DEPS : Dernier Entré, Premier Sorti">Mode LIFO</button>
-        </div>
 
-        <button id="btn-reset" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+        <button id="btn-reset" class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition md:ml-auto">
             <span class="w-4 h-4" id="icon-refresh"></span>
             Réinitialiser
         </button>
@@ -57,170 +57,179 @@
         
         <!-- GLOBAL TABS -->
         <div class="flex border-b border-slate-200 bg-slate-50">
-            <button id="tab-simu" class="flex-1 py-4 font-bold text-blue-700 bg-white border-b-2 border-blue-600 transition-colors flex justify-center items-center gap-2">
-                <span class="w-5 h-5" id="icon-simu-tab"></span> Simulateur
-            </button>
-            <button id="tab-cours" class="flex-1 py-4 font-bold text-slate-500 hover:bg-slate-100 border-b-2 border-transparent transition-colors flex justify-center items-center gap-2">
+            <button id="tab-cours" class="flex-1 py-4 font-bold text-blue-700 bg-white border-b-2 border-blue-600 transition-colors flex justify-center items-center gap-2">
                 <span class="w-5 h-5" id="icon-book-tab"></span> Fiche Pédagogique
+            </button>
+            <button id="tab-simu" class="flex-1 py-4 font-bold text-slate-500 hover:bg-slate-100 border-b-2 border-transparent transition-colors flex justify-center items-center gap-2">
+                <span class="w-5 h-5" id="icon-simu-tab"></span> Simulateur
             </button>
             <button id="tab-quiz" class="flex-1 py-4 font-bold text-slate-500 hover:bg-slate-100 border-b-2 border-transparent transition-colors flex justify-center items-center gap-2">
                 <span class="w-5 h-5" id="icon-quiz-tab"></span> Quiz de validation
             </button>
         </div>
 
-        <!-- TAB 1 : SIMULATEUR -->
-        <div id="view-simu" class="flex flex-col">
-            <!-- Message Pédagogique -->
-            <div id="message-banner" class="p-4 border-b flex items-start gap-3 transition-colors bg-blue-50 text-blue-800 border-blue-100">
-                <div class="mt-0.5 w-5 h-5" id="message-icon"></div>
-                <p id="message-text" class="text-sm font-medium leading-relaxed flex-1">Bienvenue ! La simulation commence avec un plateau en stock. Choisissez un mode (FIFO ou LIFO).</p>
+        <!-- TAB 1 : SIMULATEUR (Caché par défaut) -->
+        <div id="view-simu" class="hidden flex flex-col">
+            
+            <!-- CONTROLS MODE -->
+            <div class="flex justify-center items-center gap-4 bg-slate-100 p-3 border-b border-slate-200">
+                <button id="btn-mode-fifo" class="px-4 py-2 rounded-md font-semibold transition-colors bg-white shadow-sm text-blue-700" title="PEPS : Premier Entré, Premier Sorti">Mode FIFO</button>
+                <button id="btn-mode-lifo" class="px-4 py-2 rounded-md font-semibold transition-colors text-slate-500 hover:text-slate-700" title="DEPS : Dernier Entré, Premier Sorti">Mode LIFO</button>
             </div>
 
             <!-- 3D-ish Atelier Stage -->
-            <div class="relative w-full h-[520px] bg-gradient-to-b from-slate-50 to-slate-200 p-6 flex justify-between items-end pb-12 border-b border-slate-300">
+            <div class="relative w-full h-[580px] bg-gradient-to-b from-slate-50 to-slate-200 p-6 border-b border-slate-300">
                 
-                <!-- Poste A (Gauche) -->
-                <div class="relative z-10 flex flex-col items-center w-48">
-                    <div class="w-full bg-slate-300 h-32 rounded-t-lg border-2 border-slate-400 flex flex-col items-center justify-center shadow-lg relative">
-                        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] rounded-t-lg overflow-hidden"></div>
-                        <div class="w-10 h-10 text-slate-500 mb-2 z-10" id="icon-settings"></div>
-                        <span class="font-bold text-slate-700 text-center leading-tight z-10">Polissage</span>
-                        <span class="text-[10px] text-slate-500 font-medium uppercase tracking-wider z-10">Poste A</span>
-                        
-                        <!-- Avatar Polisseur -->
-                        <div class="absolute -bottom-5 -right-3 z-20 flex flex-col items-center">
-                            <div class="bg-slate-700 text-slate-200 p-2 rounded-full shadow-lg border-2 border-white relative">
-                                <div class="w-6 h-6" id="icon-user-polisseur"></div>
-                                <div class="absolute -top-1 -right-2 bg-yellow-500 rounded-full p-0.5 border border-white">
-                                    <div class="w-3 h-3 text-white" id="icon-sparkles"></div>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-bold bg-white text-slate-700 px-1.5 py-0.5 mt-1 rounded shadow border border-slate-200">Polisseur</span>
-                        </div>
-                    </div>
+                <div class="w-full grid grid-cols-12 gap-6 h-full relative z-10 items-start">
                     
-                    <button id="btn-livrer" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white py-2 px-2 rounded-lg font-bold shadow-md transform transition hover:-translate-y-0.5 active:translate-y-0 flex flex-col items-center justify-center gap-0.5 text-center leading-tight cursor-pointer disabled:cursor-not-allowed">
-                        <span class="text-[13px]">Livrer les carrures</span>
-                        <span class="text-[10px] font-normal opacity-80">(20 carr.)</span>
-                    </button>
-
-                    <!-- Contrôles de Production -->
-                    <div class="mt-2 w-full grid grid-cols-2 gap-1.5">
-                        <button id="btn-version" class="py-1.5 rounded text-[11px] font-bold flex items-center justify-center gap-1 border shadow-sm transition-colors bg-slate-100 text-slate-700 border-slate-300 cursor-pointer disabled:cursor-not-allowed" title="Changer la version de la carrure">
-                            <span class="w-3 h-3" id="icon-tags"></span>
-                            <span id="version-text">V1</span>
-                        </button>
-                        
-                        <button id="btn-defect" class="py-1.5 rounded text-[11px] font-bold flex items-center justify-center gap-1 border shadow-sm transition-colors bg-white text-slate-600 border-slate-300 hover:bg-slate-100 cursor-pointer disabled:cursor-not-allowed" title="Provoquer un défaut sur le prochain plateau">
-                            <span class="w-3 h-3" id="icon-bug"></span>
-                            <span id="defect-text">Défaut OFF</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Étagère Centrale (Stock) -->
-                <div class="relative z-0 flex flex-col items-center flex-1 mx-8 h-[400px]">
-                    
-                    <!-- PANNEAU D'AFFICHAGE DU STOCK -->
-                    <div class="w-full bg-slate-800 text-white rounded-lg shadow-xl border-4 border-slate-700 p-4 mb-4 z-30 relative overflow-hidden flex gap-4">
-                        <div class="absolute top-0 left-0 w-full h-1/2 bg-white/5 pointer-events-none"></div>
-
-                        <div class="flex-1 flex flex-col justify-between">
-                            <div class="flex justify-between items-center mb-2">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-4 h-4 text-slate-400" id="icon-info-led"></span>
-                                    <span class="text-xs font-bold text-slate-300 uppercase tracking-widest">Indicateurs Stock</span>
+                    <!-- Colonne Poste A -->
+                    <div class="col-span-3 flex flex-col justify-start mt-4 mb-4">
+                        <!-- Atelier Polissage (Poste A) -->
+                        <div class="w-full h-[340px] border-2 border-dashed border-slate-400 rounded-xl bg-slate-50/70 flex flex-col items-center justify-start relative p-4 pt-6 shadow-sm backdrop-blur-sm">
+                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-2 border border-slate-300 rounded shadow-sm whitespace-nowrap">Atelier Polissage</div>
+                            
+                            <!-- Machine à polir -->
+                            <div class="w-full bg-slate-300 h-28 rounded-t-xl border-2 border-slate-400 flex flex-col items-center justify-end shadow-md relative mt-auto">
+                                <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] rounded-t-xl overflow-hidden pointer-events-none"></div>
+                                <div class="font-bold text-slate-700 text-center text-xs absolute top-2 z-10">Poste à polir</div>
+                                
+                                <!-- Touret -->
+                                <div class="w-20 h-14 bg-slate-600 rounded-t-full border-2 border-slate-700 relative flex justify-center items-center z-10 mb-[-2px]">
+                                    <div class="w-8 h-8 bg-slate-200 rounded-full border-[6px] border-slate-400 animate-spin border-dashed"></div>
+                                    <div class="absolute -right-3 -top-2 text-yellow-500 animate-pulse text-xl drop-shadow-md">✨</div>
                                 </div>
-                                <span id="status-badge" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 border border-current bg-slate-900 text-blue-400">
-                                    <span class="w-4 h-4" id="status-icon"></span>
-                                    <span id="status-label">Stock élevé</span>
-                                </span>
+                                
+                                <!-- Avatar Polisseur -->
+                                <div class="absolute -bottom-5 -right-3 z-20 flex flex-col items-center">
+                                    <div class="bg-slate-700 text-slate-200 p-2 rounded-full shadow-lg border-2 border-white relative">
+                                        <div class="w-6 h-6" id="icon-user-polisseur"></div>
+                                    </div>
+                                    <span class="text-[10px] font-bold bg-white text-slate-700 px-1.5 py-0.5 mt-1 rounded shadow border border-slate-200">Polisseur</span>
+                                </div>
                             </div>
-
-                            <div class="flex justify-between items-end mt-2">
-                                <div>
-                                    <p class="text-[10px] text-slate-400 uppercase tracking-wider mb-0.5">Pièces en stock</p>
-                                    <p class="text-3xl font-black leading-none"><span id="val-qty">0</span> <span class="text-sm font-normal text-slate-400">/ 160 max</span></p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="text-[10px] text-red-400 uppercase tracking-wider mb-0.5">Niveau Sécurité</p>
-                                    <p class="text-xl font-bold leading-none text-red-400">40 <span class="text-xs font-normal opacity-70">carr.</span></p>
-                                </div>
+                            
+                            <!-- Zone Dépôt (Output Buffer) -->
+                            <div class="w-full h-12 bg-slate-200 border-2 border-slate-300 rounded shadow-inner flex flex-col items-center justify-center relative mt-3 shrink-0">
+                                <div class="text-[8px] text-slate-500 uppercase font-bold absolute top-0.5">Dépôt (Sortie)</div>
+                                <div id="buffer-tray-a" class="w-[80px] h-[36px] opacity-0 transition-opacity z-10 mt-2 flex items-center justify-center p-[1px]"></div>
                             </div>
                         </div>
 
-                        <!-- Jauge Verticale -->
-                        <div class="relative w-24 h-[84px] shrink-0 border-l border-slate-600 pl-3 flex items-end justify-end">
-                            <div class="absolute bottom-0 left-3 right-1 h-full pointer-events-none z-0">
-                                <div class="absolute w-full border-b-[1.5px] border-red-500/70 border-dashed" style="bottom: 25%">
-                                    <span class="absolute left-0 -top-2.5 text-[8px] font-black text-red-400">SÉCU</span>
-                                </div>
-                                <div class="absolute w-full border-b-[1.5px] border-green-500/70 border-dashed" style="bottom: 62.5%">
-                                    <span class="absolute left-0 -top-2.5 text-[8px] font-black text-green-400">CIBLE</span>
-                                </div>
-                            </div>
-                            <div class="w-4 h-full bg-slate-900 rounded-full overflow-hidden border border-slate-600 flex flex-col justify-end relative z-10 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]">
-                                <div id="bar-fill" class="w-full transition-all duration-500 ease-out bg-red-500 shadow-[0_0_8px_#ef4444]" style="height: 0%"></div>
+                        <!-- Controls -->
+                        <div class="w-full space-y-2 mt-4">
+                            <button id="btn-livrer" class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white py-2 px-2 rounded-lg font-bold shadow-md transform transition hover:-translate-y-0.5 active:translate-y-0 flex flex-col items-center justify-center gap-0.5 text-center leading-tight cursor-pointer disabled:cursor-not-allowed">
+                                <span class="text-[13px]">Produire & Livrer</span>
+                                <span class="text-[10px] font-normal opacity-80">(20 carr.)</span>
+                            </button>
+                            <div class="w-full grid grid-cols-2 gap-1.5 mt-2">
+                                <button id="btn-version" class="py-1.5 rounded text-[11px] font-bold flex items-center justify-center gap-1 border shadow-sm transition-colors bg-slate-100 text-slate-700 border-slate-300 cursor-pointer disabled:cursor-not-allowed" title="Changer la version de la carrure">
+                                    <span class="w-3 h-3" id="icon-tags"></span>
+                                    <span id="version-text">V1</span>
+                                </button>
+                                
+                                <button id="btn-defect" class="py-1.5 rounded text-[11px] font-bold flex items-center justify-center gap-1 border shadow-sm transition-colors bg-white text-slate-600 border-slate-300 hover:bg-slate-100 cursor-pointer disabled:cursor-not-allowed" title="Provoquer un défaut sur le prochain plateau">
+                                    <span class="w-3 h-3" id="icon-bug"></span>
+                                    <span id="defect-text">Défaut OFF</span>
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- VUE PHYSIQUE DU STOCK -->
-                    <div id="stock-view" class="w-full flex-1 relative z-10">
-                        <!-- Généré par JS -->
-                    </div>
-                    
-                    <!-- Titre STOCK en filigrane sous le rayonnage -->
-                    <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 z-0 pointer-events-none">
-                        <h2 class="text-[54px] font-black text-slate-300 tracking-[0.2em] uppercase opacity-40 drop-shadow-sm select-none">Stock</h2>
-                    </div>
+                    <!-- Zone de Stockage Centrale -->
+                    <div class="col-span-6 flex flex-col justify-start mt-4 mb-4">
+                        <div class="w-full h-[340px] border-2 border-dashed border-slate-400 rounded-xl bg-slate-50/70 flex flex-col items-center relative p-4 shadow-sm backdrop-blur-sm">
+                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-2 border border-slate-300 rounded shadow-sm whitespace-nowrap">Zone de Stockage</div>
+                            
+                            <!-- Bouton Ouvrir Indicateurs -->
+                            <button id="btn-show-indicators" class="mb-4 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-1.5 px-3 rounded flex items-center gap-2 shadow transition-colors z-20">
+                                <span class="w-4 h-4" id="icon-info-btn"></span>
+                                Voir les indicateurs
+                            </button>
 
-                    <div class="absolute -bottom-6 w-[110%] h-6 bg-slate-300 rounded-[100%] opacity-50 blur-md z-[-1]"></div>
-                </div>
-
-                <!-- Poste B (Droite) -->
-                <div class="relative z-10 flex flex-col items-center w-48">
-                    <div class="w-full bg-slate-300 h-32 rounded-t-lg border-2 border-slate-400 flex flex-col items-center justify-center shadow-lg relative">
-                        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] rounded-t-lg overflow-hidden"></div>
-                        <div class="w-10 h-10 text-slate-500 mb-2 z-10" id="icon-package-posteB"></div>
-                        <span class="font-bold text-slate-700 text-center leading-tight z-10">Montage boîte</span>
-                        <span class="text-[10px] text-slate-500 font-medium uppercase tracking-wider z-10">Poste B</span>
-
-                        <!-- Avatar Horloger -->
-                        <div class="absolute -bottom-5 -left-3 z-20 flex flex-col items-center">
-                            <div class="bg-white text-slate-800 p-2 rounded-full shadow-lg border-2 border-slate-200 relative">
-                                <div class="w-6 h-6 text-slate-700" id="icon-user-horloger"></div>
-                                <div class="absolute -top-1 -left-2 bg-blue-500 rounded-full p-0.5 border border-white">
-                                    <div class="w-3 h-3 text-white" id="icon-watch"></div>
-                                </div>
+                            <!-- VUE PHYSIQUE DU STOCK -->
+                            <div id="stock-view" class="w-full flex-1 relative z-10 mt-2">
+                                <!-- Généré par JS -->
                             </div>
-                            <span class="text-[10px] font-bold bg-white text-slate-700 px-1.5 py-0.5 mt-1 rounded shadow border border-slate-200">Horloger</span>
                         </div>
                     </div>
-                    <button id="btn-demander" class="mt-4 w-full bg-green-600 hover:bg-green-700 disabled:bg-slate-400 text-white py-2 px-2 rounded-lg font-bold shadow-md transform transition hover:-translate-y-0.5 active:translate-y-0 flex flex-col items-center justify-center gap-0.5 text-center leading-tight cursor-pointer disabled:cursor-not-allowed">
-                        <span class="text-[13px]">Demander des carrures polies</span>
-                        <span class="text-[10px] font-normal opacity-80">(20 carr.)</span>
-                    </button>
+
+                    <!-- Colonne Poste B -->
+                    <div class="col-span-3 flex flex-col justify-start mt-4 mb-4">
+                        <!-- Atelier Montage (Poste B) -->
+                        <div class="w-full h-[340px] border-2 border-dashed border-slate-400 rounded-xl bg-slate-50/70 flex flex-col items-center justify-start relative p-4 pt-6 shadow-sm backdrop-blur-sm">
+                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-50 px-2 border border-slate-300 rounded shadow-sm whitespace-nowrap">Atelier Montage</div>
+                            
+                            <!-- Établi de montage -->
+                            <div class="w-full bg-amber-100 h-28 rounded-t-xl border-2 border-amber-300 flex flex-col items-center justify-end shadow-md relative mt-auto">
+                                <div class="absolute inset-0 opacity-10 bg-orange-900 rounded-t-xl overflow-hidden pointer-events-none" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 20px);"></div>
+                                <div class="font-bold text-slate-700 text-center text-xs absolute top-2 z-10">Établi horloger</div>
+                                
+                                <!-- Tapis de coupe -->
+                                <div class="w-3/4 h-8 bg-emerald-600 rounded-t border border-emerald-700 shadow-inner z-10 relative flex justify-around items-center px-2">
+                                    <div class="w-4 h-4 bg-slate-200 rounded-full shadow-sm"></div>
+                                    <div class="w-6 h-1.5 bg-slate-400 rounded-sm shadow-sm rotate-12"></div>
+                                </div>
+                                
+                                <!-- Avatar Horloger -->
+                                <div class="absolute -bottom-5 -left-3 z-20 flex flex-col items-center">
+                                    <div class="bg-white text-slate-800 p-2 rounded-full shadow-lg border-2 border-slate-200 relative">
+                                        <div class="w-6 h-6 text-slate-700" id="icon-user-horloger"></div>
+                                    </div>
+                                    <span class="text-[10px] font-bold bg-white text-slate-700 px-1.5 py-0.5 mt-1 rounded shadow border border-slate-200">Horloger</span>
+                                </div>
+                            </div>
+
+                            <!-- Zone Réception (Input Buffer) -->
+                            <div class="w-full h-12 bg-slate-200 border-2 border-slate-300 rounded shadow-inner flex flex-col items-center justify-center relative mt-3 shrink-0">
+                                <div class="text-[8px] text-slate-500 uppercase font-bold absolute top-0.5">Réception (Entrée)</div>
+                                <div id="buffer-tray-b" class="w-[80px] h-[36px] opacity-0 transition-opacity z-10 mt-2 flex items-center justify-center p-[1px]"></div>
+                            </div>
+                        </div>
+
+                        <!-- Controls -->
+                        <div class="w-full mt-4">
+                            <button id="btn-demander" class="w-full bg-green-600 hover:bg-green-700 disabled:bg-slate-400 text-white py-2 px-2 rounded-lg font-bold shadow-md transform transition hover:-translate-y-0.5 active:translate-y-0 flex flex-col items-center justify-center gap-0.5 text-center leading-tight cursor-pointer disabled:cursor-not-allowed">
+                                <span class="text-[13px]">Consommer</span>
+                                <span class="text-[10px] font-normal opacity-80">(20 carr.)</span>
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- Character / Manager Animé -->
-                <div id="manager-wrapper" class="absolute bottom-[40px] z-20 flex flex-col items-center transition-all duration-700 ease-in-out" style="left: 50%; transform: translateX(-50%);">
-                    <!-- Plateau porté -->
-                    <div id="manager-tray" class="transition-opacity duration-300 mb-1 w-[100px] h-[34px] rounded border shadow-xl flex items-center justify-center p-[1px] opacity-0 translate-y-4">
-                        <!-- Rempli par JS -->
-                    </div>
-                    
-                    <!-- Avatar Gestionnaire Moderne -->
-                    <div class="bg-gradient-to-b from-indigo-500 to-indigo-700 text-white p-3 rounded-full shadow-lg border-2 border-white relative">
-                        <div class="w-8 h-8" id="icon-usercog"></div>
-                        <div class="absolute -top-2 -right-2 bg-orange-500 text-white p-1 rounded-full shadow-md border border-white">
-                            <div class="w-4 h-4" id="icon-clipboard"></div>
+                <div id="manager-wrapper" class="absolute z-40 flex flex-col items-center transition-all duration-[800ms] ease-in-out" style="left: 50%; bottom: 10px; transform: translateX(-50%);">
+                    <div class="relative flex flex-col items-center">
+                        <!-- Plateau porté -->
+                        <div class="relative mb-1 h-[40px] flex items-center justify-center">
+                            <!-- Main Gauche -->
+                            <div id="hand-left" class="w-4 h-4 bg-orange-200 rounded-full border-2 border-orange-300 absolute -left-1.5 z-30 opacity-0 transition-opacity duration-300 shadow-sm"></div>
+                            
+                            <!-- Tray content -->
+                            <div id="manager-tray" class="transition-opacity duration-300 w-[80px] h-[36px] rounded border shadow-xl flex items-center justify-center p-[1px] opacity-0 z-20"></div>
+                            
+                            <!-- Main Droite -->
+                            <div id="hand-right" class="w-4 h-4 bg-orange-200 rounded-full border-2 border-orange-300 absolute -right-1.5 z-30 opacity-0 transition-opacity duration-300 shadow-sm"></div>
                         </div>
-                        <div class="absolute -bottom-2 bg-slate-800 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm whitespace-nowrap left-1/2 -translate-x-1/2">
-                            Gestionnaire
+                        
+                        <!-- Avatar Gestionnaire Moderne -->
+                        <div class="bg-gradient-to-b from-indigo-500 to-indigo-700 text-white p-3 rounded-full shadow-lg border-2 border-white relative z-10">
+                            <div class="w-8 h-8" id="icon-usercog"></div>
+                            <div class="absolute -top-2 -right-2 bg-orange-500 text-white p-1 rounded-full shadow-md border border-white">
+                                <div class="w-4 h-4" id="icon-clipboard"></div>
+                            </div>
+                            <div class="absolute -bottom-2 bg-slate-800 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm whitespace-nowrap left-1/2 -translate-x-1/2">
+                                Gestionnaire
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Message Pédagogique au-dessus de l'historique -->
+            <div id="message-banner" class="p-4 flex items-start gap-3 transition-colors bg-blue-50 text-blue-800 border-t border-blue-100">
+                <div class="mt-0.5 w-5 h-5" id="message-icon"></div>
+                <p id="message-text" class="text-sm font-medium leading-relaxed flex-1">Bienvenue ! La simulation commence avec un plateau en stock. Choisissez un mode (FIFO ou LIFO).</p>
             </div>
 
             <!-- HISTORIQUE (Intégré dans Simulator) -->
@@ -234,10 +243,11 @@
                     <!-- Rempli par JS -->
                 </div>
             </div>
+
         </div>
 
-        <!-- TAB 2 : CONTENU THÉORIQUE (Fiche Pédagogique) -->
-        <div id="view-cours" class="hidden p-6 flex flex-col">
+        <!-- TAB 2 : CONTENU THÉORIQUE (Fiche Pédagogique visible par défaut) -->
+        <div id="view-cours" class="p-6 flex flex-col">
             <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
                 <span class="w-6 h-6 text-blue-600" id="icon-book"></span>
                 Fiche Pédagogique : Comparatif FIFO / LIFO
@@ -328,8 +338,7 @@
                 Testez vos connaissances
             </h2>
             <div class="space-y-6">
-                
-                <!-- Question 1 -->
+                <!-- Questions... -->
                 <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
                     <h3 class="font-bold text-slate-800 mb-3 text-lg">Question 1 : Détection des défauts</h3>
                     <p class="text-slate-700 mb-5 leading-relaxed">
@@ -343,33 +352,74 @@
                     <div id="feedback-q1" class="hidden"></div>
                 </div>
 
-                <!-- Question 2 -->
                 <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
                     <h3 class="font-bold text-slate-800 mb-3 text-lg">Question 2 : Gestion des versions et stock vieillissant</h3>
                     <p class="text-slate-700 mb-5 leading-relaxed">
                         L'atelier décide de passer d'une version V1 à une version V2 améliorée pour les carrures. Il reste encore plusieurs plateaux V1 en stock. Le polisseur commence à produire exclusivement la nouvelle version V2.<br/><br/>
-                        Pour éviter que les pièces V1 ne deviennent un "stock dormant" (stock vieillissant risquant l'obsolescence) au fond des étagères, quelle méthode de gestion est-il impératif d'utiliser ?
+                        Pour éviter que les pièces V1 ne deviennent un "stock dormant" au fond des étagères, quelle méthode de gestion est-il impératif d'utiliser ?
                     </p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <button onclick="checkQ2('FIFO')" class="py-3 px-4 bg-slate-50 border border-slate-300 rounded-lg hover:bg-slate-100 font-semibold text-slate-700 transition">Impérativement FIFO</button>
                         <button onclick="checkQ2('LIFO')" class="py-3 px-4 bg-slate-50 border border-slate-300 rounded-lg hover:bg-slate-100 font-semibold text-slate-700 transition">Impérativement LIFO</button>
-                        <button onclick="checkQ2('BOTH')" class="py-3 px-4 bg-slate-50 border border-slate-300 rounded-lg hover:bg-slate-100 font-semibold text-slate-700 transition">Peu importe (Les deux fonctionnent)</button>
+                        <button onclick="checkQ2('BOTH')" class="py-3 px-4 bg-slate-50 border border-slate-300 rounded-lg hover:bg-slate-100 font-semibold text-slate-700 transition">Peu importe</button>
                         <button onclick="checkQ2('NONE')" class="py-3 px-4 bg-slate-50 border border-slate-300 rounded-lg hover:bg-slate-100 font-semibold text-slate-700 transition">Aucune des deux</button>
                     </div>
                     <div id="feedback-q2" class="hidden"></div>
                 </div>
 
-                <!-- Bouton Réinitialisation Quiz -->
                 <div class="mt-8 pt-6 border-t border-slate-200 flex justify-end">
                     <button onclick="resetQuiz()" class="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 bg-white border border-slate-300 hover:bg-slate-100 rounded-lg transition shadow-sm">
                         <span class="w-4 h-4" id="icon-refresh-quiz"></span>
                         Réinitialiser le quiz
                     </button>
                 </div>
-
             </div>
         </div>
     </div>
+
+    <!-- MODAL INDICATEURS -->
+    <dialog id="modal-indicators" class="bg-transparent p-0 rounded-xl shadow-2xl border-none m-auto">
+        <div class="w-[350px] bg-slate-800 text-white rounded-xl shadow-xl border-4 border-slate-700 p-6 relative overflow-hidden flex flex-col gap-4">
+            <button id="btn-close-indicators" class="absolute top-3 right-3 text-slate-400 hover:text-white transition-colors" title="Fermer">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+
+            <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 text-slate-400" id="icon-info-led"></span>
+                    <span class="text-sm font-bold text-slate-300 uppercase tracking-widest">Indicateurs</span>
+                </div>
+                <span id="status-badge" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 border border-current bg-slate-900 text-blue-400 mr-6">
+                    <span class="w-4 h-4" id="status-icon"></span>
+                    <span id="status-label">Stock élevé</span>
+                </span>
+            </div>
+
+            <div class="flex justify-between items-end mt-2">
+                <div>
+                    <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Pièces en stock</p>
+                    <p class="text-4xl font-black leading-none"><span id="val-qty">0</span> <span class="text-lg font-normal text-slate-400">/ 160</span></p>
+                </div>
+                <div class="text-right flex flex-col items-end gap-2">
+                    <!-- Jauge Verticale -->
+                    <div class="relative w-12 h-[60px] border-l border-slate-600 pl-2 flex items-end justify-end">
+                        <div class="absolute bottom-0 left-2 right-1 h-full pointer-events-none z-0">
+                            <div class="absolute w-full border-b-[1.5px] border-red-500/70 border-dashed" style="bottom: 25%"></div>
+                            <div class="absolute w-full border-b-[1.5px] border-green-500/70 border-dashed" style="bottom: 62.5%"></div>
+                        </div>
+                        <div class="w-full h-full bg-slate-900 rounded-t-sm overflow-hidden border border-slate-600 flex flex-col justify-end relative z-10 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]">
+                            <div id="bar-fill" class="w-full transition-all duration-500 ease-out bg-red-500 shadow-[0_0_8px_#ef4444]" style="height: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <p class="text-[10px] text-red-400 uppercase tracking-wider">Sécurité</p>
+                        <p class="text-xl font-bold leading-none text-red-400">40 <span class="text-xs font-normal opacity-70">pcs</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </dialog>
 
     <script>
         // --- 1. ICONS SVG (Lucide-like) ---
@@ -393,18 +443,14 @@
             quiz: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`
         };
 
-        // Inject Static Icons
         document.getElementById('icon-package-header').innerHTML = icons.package;
         document.getElementById('icon-refresh').innerHTML = icons.refresh;
-        document.getElementById('icon-settings').innerHTML = icons.settings;
         document.getElementById('icon-user-polisseur').innerHTML = icons.user;
-        document.getElementById('icon-sparkles').innerHTML = icons.sparkles;
         document.getElementById('icon-tags').innerHTML = icons.tags;
         document.getElementById('icon-bug').innerHTML = icons.bug;
         document.getElementById('icon-info-led').innerHTML = icons.info;
-        document.getElementById('icon-package-posteB').innerHTML = icons.package;
+        document.getElementById('icon-info-btn').innerHTML = icons.info;
         document.getElementById('icon-user-horloger').innerHTML = icons.user;
-        document.getElementById('icon-watch').innerHTML = icons.watch;
         document.getElementById('icon-usercog').innerHTML = icons.usercog;
         document.getElementById('icon-clipboard').innerHTML = icons.clipboard;
         document.getElementById('icon-history-title').innerHTML = icons.history;
@@ -417,6 +463,22 @@
         document.getElementById('icon-simu-tab').innerHTML = icons.layout;
         document.getElementById('icon-refresh-quiz').innerHTML = icons.refresh;
 
+        // Modal Logic
+        const modalIndicators = document.getElementById('modal-indicators');
+        document.getElementById('btn-show-indicators').addEventListener('click', () => modalIndicators.showModal());
+        document.getElementById('btn-close-indicators').addEventListener('click', () => modalIndicators.close());
+        modalIndicators.addEventListener('click', (e) => {
+            const dialogDimensions = modalIndicators.getBoundingClientRect()
+            if (
+                e.clientX < dialogDimensions.left ||
+                e.clientX > dialogDimensions.right ||
+                e.clientY < dialogDimensions.top ||
+                e.clientY > dialogDimensions.bottom
+            ) {
+                modalIndicators.close()
+            }
+        });
+
         // --- 2. CONSTANTES ET ÉTAT GLOBAL ---
         const TRAY_QTY = 20;
         const MAX_TRAYS = 8;
@@ -424,10 +486,19 @@
         const TARGET_STOCK = 100;
         const SAFETY_STOCK = 40;
 
+        const POSITIONS = {
+            A: { left: '16.5%', bottom: '160px' },
+            B: { left: '83.5%', bottom: '160px' },
+            STOCK: { left: '50%', bottom: '150px' },
+            CENTER: { left: '50%', bottom: '10px' }
+        };
+
         const delay = ms => new Promise(res => setTimeout(res, ms));
 
         let state = {
-            stock: [{ id: 1, qty: TRAY_QTY, defect: false, version: 1 }],
+            stock: [{ id: 1, qty: TRAY_QTY, defect: false, version: 1, enteredAt: Date.now() }],
+            bufferA: null, // Plateau prêt au polissage
+            bufferB: null, // Plateau reçu au montage
             mode: 'FIFO',
             history: [{
                 id: Date.now(), type: 'Entrée', trayId: 1, mode: '-', stockAfter: TRAY_QTY, defect: false, version: 1
@@ -436,7 +507,7 @@
             nextDefect: false,
             currentVersion: 1,
             animating: false,
-            manager: { position: 'CENTER', carrying: null },
+            manager: { position: 'CENTER', carrying: null }, // Démarrage au Centre
             message: { text: "Bienvenue ! La simulation commence avec un plateau en stock. Choisissez un mode (FIFO ou LIFO).", type: "info" }
         };
 
@@ -444,14 +515,14 @@
         const getTrayOuterClasses = (version) => {
             switch(version) {
                 case 2: return 'bg-blue-500 border-blue-700 text-white';
-                default: return 'bg-slate-500 border-slate-700 text-white'; // V1
+                default: return 'bg-slate-500 border-slate-700 text-white';
             }
         };
 
         const getTrayInnerClasses = (version) => {
             switch(version) {
                 case 2: return 'bg-blue-600/80';
-                default: return 'bg-slate-600/80'; // V1
+                default: return 'bg-slate-600/80';
             }
         };
 
@@ -468,38 +539,51 @@
 
         const checkAlerts = (newQty) => {
             if (newQty === 0) state.message = { text: "Rupture de stock : le montage boîte ne peut plus être alimenté !", type: "error" };
-            else if (newQty < SAFETY_STOCK) state.message = { text: "Attention : le stock est sous le niveau de sécurité. Le montage boîte risque de manquer de carrures.", type: "warning" };
+            else if (newQty < SAFETY_STOCK) state.message = { text: "Attention : le stock est sous le niveau de sécurité.", type: "warning" };
             else if (newQty === TARGET_STOCK) state.message = { text: "Parfait ! Le stock a atteint son niveau cible.", type: "success" };
             renderMessage();
         };
 
-        const getTrayHTML = (id, defect, version) => {
+        const getTrayHTML = (tray) => {
+            const { id, defect, version, enteredAt } = tray;
             let cells = '';
             for(let i=0; i<20; i++) {
                 let isDefect = defect && i === 12;
                 let circleClass = isDefect ? 'border-red-600 bg-red-500 shadow-[0_0_6px_#ef4444]' : 'border-amber-500 bg-gradient-to-br from-amber-100 to-amber-300 shadow-[0_1px_1px_rgba(0,0,0,0.3)]';
                 let title = isDefect ? "Carrure défectueuse !" : "Carrure conforme";
-                cells += `<div class="w-full h-full rounded-[2px] shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)] flex items-center justify-center ${getTrayInnerClasses(version)}"><div class="w-[70%] h-[70%] rounded-full border-[1.5px] ${circleClass}" title="${title}"></div></div>`;
+                cells += `<div class="w-full h-full rounded-[2px] shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)] flex items-center justify-center ${getTrayInnerClasses(version)}"><div class="w-[60%] aspect-square rounded-full border-[1.5px] ${circleClass}" title="${title}"></div></div>`;
             }
-            
             let baseColor = version === 2 ? 'bg-blue-400' : 'bg-slate-400';
             let vBadge = version > 1 ? `<span class="ml-0.5 text-[6px] font-bold px-0.5 rounded bg-blue-800 text-white">v${version}</span>` : '';
 
+            let ageBarHTML = '';
+            let tooltipAttr = '';
+            if (enteredAt) {
+                const ageSec = Math.floor((Date.now() - enteredAt) / 1000);
+                const percent = Math.min(100, (ageSec / 60) * 100);
+                let barColor = "bg-green-500";
+                if (percent >= 50 && percent < 80) barColor = "bg-yellow-500";
+                else if (percent >= 80) barColor = "bg-red-500";
+                
+                ageBarHTML = `<div class="absolute bottom-0 left-0 h-1 ${barColor} transition-all duration-1000" id="age-bar-${id}" style="width: ${percent}%;"></div>`;
+                tooltipAttr = ` title="Durée de stockage : ${ageSec}s" id="tray-tooltip-${id}"`;
+            }
+
             return `
-                <div class="relative w-full h-full flex flex-col items-center justify-center p-[2px] overflow-hidden rounded-sm ${baseColor}">
-                    <div class="absolute z-20 top-0.5 left-0.5 bg-white border border-slate-400 shadow-[0_1px_3px_rgba(0,0,0,0.3)] px-1.5 py-[2px] rounded-[2px] pointer-events-none flex items-center justify-center transform -rotate-3">
-                        <span class="text-[11px] font-black text-slate-800 leading-none tracking-tight">#${id}</span>
+                <div class="relative w-full h-full flex flex-col items-center justify-center p-[2px] overflow-hidden rounded-sm ${baseColor}"${tooltipAttr}>
+                    <div class="absolute z-20 top-0.5 left-0.5 bg-white border border-slate-400 shadow-[0_1px_3px_rgba(0,0,0,0.3)] px-1 py-[1px] rounded-[2px] pointer-events-none flex items-center justify-center transform -rotate-3">
+                        <span class="text-[9px] font-black text-slate-800 leading-none tracking-tight">#${id}</span>
                         ${vBadge}
                     </div>
-                    <div class="grid grid-cols-10 grid-rows-2 gap-[1.5px] w-full h-full z-10">${cells}</div>
+                    <div class="grid grid-cols-10 grid-rows-2 gap-[1.5px] w-full h-full z-10 pb-1">${cells}</div>
+                    ${ageBarHTML}
                 </div>`;
         };
 
-        // --- 4. RENDER FONCTIONS (Vanilla JS DOM Updates) ---
+        // --- 4. RENDER FONCTIONS ---
         const renderHeader = () => {
             const btnFifo = document.getElementById('btn-mode-fifo');
             const btnLifo = document.getElementById('btn-mode-lifo');
-            
             if (state.mode === 'FIFO') {
                 btnFifo.className = 'px-4 py-2 rounded-md font-semibold transition-colors bg-white shadow-sm text-blue-700';
                 btnLifo.className = 'px-4 py-2 rounded-md font-semibold transition-colors text-slate-500 hover:text-slate-700';
@@ -513,20 +597,18 @@
             const banner = document.getElementById('message-banner');
             const text = document.getElementById('message-text');
             const icon = document.getElementById('message-icon');
-            
             text.innerText = state.message.text;
-            
             if (state.message.type === 'error') {
-                banner.className = 'p-4 border-b flex items-start gap-3 transition-colors bg-red-50 text-red-800 border-red-100';
+                banner.className = 'p-4 flex items-start gap-3 transition-colors bg-red-50 text-red-800 border-t border-red-100';
                 icon.innerHTML = icons.alert;
             } else if (state.message.type === 'warning') {
-                banner.className = 'p-4 border-b flex items-start gap-3 transition-colors bg-yellow-50 text-yellow-800 border-yellow-100';
+                banner.className = 'p-4 flex items-start gap-3 transition-colors bg-yellow-50 text-yellow-800 border-t border-yellow-100';
                 icon.innerHTML = icons.alert;
             } else if (state.message.type === 'success') {
-                banner.className = 'p-4 border-b flex items-start gap-3 transition-colors bg-green-50 text-green-800 border-green-100';
+                banner.className = 'p-4 flex items-start gap-3 transition-colors bg-green-50 text-green-800 border-t border-green-100';
                 icon.innerHTML = icons.check;
             } else {
-                banner.className = 'p-4 border-b flex items-start gap-3 transition-colors bg-blue-50 text-blue-800 border-blue-100';
+                banner.className = 'p-4 flex items-start gap-3 transition-colors bg-blue-50 text-blue-800 border-t border-blue-100';
                 icon.innerHTML = icons.info;
             }
         };
@@ -544,15 +626,13 @@
             
             [btnFifo, btnLifo, btnReset, btnVersion, btnDefect].forEach(btn => btn.disabled = state.animating);
             btnLivrer.disabled = state.animating || isFull;
-            btnDemander.disabled = state.animating; // Disabled removed for empty stock to show error alert
+            btnDemander.disabled = state.animating;
 
-            // Version button style
             document.getElementById('version-text').innerText = `V${state.currentVersion}`;
             btnVersion.className = `py-1.5 rounded text-[11px] font-bold flex items-center justify-center gap-1 border shadow-sm transition-colors cursor-pointer disabled:cursor-not-allowed ${
                 state.currentVersion === 1 ? 'bg-slate-100 text-slate-700 border-slate-300' : 'bg-blue-100 text-blue-800 border-blue-300'
             }`;
 
-            // Defect button style
             document.getElementById('defect-text').innerText = state.nextDefect ? 'Défaut ON' : 'Défaut OFF';
             btnDefect.className = `py-1.5 rounded text-[11px] font-bold flex items-center justify-center gap-1 border shadow-sm transition-colors cursor-pointer disabled:cursor-not-allowed ${
                 state.nextDefect ? 'bg-red-500 text-white border-red-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'
@@ -562,11 +642,10 @@
         const renderDashboard = () => {
             const status = getStockStatus();
             const stockQty = state.stock.length * TRAY_QTY;
-
             document.getElementById('val-qty').innerText = stockQty;
             
             const badge = document.getElementById('status-badge');
-            badge.className = `px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 border border-current bg-slate-900 ${status.bg.replace('bg-', 'text-').replace('50', '400')}`;
+            badge.className = `px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 border border-current bg-slate-900 ${status.bg.replace('bg-', 'text-').replace('50', '400')} mr-6`;
             document.getElementById('status-icon').innerHTML = icons[status.icon] || icons.info;
             document.getElementById('status-label').innerText = status.label;
 
@@ -583,17 +662,15 @@
             const nextOut = getNextOutIndex();
 
             if (state.mode === 'FIFO') {
-                // Ensure layout exists
                 if (!document.getElementById('fifo-rack')) {
                     let rollersHTML = '';
-                    for(let i=0; i<18; i++) rollersHTML += `<div class="w-[14px] h-[14px] bg-slate-400 rounded-full border border-slate-500 shadow-sm mt-[-4px]"></div>`;
-                    
+                    for(let i=0; i<14; i++) rollersHTML += `<div class="w-[12px] h-[12px] bg-slate-400 rounded-full border border-slate-500 shadow-sm mt-[-3px]"></div>`;
                     container.innerHTML = `
                         <div class="absolute inset-0 bg-slate-200 rounded-md shadow-inner border-4 border-slate-400 flex flex-col justify-between p-2 overflow-hidden">
-                            <div class="absolute top-2 left-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest z-20 bg-slate-200/80 px-1 rounded">Rayonnage Dynamique (Gravité)</div>
+                            <div class="absolute top-1 left-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest z-20 bg-slate-200/80 px-1 rounded">Rayonnage Gravité</div>
                             <div class="relative w-full h-full flex flex-col justify-center gap-8 mt-2 ml-1 transform rotate-[4deg] origin-top-left">
-                                <div class="w-[95%] h-[50px] relative border-b-[6px] border-slate-600 bg-slate-300 rounded-sm flex items-end px-2" id="fifo-rack">
-                                    <div class="absolute -bottom-[6px] left-0 w-full h-[6px] flex justify-around pointer-events-none">${rollersHTML}</div>
+                                <div class="w-[95%] h-[40px] relative border-b-[4px] border-slate-600 bg-slate-300 rounded-sm flex items-end px-2" id="fifo-rack">
+                                    <div class="absolute -bottom-[5px] left-0 w-full h-[5px] flex justify-around pointer-events-none">${rollersHTML}</div>
                                 </div>
                             </div>
                         </div>`;
@@ -601,27 +678,21 @@
                 
                 const rack = document.getElementById('fifo-rack');
                 const currentIds = state.stock.map(t => String(t.id));
-                
-                // Cleanup removed
                 Array.from(rack.children).forEach(child => {
-                    if (child.dataset.id && !currentIds.includes(child.dataset.id)) {
-                        child.remove();
-                    }
+                    if (child.dataset.id && !currentIds.includes(child.dataset.id)) child.remove();
                 });
 
-                // Update or Add
                 state.stock.forEach((tray, idx) => {
                     let el = rack.querySelector(`[data-id="${tray.id}"]`);
                     const isNextOut = (idx === nextOut && state.mode === 'FIFO');
-                    const rightVal = `${idx * 24 + 2}%`;
-                    
-                    let cls = `absolute bottom-[2px] w-[22%] h-[32px] rounded border shadow-md flex items-center justify-center transition-all duration-[800ms] ease-out animate-roll-in ${getTrayOuterClasses(tray.version)}`;
+                    const rightVal = `${idx * 25 + 2}%`;
+                    let cls = `absolute bottom-[2px] w-[22%] h-[36px] rounded border shadow-md flex items-center justify-center transition-all duration-[800ms] ease-out animate-roll-in p-[1px] ${getTrayOuterClasses(tray.version)}`;
                     if (isNextOut && !state.animating) cls += ' ring-2 ring-blue-500 animate-pulse shadow-[0_0_15px_rgba(59,130,246,0.6)]';
 
                     if (!el) {
                         el = document.createElement('div');
                         el.dataset.id = tray.id;
-                        el.innerHTML = getTrayHTML(tray.id, tray.defect, tray.version);
+                        el.innerHTML = getTrayHTML(tray);
                         rack.appendChild(el);
                     }
                     el.className = cls;
@@ -629,89 +700,113 @@
                 });
 
             } else {
-                // LIFO Mode
                 let stackHTML = '';
-                [...state.stock].reverse().forEach((tray, i) => {
-                    const idx = state.stock.length - 1 - i;
+                state.stock.forEach((tray, idx) => {
                     const isNextOut = (idx === nextOut && state.mode === 'LIFO');
-                    let cls = `w-[100px] h-[30px] rounded border shadow-md flex items-center justify-center transition-all ${getTrayOuterClasses(tray.version)}`;
+                    let cls = `w-[80px] h-[36px] rounded border shadow-md flex items-center justify-center p-[1px] transition-all ${getTrayOuterClasses(tray.version)}`;
                     if (isNextOut && !state.animating) cls += ' ring-2 ring-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.6)]';
                     
-                    stackHTML += `
-                        <div>
-                            <div class="${cls}">
-                                ${getTrayHTML(tray.id, tray.defect, tray.version)}
-                            </div>
-                        </div>`;
+                    stackHTML += `<div><div class="${cls}">${getTrayHTML(tray)}</div></div>`;
                 });
 
                 container.innerHTML = `
                     <div class="absolute inset-0 flex flex-col items-center justify-end pb-2">
-                        <div class="absolute top-2 left-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Zone de stockage au sol</div>
-                        <div class="flex flex-col-reverse items-center justify-start gap-[2px] mb-[2px] z-10">${stackHTML}</div>
-                        <div class="w-32 h-4 bg-amber-700 rounded-sm border-b-2 border-amber-900 flex justify-around items-end px-2 shadow-lg z-0 relative">
-                            <div class="w-3 h-2 bg-amber-900 rounded-t-sm"></div>
-                            <div class="w-3 h-2 bg-amber-900 rounded-t-sm"></div>
-                            <div class="w-3 h-2 bg-amber-900 rounded-t-sm"></div>
+                        <div class="absolute top-1 left-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Stockage Sol</div>
+                        <div class="flex flex-col-reverse items-center justify-start gap-[1px] mb-[1px] z-10">${stackHTML}</div>
+                        <div class="w-28 h-3 bg-amber-700 rounded-sm border-b-2 border-amber-900 flex justify-around items-end px-2 shadow-lg z-0 relative">
+                            <div class="w-3 h-1.5 bg-amber-900 rounded-t-sm"></div><div class="w-3 h-1.5 bg-amber-900 rounded-t-sm"></div><div class="w-3 h-1.5 bg-amber-900 rounded-t-sm"></div>
                         </div>
                     </div>`;
+            }
+        };
+
+        const renderBuffers = () => {
+            const bufA = document.getElementById('buffer-tray-a');
+            if (state.bufferA) {
+                bufA.innerHTML = getTrayHTML(state.bufferA);
+                bufA.className = `w-[80px] h-[36px] opacity-100 transition-opacity ${getTrayOuterClasses(state.bufferA.version)} rounded border flex items-center justify-center p-[1px] shadow-md`;
+            } else {
+                bufA.className = `w-[80px] h-[36px] opacity-0 transition-opacity flex items-center justify-center p-[1px]`;
+                bufA.innerHTML = '';
+            }
+
+            const bufB = document.getElementById('buffer-tray-b');
+            if (state.bufferB) {
+                bufB.innerHTML = getTrayHTML(state.bufferB);
+                bufB.className = `w-[80px] h-[36px] opacity-100 transition-opacity ${getTrayOuterClasses(state.bufferB.version)} rounded border flex items-center justify-center p-[1px] shadow-md`;
+            } else {
+                bufB.className = `w-[80px] h-[36px] opacity-0 transition-opacity flex items-center justify-center p-[1px]`;
+                bufB.innerHTML = '';
             }
         };
 
         const renderManager = () => {
             const wrapper = document.getElementById('manager-wrapper');
             const tray = document.getElementById('manager-tray');
+            const handLeft = document.getElementById('hand-left');
+            const handRight = document.getElementById('hand-right');
             
-            let left = '50%';
-            if (state.manager.position === 'A') left = '15%';
-            else if (state.manager.position === 'B') left = '85%';
-            else if (state.manager.position === 'STOCK') left = '50%';
-            
-            wrapper.style.left = left;
+            const pos = POSITIONS[state.manager.position];
+            wrapper.style.left = pos.left;
+            wrapper.style.bottom = pos.bottom;
 
             if (state.manager.carrying) {
-                tray.innerHTML = getTrayHTML(state.manager.carrying.id, state.manager.carrying.defect, state.manager.carrying.version);
-                tray.className = `transition-opacity duration-300 mb-1 w-[100px] h-[34px] rounded border shadow-xl flex items-center justify-center p-[1px] opacity-100 translate-y-0 ${getTrayOuterClasses(state.manager.carrying.version)}`;
+                tray.innerHTML = getTrayHTML(state.manager.carrying);
+                tray.className = `transition-opacity duration-300 w-[80px] h-[36px] rounded border shadow-xl flex items-center justify-center p-[1px] opacity-100 ${getTrayOuterClasses(state.manager.carrying.version)}`;
+                handLeft.style.opacity = '1';
+                handRight.style.opacity = '1';
             } else {
-                tray.className = `transition-opacity duration-300 mb-1 w-[100px] h-[34px] rounded border shadow-xl flex items-center justify-center p-[1px] opacity-0 translate-y-4`;
+                tray.className = `transition-opacity duration-300 w-[80px] h-[36px] rounded border shadow-xl flex items-center justify-center p-[1px] opacity-0`;
                 tray.innerHTML = '';
+                handLeft.style.opacity = '0';
+                handRight.style.opacity = '0';
             }
         };
 
         const renderHistory = () => {
             const container = document.getElementById('history-container');
             if (state.history.length === 0) {
-                container.innerHTML = `
-                    <div class="h-full flex flex-col items-center justify-center text-slate-400 text-sm text-center">
-                        <div class="w-8 h-8 mb-2 opacity-30">${icons.history}</div>
-                        Aucun mouvement pour le moment.<br/>Entrez un plateau pour commencer la simulation.
-                    </div>`;
+                container.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-400 text-sm text-center">Aucun mouvement pour le moment.</div>`;
                 return;
             }
-
-            let html = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">';
+            
+            let html = `
+                <table class="w-full text-left text-sm text-slate-600 border-collapse">
+                    <thead class="bg-slate-100 text-slate-700 sticky top-0 z-10 shadow-sm">
+                        <tr>
+                            <th class="py-2.5 px-3 border-b border-slate-200 font-semibold rounded-tl-md">Type d'action</th>
+                            <th class="py-2.5 px-3 border-b border-slate-200 font-semibold">Lot / Plateau</th>
+                            <th class="py-2.5 px-3 border-b border-slate-200 font-semibold">Version & État</th>
+                            <th class="py-2.5 px-3 border-b border-slate-200 font-semibold">Mode Sortie</th>
+                            <th class="py-2.5 px-3 border-b border-slate-200 font-semibold text-right rounded-tr-md">Stock Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
             state.history.forEach(item => {
-                const borderClass = item.defect ? 'border-red-200 bg-red-50' : 'border-slate-100 bg-slate-50';
-                const dotClass = item.type === 'Entrée' ? 'bg-blue-500' : 'bg-green-500';
-                const textClass = item.defect ? 'text-red-700' : 'text-slate-700';
-                const modeText = item.type === 'Sortie' ? `<p class="text-[10px] text-slate-500 uppercase tracking-wide mt-0.5">Mode ${item.mode}</p>` : '';
-
+                const bgClass = item.defect ? 'bg-red-50/50 hover:bg-red-100/80' : 'hover:bg-slate-50 transition-colors';
+                const typeColor = item.type === 'Entrée' ? 'text-blue-600' : 'text-green-600';
+                const defectTag = item.defect ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 border border-red-200">NON-CONFORME</span>' : '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700 border border-green-200">CONFORME</span>';
+                const versionTag = `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${item.version === 2 ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-slate-100 text-slate-700 border border-slate-200'}">V${item.version}</span>`;
+                const modeText = item.type === 'Sortie' ? `<span class="font-bold text-slate-700 bg-white px-1.5 py-0.5 border border-slate-200 rounded shadow-sm">${item.mode}</span>` : '<span class="text-slate-400">-</span>';
+                
                 html += `
-                    <div class="text-sm ${borderClass} border rounded-lg p-3 flex items-center justify-between shadow-sm">
-                        <div class="flex items-center gap-3">
-                            <span class="w-2.5 h-2.5 rounded-full shadow-sm ${dotClass}"></span>
-                            <div>
-                                <p class="font-bold ${textClass}">${item.type} <span class="text-slate-500 font-normal ml-1">Lot #${item.trayId} (V${item.version})</span></p>
-                                ${modeText}
-                            </div>
-                        </div>
-                        <div class="text-right bg-white px-2 py-1 rounded border border-slate-100">
-                            <p class="font-bold text-slate-700 leading-none">${item.stockAfter} <span class="text-[10px] font-normal">pcs</span></p>
-                            <p class="text-[9px] text-slate-400 uppercase mt-0.5">Total</p>
-                        </div>
-                    </div>`;
+                    <tr class="border-b border-slate-100 ${bgClass}">
+                        <td class="py-2 px-3 font-bold ${typeColor} flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full ${item.type === 'Entrée' ? 'bg-blue-500' : 'bg-green-500'}"></span>${item.type}</td>
+                        <td class="py-2 px-3 font-medium text-slate-800">#${item.trayId}</td>
+                        <td class="py-2 px-3 flex gap-2 items-center">${versionTag} ${defectTag}</td>
+                        <td class="py-2 px-3">${modeText}</td>
+                        <td class="py-2 px-3 text-right font-black text-slate-800">${item.stockAfter} <span class="text-xs font-normal text-slate-500">pcs</span></td>
+                    </tr>
+                `;
             });
-            html += '</div>';
+            
+            html += `
+                    </tbody>
+                </table>
+            `;
+            
             container.innerHTML = html;
         };
 
@@ -721,6 +816,7 @@
             renderControls();
             renderDashboard();
             renderStockView();
+            renderBuffers();
             renderManager();
             renderHistory();
         };
@@ -730,48 +826,48 @@
             if (state.animating || state.stock.length >= MAX_TRAYS) return;
             state.animating = true;
             
-            if (state.nextDefect) {
-                state.message = { text: "Le poste de polissage a terminé un plateau contenant une NON-CONFORMITÉ. Le gestionnaire le prend.", type: "warning" };
-            } else {
-                state.message = { text: `Le poste de polissage a terminé un plateau V${state.currentVersion}. Le gestionnaire va le chercher.`, type: "info" };
-            }
-            renderAll();
-
-            // 1. Move to A
-            state.manager.position = 'A';
-            renderManager();
-            await delay(600);
-
-            // 2. Pickup
             const newTray = { id: state.trayCounter, qty: TRAY_QTY, defect: state.nextDefect, version: state.currentVersion };
             state.trayCounter++;
-            state.manager.carrying = newTray;
+            
+            // Apparition du plateau au polissage
+            state.bufferA = newTray;
+            if (state.nextDefect) {
+                state.message = { text: "Polissage terminé : Plateau NON-CONFORME en zone de départ.", type: "warning" };
+            } else {
+                state.message = { text: `Polissage terminé : Plateau V${state.currentVersion} en zone de départ.`, type: "info" };
+            }
+            renderAll();
+            await delay(400);
+
+            // 1. Déplacement du centre vers le Dépôt (A)
+            state.manager.position = 'A';
             renderManager();
-            await delay(300);
+            await delay(800);
+
+            // 2. Pickup
+            state.manager.carrying = state.bufferA;
+            state.bufferA = null;
+            renderAll();
+            await delay(400);
 
             // 3. Move to Stock
             state.manager.position = 'STOCK';
-            state.message = { text: "Le gestionnaire range le plateau dans l'étagère.", type: "info" };
+            state.message = { text: "Le gestionnaire transporte et range le plateau.", type: "info" };
             renderMessage();
             renderManager();
-            await delay(600);
+            await delay(800);
 
             // 4. Drop
-            state.stock.push(newTray);
-            state.manager.carrying = null;
-            
+            state.manager.carrying.enteredAt = Date.now(); // Start tracking age when added to stock
+            state.stock.push(state.manager.carrying);
             state.history.unshift({
-                id: Date.now(), type: 'Entrée', trayId: newTray.id, mode: '-', stockAfter: state.stock.length * TRAY_QTY, defect: newTray.defect, version: newTray.version
+                id: Date.now(), type: 'Entrée', trayId: state.manager.carrying.id, mode: '-', stockAfter: state.stock.length * TRAY_QTY, defect: state.manager.carrying.defect, version: state.manager.carrying.version
             });
-            
+            state.manager.carrying = null;
             state.nextDefect = false; // reset
-            renderManager();
-            renderStockView();
-            renderDashboard();
-            renderHistory();
-            renderControls(); // to update defect text
+            renderAll();
 
-            // 5. Back to center
+            // 5. Back to CENTER
             await delay(400);
             state.manager.position = 'CENTER';
             state.animating = false;
@@ -783,62 +879,64 @@
             if (state.animating) return;
             
             if (state.stock.length === 0) {
-                state.message = { text: "Rupture de stock ! L'horloger demande des pièces, mais l'étagère est vide. Le montage est bloqué.", type: "error" };
+                state.message = { text: "Rupture de stock ! Le montage est bloqué.", type: "error" };
                 renderAll();
                 return;
             }
             
             state.animating = true;
-            renderAll(); // block buttons
+            renderAll();
 
             const outIndex = state.mode === 'FIFO' ? 0 : state.stock.length - 1;
             const trayToOut = state.stock[outIndex];
 
-            const modeText = state.mode === 'FIFO' ? "En FIFO, on sort le plateau le plus ancien." : "En LIFO, on sort le plateau le plus récent.";
-            state.message = { text: `Demande du montage boîte. ${modeText} Lot #${trayToOut.id} récupéré.`, type: "info" };
+            const modeText = state.mode === 'FIFO' ? "En FIFO, lot le plus ancien récupéré." : "En LIFO, lot le plus récent récupéré.";
+            state.message = { text: `Demande de pièces. ${modeText}`, type: "info" };
             renderMessage();
 
-            // 1. Move to Stock
+            // 1. Déplacement du centre vers le Stock
             state.manager.position = 'STOCK';
             renderManager();
-            await delay(600);
+            await delay(800);
 
             // 2. Pickup
             state.stock.splice(outIndex, 1);
             state.manager.carrying = trayToOut;
-            renderStockView();
-            renderManager();
-            renderDashboard();
-            await delay(300);
+            // Stop tracking age now that it's out of stock
+            delete state.manager.carrying.enteredAt;
+            renderAll();
+            await delay(400);
 
-            // 3. Move to B
+            // 3. Move to Réception (B)
             state.manager.position = 'B';
             renderManager();
-            await delay(600);
+            await delay(800);
 
-            if (trayToOut.defect) {
-                state.message = { text: `NON-CONFORMITÉ DÉTECTÉE ! L'horloger a trouvé une pièce défectueuse dans le lot #${trayToOut.id}.`, type: "error" };
-            } else {
-                state.message = { text: `Le gestionnaire apporte le plateau V${trayToOut.version} au montage boîte. Pièces conformes.`, type: "success" };
-            }
-            renderMessage();
-
-            // 4. Drop
+            // 4. Drop into Buffer B
+            state.bufferB = state.manager.carrying;
             state.manager.carrying = null;
             state.history.unshift({
                 id: Date.now(), type: 'Sortie', trayId: trayToOut.id, mode: state.mode, stockAfter: state.stock.length * TRAY_QTY, defect: trayToOut.defect, version: trayToOut.version
             });
-            renderManager();
-            renderHistory();
+            
+            if (trayToOut.defect) {
+                state.message = { text: `DÉFAUT ! L'horloger a trouvé une pièce défectueuse dans le lot #${trayToOut.id}.`, type: "error" };
+            } else {
+                state.message = { text: `Plateau V${trayToOut.version} livré à l'établi. Pièces conformes.`, type: "success" };
+            }
+            renderAll();
+            await delay(800);
 
-            // 5. Back to center
-            await delay(400);
+            // 5. Horloger consomme le plateau
+            state.bufferB = null;
+            renderAll();
+
+            // 6. Back to CENTER
+            await delay(200);
             state.manager.position = 'CENTER';
             state.animating = false;
             
-            if (!trayToOut.defect) {
-                checkAlerts(state.stock.length * TRAY_QTY);
-            }
+            if (!trayToOut.defect) checkAlerts(state.stock.length * TRAY_QTY);
             renderAll();
         };
 
@@ -846,115 +944,71 @@
             if (state.animating) return;
             state.stock = [];
             state.history = [];
+            state.bufferA = null;
+            state.bufferB = null;
             state.trayCounter = 1;
             state.nextDefect = false;
             state.currentVersion = 1;
+            state.manager.position = 'CENTER'; // Retour au centre
             state.message = { text: "Simulation réinitialisée avec un plateau initial.", type: "info" };
             
-            // Re-ajouter un plateau automatiquement après le "Zéro"
-            state.stock.push({ id: state.trayCounter, qty: TRAY_QTY, defect: false, version: 1 });
+            state.stock.push({ id: state.trayCounter, qty: TRAY_QTY, defect: false, version: 1, enteredAt: Date.now() });
             state.trayCounter++;
-            state.history.unshift({
-                id: Date.now(), type: 'Entrée', trayId: 1, mode: '-', stockAfter: TRAY_QTY, defect: false, version: 1
-            });
+            state.history.unshift({ id: Date.now(), type: 'Entrée', trayId: 1, mode: '-', stockAfter: TRAY_QTY, defect: false, version: 1 });
             
             renderAll();
         };
 
-        // --- 6. INITIALISATION ET ÉCOUTEURS D'ÉVÉNEMENTS ---
+        // --- 6. INITIALISATION ---
         document.getElementById('btn-mode-fifo').addEventListener('click', () => { if(!state.animating){ state.mode = 'FIFO'; renderAll(); }});
         document.getElementById('btn-mode-lifo').addEventListener('click', () => { if(!state.animating){ state.mode = 'LIFO'; renderAll(); }});
         document.getElementById('btn-reset').addEventListener('click', handleReset);
-        
         document.getElementById('btn-livrer').addEventListener('click', handleAdd);
         document.getElementById('btn-demander').addEventListener('click', handleRemove);
-        
-        document.getElementById('btn-version').addEventListener('click', () => {
-            if(!state.animating) {
-                // Alternance entre V1 et V2
-                state.currentVersion = state.currentVersion === 2 ? 1 : 2;
-                renderControls();
-            }
-        });
-        
-        document.getElementById('btn-defect').addEventListener('click', () => {
-            if(!state.animating) {
-                state.nextDefect = !state.nextDefect;
-                renderControls();
-            }
-        });
+        document.getElementById('btn-version').addEventListener('click', () => { if(!state.animating) { state.currentVersion = state.currentVersion === 2 ? 1 : 2; renderControls(); }});
+        document.getElementById('btn-defect').addEventListener('click', () => { if(!state.animating) { state.nextDefect = !state.nextDefect; renderControls(); }});
 
-        // Premier rendu
         renderAll();
 
+        // --- INTERVAL DE MISE A JOUR DES AGES ---
+        setInterval(() => {
+            const now = Date.now();
+            state.stock.forEach(tray => {
+                if (tray.enteredAt) {
+                    const ageSec = Math.floor((now - tray.enteredAt) / 1000);
+                    const bar = document.getElementById(`age-bar-${tray.id}`);
+                    const tooltip = document.getElementById(`tray-tooltip-${tray.id}`);
+                    
+                    if (bar) {
+                        const percent = Math.min(100, (ageSec / 60) * 100);
+                        bar.style.width = `${percent}%`;
+                        
+                        let barColor = "bg-green-500";
+                        if (percent >= 50 && percent < 80) barColor = "bg-yellow-500";
+                        else if (percent >= 80) barColor = "bg-red-500";
+                        
+                        bar.className = `absolute bottom-0 left-0 h-1 transition-all duration-1000 ${barColor}`;
+                    }
+                    if (tooltip) {
+                        tooltip.title = `Durée de stockage : ${ageSec}s`;
+                    }
+                }
+            });
+        }, 1000);
+
         // --- 7. LOGIQUE DES ONGLETS ET DU QUIZ ---
-        const tabSimu = document.getElementById('tab-simu');
-        const tabCours = document.getElementById('tab-cours');
-        const tabQuiz = document.getElementById('tab-quiz');
-        const viewSimu = document.getElementById('view-simu');
-        const viewCours = document.getElementById('view-cours');
-        const viewQuiz = document.getElementById('view-quiz');
-        
+        const tabSimu = document.getElementById('tab-simu'), tabCours = document.getElementById('tab-cours'), tabQuiz = document.getElementById('tab-quiz');
+        const viewSimu = document.getElementById('view-simu'), viewCours = document.getElementById('view-cours'), viewQuiz = document.getElementById('view-quiz');
         const activeClass = "flex-1 py-4 font-bold text-blue-700 bg-white border-b-2 border-blue-600 transition-colors flex justify-center items-center gap-2";
         const inactiveClass = "flex-1 py-4 font-bold text-slate-500 hover:bg-slate-100 border-b-2 border-transparent transition-colors flex justify-center items-center gap-2";
 
-        tabSimu.addEventListener('click', () => {
-            viewSimu.classList.remove('hidden');
-            viewCours.classList.add('hidden');
-            viewQuiz.classList.add('hidden');
-            tabSimu.className = activeClass;
-            tabCours.className = inactiveClass;
-            tabQuiz.className = inactiveClass;
-        });
+        tabSimu.addEventListener('click', () => { viewSimu.classList.remove('hidden'); viewCours.classList.add('hidden'); viewQuiz.classList.add('hidden'); tabSimu.className = activeClass; tabCours.className = inactiveClass; tabQuiz.className = inactiveClass; });
+        tabCours.addEventListener('click', () => { viewCours.classList.remove('hidden'); viewSimu.classList.add('hidden'); viewQuiz.classList.add('hidden'); tabCours.className = activeClass; tabSimu.className = inactiveClass; tabQuiz.className = inactiveClass; });
+        tabQuiz.addEventListener('click', () => { viewQuiz.classList.remove('hidden'); viewSimu.classList.add('hidden'); viewCours.classList.add('hidden'); tabQuiz.className = activeClass; tabSimu.className = inactiveClass; tabCours.className = inactiveClass; });
 
-        tabCours.addEventListener('click', () => {
-            viewCours.classList.remove('hidden');
-            viewSimu.classList.add('hidden');
-            viewQuiz.classList.add('hidden');
-            tabCours.className = activeClass;
-            tabSimu.className = inactiveClass;
-            tabQuiz.className = inactiveClass;
-        });
-
-        tabQuiz.addEventListener('click', () => {
-            viewQuiz.classList.remove('hidden');
-            viewSimu.classList.add('hidden');
-            viewCours.classList.add('hidden');
-            tabQuiz.className = activeClass;
-            tabSimu.className = inactiveClass;
-            tabCours.className = inactiveClass;
-        });
-
-        window.resetQuiz = () => {
-            document.getElementById('feedback-q1').classList.add('hidden');
-            document.getElementById('feedback-q2').classList.add('hidden');
-            document.getElementById('feedback-q1').innerHTML = '';
-            document.getElementById('feedback-q2').innerHTML = '';
-        };
-
-        window.checkQ1 = (answer) => {
-            const feedback = document.getElementById('feedback-q1');
-            feedback.classList.remove('hidden');
-            if(answer === 'FIFO') {
-                feedback.className = "mt-5 p-4 rounded-lg text-sm bg-green-50 text-green-800 border border-green-200 animate-roll-in";
-                feedback.innerHTML = "<strong>✅ Bonne réponse !</strong> Le lot défectueux étant le plus ancien (il était déjà en stock), la méthode FIFO (Premier entré, premier sorti) garantit que l'horloger le prélèvera lors de sa première demande. Le défaut est détecté immédiatement !";
-            } else {
-                feedback.className = "mt-5 p-4 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200 animate-roll-in";
-                feedback.innerHTML = "<strong>❌ Mauvaise réponse.</strong> En LIFO (Dernier entré, premier sorti), l'horloger prendra d'abord les nouveaux lots fraîchement produits (qui n'ont pas de défaut). Le lot défectueux restera au fond du stock et l'anomalie sera découverte très tardivement.";
-            }
-        };
-
-        window.checkQ2 = (answer) => {
-            const feedback = document.getElementById('feedback-q2');
-            feedback.classList.remove('hidden');
-            if(answer === 'FIFO') {
-                feedback.className = "mt-5 p-4 rounded-lg text-sm bg-green-50 text-green-800 border border-green-200 animate-roll-in";
-                feedback.innerHTML = "<strong>✅ Bonne réponse !</strong> Le FIFO oblige à consommer les anciens lots V1 avant de toucher aux nouveaux lots V2. Cela permet d'écouler l'ancien stock proprement et évite totalement l'effet de \"stock dormant\".";
-            } else {
-                feedback.className = "mt-5 p-4 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200 animate-roll-in";
-                feedback.innerHTML = "<strong>❌ Mauvaise réponse.</strong> En LIFO, l'horloger va consommer en priorité les lots V2 fraîchement produits. Les plateaux V1 vont donc rester bloqués au fond de l'étagère de manière indéfinie, créant un stock vieillissant qui risque l'obsolescence totale.";
-            }
-        };
+        window.resetQuiz = () => { document.getElementById('feedback-q1').classList.add('hidden'); document.getElementById('feedback-q2').classList.add('hidden'); };
+        window.checkQ1 = (ans) => { const f = document.getElementById('feedback-q1'); f.classList.remove('hidden'); f.className = ans === 'FIFO' ? "mt-5 p-4 rounded-lg text-sm bg-green-50 text-green-800 border border-green-200" : "mt-5 p-4 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200"; f.innerHTML = ans === 'FIFO' ? "<strong>✅ Bonne réponse !</strong> Le lot défectueux étant le plus ancien, la méthode FIFO garantit que l'horloger le prélèvera lors de sa première demande." : "<strong>❌ Mauvaise réponse.</strong> En LIFO, l'horloger prendra d'abord les nouveaux lots. Le lot défectueux restera au fond du stock."; };
+        window.checkQ2 = (ans) => { const f = document.getElementById('feedback-q2'); f.classList.remove('hidden'); f.className = ans === 'FIFO' ? "mt-5 p-4 rounded-lg text-sm bg-green-50 text-green-800 border border-green-200" : "mt-5 p-4 rounded-lg text-sm bg-red-50 text-red-800 border border-red-200"; f.innerHTML = ans === 'FIFO' ? "<strong>✅ Bonne réponse !</strong> Le FIFO oblige à consommer les anciens lots V1 avant de toucher aux nouveaux lots V2, évitant le stock dormant." : "<strong>❌ Mauvaise réponse.</strong> En LIFO, les plateaux V1 vont rester bloqués au fond de l'étagère."; };
 
     </script>
 </body>
