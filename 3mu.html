@@ -1,466 +1,791 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analyse VA/NVA - Excellence Opérationnelle</title>
-    <!-- 
-        INSTRUCTIONS DE CORRECTION : 
-        Le bouton de correction est masqué pour les élèves.
-        RACCOURCI CLAVIER (ADMIN) : Appuyez sur "Maj + Alt + L" (Shift + Alt + L) 
-        pour classer automatiquement toutes les cartes.
-    -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #1a1a1a;
-            --accent: #cfa346;
-            --accent-text: #856404;
-            --accent-light: #f4e8cb;
-            --bg-color: #f8f9fa;
-            --panel-bg: #ffffff;
-            --border-color: #e0e0e0;
-            --text-color: #2d3436;
-            --danger: #e74c3c;
-            --success: #27ae60;
-            --warning: #f39c12;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Classement Lean — 3 Mu et 7 gaspillages</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --blue: #2563eb;
+      --light-blue: #eff6ff;
+      --green: #16a34a;
+      --orange: #f97316;
+      --red: #dc2626;
+      --purple: #7c3aed;
+      --line: #e2e8f0;
+      --ok: #dcfce7;
+      --bad: #fee2e2;
+      --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 12px 30px rgba(15, 23, 42, 0.08);
+      --radius: 16px;
+    }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
+    * { box-sizing: border-box; }
 
-        .step-card {
-            cursor: grab;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s;
-            z-index: 10;
-        }
-        .step-card:active {
-            cursor: grabbing;
-        }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at top center, #ffffff 0, var(--bg) 100%);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .drop-zone {
-            min-height: 90px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            border-radius: 0.75rem;
-            background-color: rgba(0,0,0,0.02);
-        }
-        .drop-zone.drag-over {
-            background-color: var(--accent-light);
-            border-color: var(--accent);
-        }
-        
-        /* Styles de cartes par type */
-        .va-color { background-color: #f0fdf4; border-color: var(--success); color: #14532d; }
-        .nvan-color { background-color: #fff7ed; border-color: var(--warning); color: #7c2d12; }
-        .nvap-color { background-color: #fef2f2; border-color: var(--danger); color: #7f1d1d; }
-        .default-color { background-color: var(--panel-bg); border-color: var(--border-color); color: var(--text-color); }
+    header {
+      text-align: center;
+      padding: 32px 22px 16px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
 
-        .va-bg { background-color: var(--success); }
-        .nvan-bg { background-color: var(--warning); }
-        .nvap-bg { background-color: var(--danger); }
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2.2rem, 4vw, 3.2rem);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: #1e293b;
+    }
 
-        #svg-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
+    .subtitle {
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 600px;
+      line-height: 1.5;
+    }
 
-        @keyframes success-pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.03); box-shadow: 0 0 15px rgba(207, 163, 70, 0.4); }
-            100% { transform: scale(1); }
-        }
-        .correct-anim { animation: success-pulse 0.5s ease-out; }
+    /* --- NOUVEAU DESIGN DES ONGLETS --- */
+    .tabs-wrapper {
+      display: flex;
+      justify-content: center;
+      padding: 0 22px 24px;
+    }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg-color); }
-        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-    </style>
+    .tabs {
+      display: inline-flex;
+      background: #e2e8f0;
+      padding: 6px;
+      border-radius: 999px;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tab-button {
+      background: transparent;
+      color: var(--muted);
+      border: none;
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-button:hover {
+      color: var(--ink);
+    }
+
+    .tab-button.active {
+      background: white;
+      color: var(--blue);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* --- ZONES PRINCIPALES --- */
+    main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 22px 40px;
+      flex-grow: 1;
+      width: 100%;
+    }
+
+    #game-wrapper {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel h2 {
+      margin: 0;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      font-size: 1.15rem;
+      background: white;
+    }
+
+    .instructions {
+      padding: 14px 20px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.95rem;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--line);
+    }
+
+    /* --- BANQUE DE CARTES --- */
+    .bank {
+      padding: 16px;
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex-grow: 1;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-left: 6px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 14px;
+      cursor: grab;
+      box-shadow: var(--shadow-sm);
+      user-select: none;
+      touch-action: none;
+      transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .card:active { cursor: grabbing; }
+    .card.dragging { opacity: 0.4; transform: scale(0.95); }
+
+    .card-text {
+      font-size: 0.95rem;
+      color: var(--ink);
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    /* --- ZONES DE DEPOT --- */
+    .zones-grid {
+      display: grid;
+      gap: 16px;
+      padding: 16px;
+      background: #f8fafc;
+      flex-grow: 1;
+    }
+
+    .zones-3mu { grid-template-columns: repeat(3, 1fr); }
+    .zones-muda { grid-template-columns: repeat(3, 1fr); }
+
+    .zone {
+      min-height: 180px;
+      background: white;
+      border: 2px dashed #cbd5e1;
+      border-radius: 14px;
+      padding: 14px;
+      transition: all .2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .zone.over {
+      transform: scale(1.02);
+      border-color: var(--blue);
+      background: var(--light-blue);
+    }
+
+    .zone-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 2px;
+      font-weight: 800;
+      font-size: 1.05rem;
+    }
+
+    .zone small {
+      display: block;
+      color: var(--muted);
+      line-height: 1.3;
+      font-size: 0.85rem;
+    }
+
+    .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* Couleurs des catégories */
+    [data-id="mura"] { --accent: var(--orange); }
+    [data-id="muri"] { --accent: var(--red); }
+    [data-id="muda"] { --accent: var(--blue); }
+    [data-id="transport"] { --accent: #3b82f6; }
+    [data-id="inventory"] { --accent: #8b5cf6; }
+    [data-id="motion"] { --accent: #ec4899; }
+    [data-id="waiting"] { --accent: #eab308; }
+    [data-id="overprocessing"] { --accent: #14b8a6; }
+    [data-id="overproduction"] { --accent: #f97316; }
+    [data-id="defects"] { --accent: #ef4444; }
+
+    .zone .dot { background: var(--accent); }
+    .zone { border-color: color-mix(in srgb, var(--accent) 30%, #cbd5e1); }
+
+    .zone .card { margin: 0; border-left-color: var(--accent); }
+    .card.correct {
+      background: var(--ok);
+      border-color: #86efac;
+      border-left-color: var(--green) !important;
+      pointer-events: none;
+    }
+    .card.incorrect {
+      background: var(--bad);
+      border-color: #fca5a5;
+      border-left-color: var(--red) !important;
+      animation: shake 0.4s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
+    /* --- ONGLET AIDE & ASTUCES --- */
+    #help-wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .help-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      padding: 24px;
+    }
+
+    .help-section h3 {
+      color: var(--blue);
+      margin-top: 0;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .concept-card {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .concept-card h4 { margin: 0 0 6px 0; color: var(--ink); }
+    .concept-card p { margin: 0; font-size: 0.9rem; color: var(--muted); line-height: 1.5; }
+    .concept-card span.badge {
+      display: inline-block;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--blue);
+      margin-left: 6px;
+    }
+
+    /* --- SCHÉMA HIÉRARCHIQUE --- */
+    .lean-diagram {
+      background: white;
+      border-bottom: 1px solid var(--line);
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .lean-diagram h3 {
+      margin-top: 0;
+      color: var(--ink);
+      margin-bottom: 24px;
+    }
+
+    /* --- INDICATEURS EN BAS (SCORE) --- */
+    .bottom-indicator {
+      background: white;
+      border-top: 1px solid var(--line);
+      padding: 16px 22px;
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
+    }
+
+    .indicator-content {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .score-area {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .score-badge {
+      background: var(--light-blue);
+      color: var(--blue);
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-weight: 800;
+      font-size: 1.1rem;
+      border: 1px solid #bfdbfe;
+    }
+
+    .feedback-msg {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: color 0.3s;
+    }
+
+    .action-btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-weight: 700;
+      cursor: pointer;
+      color: white;
+      background: var(--ink);
+      transition: transform 0.1s, opacity 0.2s;
+    }
+    
+    .action-btn:hover { opacity: 0.85; }
+    .action-btn:active { transform: scale(0.96); }
+
+    .hidden { display: none !important; }
+
+    /* On maintient les 2 colonnes principales sur tablette/écran moyen */
+    @media (max-width: 1050px) {
+      #game-wrapper { grid-template-columns: 280px 1fr; }
+      .zones-muda { grid-template-columns: repeat(2, 1fr); }
+      .help-grid { grid-template-columns: 1fr; }
+    }
+
+    /* On empile tout uniquement sur les petits écrans (mobiles) */
+    @media (max-width: 820px) {
+      #game-wrapper { grid-template-columns: 1fr; }
+      .bank { min-height: auto; flex-direction: row; flex-wrap: wrap; }
+      .card { flex: 1 1 calc(50% - 10px); }
+      .zones-3mu, .zones-muda { grid-template-columns: 1fr; }
+      .indicator-content { flex-direction: column; text-align: center; justify-content: center; }
+      .score-area { flex-direction: column; gap: 8px; }
+    }
+
+    @media (max-width: 480px) {
+      .card { flex: 1 1 100%; }
+    }
+  </style>
 </head>
-<body class="p-4 md:p-6">
+<body>
 
-    <div class="max-w-7xl mx-auto relative">
-        <!-- Header -->
-        <header class="mb-6 relative z-20">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6">
-                <div class="flex items-center gap-4">
-                    <a href="index.html" class="p-3 rounded-xl shadow-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition-colors" title="Retour à l'accueil">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                    </a>
-                    <div class="p-3 rounded-xl shadow-lg" style="background-color: var(--primary);">
-                        <svg class="w-8 h-8 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-bold tracking-tight" style="color: var(--primary);">Analyse de la Valeur Ajoutée</h1>
-                        <p class="text-[10px] font-black uppercase tracking-[0.2em]" style="color: var(--accent);">Excellence Opérationnelle</p>
-                    </div>
-                </div>
-                
-                <div class="flex flex-wrap gap-3 items-center">
-                    <button onclick="checkAnswers()" class="flex items-center gap-2 px-6 py-2.5 text-white font-bold rounded-lg shadow-md transition-all active:scale-95" style="background-color: var(--primary);">
-                        <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        Valider l'analyse
-                    </button>
-                    <button onclick="resetScenario()" class="flex items-center gap-2 px-4 py-2.5 bg-white border font-semibold rounded-lg hover:bg-slate-50 transition-all" style="border-color: var(--border-color); color: var(--text-color);">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                        Réinitialiser
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Accordion Théorie -->
-            <div class="rounded-xl shadow-sm border overflow-hidden" style="background-color: var(--panel-bg); border-color: var(--border-color);">
-                <button id="theoryToggle" class="flex items-center justify-between w-full p-4 font-bold transition-colors hover:bg-gray-50" style="color: var(--primary);">
-                    <span class="flex items-center gap-2">
-                        <svg class="w-5 h-5" style="color: var(--accent);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.582.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                        Rappel des concepts stratégiques
-                    </span>
-                    <svg id="theoryIcon" class="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </button>
-                <div id="theoryContent" class="hidden p-5 text-sm grid md:grid-cols-3 gap-6 border-t" style="border-color: var(--border-color); background-color: var(--bg-color);">
-                    <div class="p-4 bg-white rounded-lg border-l-4" style="border-left-color: var(--success);">
-                        <h3 class="font-bold mb-1 italic" style="color: var(--success);">Valeur Ajoutée (VA)</h3>
-                        <p class="text-xs">Transformation réelle du produit attendue par le client final.</p>
-                    </div>
-                    <div class="p-4 bg-white rounded-lg border-l-4" style="border-left-color: var(--warning);">
-                        <h3 class="font-bold mb-1 italic" style="color: var(--warning);">NVA Nécessaire (NVAN)</h3>
-                        <p class="text-xs">Tâches sans valeur directe mais obligatoires (qualité, sécurité).</p>
-                    </div>
-                    <div class="p-4 bg-white rounded-lg border-l-4" style="border-left-color: var(--danger);">
-                        <h3 class="font-bold mb-1 italic" style="color: var(--danger);">NVA Pure (NVAP)</h3>
-                        <p class="text-xs">NVA Pure (NVAP) à éliminer pour gagner en efficience.</p>
-                    </div>
-                </div>
-            </div>
-        </header>
+  <header>
+    <h1>Classement Lean</h1>
+    <p class="subtitle">Mettez de l'ordre dans vos processus. Identifiez correctement les sources d'inefficacité (les 3 Mu) et les types de gaspillages (TIMWOOD).</p>
+  </header>
 
-        <!-- Sélecteur de Scénario -->
-        <div class="mb-6 flex flex-wrap gap-3 items-center relative z-20">
-            <span class="text-[10px] font-black uppercase tracking-widest mr-2" style="color: var(--accent);">Processus :</span>
-            <button onclick="loadScenario('bike')" class="px-4 py-2 bg-white border text-xs rounded-lg hover:border-[var(--accent)] transition-all font-bold shadow-sm flex items-center gap-2" style="border-color: var(--border-color); color: var(--primary);">
-                <span>🚲</span> Industrie
-            </button>
-            <button onclick="loadScenario('order')" class="px-4 py-2 bg-white border text-xs rounded-lg hover:border-[var(--accent)] transition-all font-bold shadow-sm flex items-center gap-2" style="border-color: var(--border-color); color: var(--primary);">
-                <span>📄</span> Administratif
-            </button>
-            <button onclick="loadScenario('pizza')" class="px-4 py-2 bg-white border text-xs rounded-lg hover:border-[var(--accent)] transition-all font-bold shadow-sm flex items-center gap-2" style="border-color: var(--border-color); color: var(--primary);">
-                <span>🍕</span> Services
-            </button>
+  <!-- Onglets -->
+  <nav class="tabs-wrapper">
+    <div class="tabs">
+      <button class="tab-button active" onclick="switchMode('help', event)">
+        <span>💡</span> Astuces & Aide
+      </button>
+      <button class="tab-button" onclick="switchMode('3mu', event)">
+        <span>1️⃣</span> Les 3 Mu
+      </button>
+      <button class="tab-button" onclick="switchMode('muda', event)">
+        <span>2️⃣</span> Les 7 Mudas
+      </button>
+    </div>
+  </nav>
+
+  <main>
+    <!-- ZONE DE JEU -->
+    <div id="game-wrapper" class="hidden">
+      <!-- Banque -->
+      <div class="panel">
+        <h2>À classer</h2>
+        <div class="instructions">Glissez les situations ci-dessous dans la bonne catégorie à droite.</div>
+        <div class="bank" id="bank" data-id="bank"></div>
+      </div>
+
+      <!-- Catégories de dépôt -->
+      <div class="panel">
+        <h2>Catégories</h2>
+        
+        <!-- Vue 3 MU -->
+        <div id="view-3mu" class="zones-grid zones-3mu">
+          <div class="zone" data-id="mura">
+            <div class="zone-header"><span class="dot"></span> Mura</div>
+            <small>Irrégularité, variabilité, rythme non constant ou flux haché.</small>
+          </div>
+          <div class="zone" data-id="muri">
+            <div class="zone-header"><span class="dot"></span> Muri</div>
+            <small>Surcharge, excès, effort déraisonnable (hommes ou machines).</small>
+          </div>
+          <div class="zone" data-id="muda">
+            <div class="zone-header"><span class="dot"></span> Muda</div>
+            <small>Gaspillage pur, activité qui n'ajoute aucune valeur pour le client.</small>
+          </div>
         </div>
 
-        <!-- Dashboard -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 relative z-20">
-            <div class="p-5 rounded-2xl border shadow-sm flex flex-col justify-center text-center" style="background-color: var(--panel-bg); border-color: var(--border-color);">
-                <p class="text-[10px] font-black uppercase tracking-wider mb-2" style="color: var(--accent);">Efficience globale</p>
-                <p id="efficiencyVal" class="text-4xl font-black" style="color: var(--primary);">0%</p>
-                <p class="text-[10px] uppercase font-bold opacity-40 mt-1">Ratio VA / Total</p>
-            </div>
-
-            <div class="p-5 rounded-2xl border shadow-sm md:col-span-2" style="background-color: var(--panel-bg); border-color: var(--border-color);">
-                <div class="flex justify-between items-center mb-4">
-                    <p class="text-[10px] font-black uppercase tracking-wider" style="color: var(--accent);">Analyse temporelle des flux</p>
-                    <p id="statTotal" class="text-xs font-bold" style="color: var(--primary);">Temps : 0 min</p>
-                </div>
-                
-                <div class="w-full bg-gray-100 h-10 rounded-xl flex overflow-hidden shadow-inner border mb-4" style="border-color: var(--border-color);">
-                    <div id="barVA" class="va-bg h-full transition-all duration-700 flex items-center justify-center text-[10px] text-white font-bold" style="width: 0%"></div>
-                    <div id="barNVAN" class="nvan-bg h-full transition-all duration-700 flex items-center justify-center text-[10px] text-white font-bold" style="width: 0%"></div>
-                    <div id="barNVAP" class="nvap-bg h-full transition-all duration-700 flex items-center justify-center text-[10px] text-white font-bold" style="width: 0%"></div>
-                </div>
-
-                <div class="flex flex-wrap justify-center gap-8 text-[9px] font-black uppercase">
-                    <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 va-bg rounded-full"></div> Valeur Ajoutée</div>
-                    <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 nvan-bg rounded-full"></div> NVA Nécessaire</div>
-                    <div class="flex items-center gap-2"><div class="w-2.5 h-2.5 nvap-bg rounded-full"></div> NVA Pure</div>
-                </div>
-            </div>
+        <!-- Vue 7 MUDAS -->
+        <div id="view-muda" class="zones-grid zones-muda hidden">
+          <div class="zone" data-id="transport"><div class="zone-header"><span class="dot"></span> Transport</div></div>
+          <div class="zone" data-id="inventory"><div class="zone-header"><span class="dot"></span> Stock</div></div>
+          <div class="zone" data-id="motion"><div class="zone-header"><span class="dot"></span> Mouvements</div></div>
+          <div class="zone" data-id="waiting"><div class="zone-header"><span class="dot"></span> Attente</div></div>
+          <div class="zone" data-id="overprocessing"><div class="zone-header"><span class="dot"></span> Sur-traitement</div></div>
+          <div class="zone" data-id="overproduction"><div class="zone-header"><span class="dot"></span> Surproduction</div></div>
+          <div class="zone" data-id="defects"><div class="zone-header"><span class="dot"></span> Défauts</div></div>
         </div>
-
-        <!-- Zone de travail -->
-        <div class="relative rounded-2xl border shadow-xl p-6 overflow-hidden min-h-[700px]" style="background-color: var(--panel-bg); border-color: var(--border-color);">
-            <svg id="svg-canvas">
-                <defs>
-                    <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="5" refY="3" orientation="auto">
-                        <path d="M0,0 L6,3 L0,6 Z" fill="#cbd5e1" />
-                    </marker>
-                </defs>
-            </svg>
-
-            <div class="grid grid-cols-4 gap-6 mb-6 font-black text-[10px] text-center uppercase tracking-[0.2em] sticky top-0 backdrop-blur-sm py-4 z-30 border-b" style="background-color: rgba(255,255,255,0.9); border-color: var(--border-color);">
-                <div class="text-gray-400">Flux de départ</div>
-                <div style="color: var(--success);">Valeur Ajoutée</div>
-                <div style="color: var(--warning);">NVA Nécessaire (NVAN)</div>
-                <div style="color: var(--danger);">NVA Pure (NVAP)</div>
-            </div>
-
-            <div id="process-grid" class="space-y-4 relative z-10 pb-12">
-                <!-- Lignes injectées ici -->
-            </div>
-        </div>
-
-        <!-- Feedback Modal -->
-        <div id="feedbackModal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center z-50 p-4 backdrop-blur-md">
-            <div class="bg-white rounded-3xl p-10 max-w-sm w-full shadow-2xl text-center border-t-8" id="modalBorder" style="border-top-color: var(--accent);">
-                <div id="feedbackIcon" class="text-5xl mb-4"></div>
-                <h2 id="feedbackTitle" class="text-xl font-bold mb-2" style="color: var(--primary);"></h2>
-                <p id="feedbackText" class="text-sm text-gray-500 mb-8"></p>
-                <button onclick="closeModal()" class="w-full py-4 text-white font-black uppercase text-xs tracking-widest rounded-xl transition active:scale-95 shadow-lg" style="background-color: var(--primary);">
-                    Continuer
-                </button>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <script>
-        const scenarios = {
-            bike: {
-                steps: [
-                    { id: 'b1', text: "Réception commande", time: 10, type: 'nvan' },
-                    { id: 'b2', text: "Attente livraison tubes", time: 120, type: 'nvap' },
-                    { id: 'b3', text: "Découpe des tubes", time: 15, type: 'va' },
-                    { id: 'b4', text: "Soudure du cadre", time: 45, type: 'va' },
-                    { id: 'b5', text: "Contrôle qualité", time: 15, type: 'nvan' },
-                    { id: 'b6', text: "Retouche soudure", time: 30, type: 'nvap' },
-                    { id: 'b7', text: "Peinture", time: 60, type: 'va' },
-                    { id: 'b8', text: "Séchage cabine", time: 90, type: 'nvan' },
-                    { id: 'b9', text: "Stockage expédition", time: 480, type: 'nvap' }
-                ]
-            },
-            order: {
-                steps: [
-                    { id: 'o1', text: "Ouverture mail client", time: 2, type: 'nvan' },
-                    { id: 'o2', text: "Recherche facture", time: 15, type: 'nvap' },
-                    { id: 'o3', text: "Vérification conditions", time: 5, type: 'nvan' },
-                    { id: 'o4', text: "Saisie validation", time: 2, type: 'va' },
-                    { id: 'o5', text: "Panne logiciel", time: 45, type: 'nvap' },
-                    { id: 'o6', text: "Envoi confirmation", time: 3, type: 'va' }
-                ]
-            },
-            pizza: {
-                steps: [
-                    { id: 'p1', text: "Prise de commande", time: 3, type: 'nvan' },
-                    { id: 'p2', text: "Préparation pâte", time: 5, type: 'va' },
-                    { id: 'p3', text: "Cuisson four bois", time: 8, type: 'va' },
-                    { id: 'p4', text: "Attente livreur", time: 10, type: 'nvap' },
-                    { id: 'p5', text: "Trajet livraison", time: 15, type: 'nvan' },
-                    { id: 'p6', text: "Erreur adresse GPS", time: 10, type: 'nvap' }
-                ]
-            }
-        };
+    <!-- ZONE AIDE & ASTUCES -->
+    <div id="help-wrapper" class="panel">
+      <h2>💡 Comprendre les concepts du Lean</h2>
 
-        let currentSteps = [];
+      <div class="lean-diagram">
+        <h3>Schéma de la hiérarchie</h3>
+        <svg viewBox="0 0 600 380" style="width: 100%; max-width: 650px; height: auto;">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb" />
+            </marker>
+          </defs>
 
-        function loadScenario(key) {
-            currentSteps = scenarios[key].steps;
-            const container = document.getElementById('process-grid');
-            container.innerHTML = '';
+          <!-- Top Node -->
+          <rect x="225" y="10" width="150" height="40" rx="8" fill="#0f172a" />
+          <text x="300" y="35" fill="white" font-family="sans-serif" font-weight="bold" font-size="16" text-anchor="middle">Les 3 Mu</text>
 
-            currentSteps.forEach((step, index) => {
-                const row = document.createElement('div');
-                row.className = 'grid grid-cols-4 gap-6 items-center h-24';
-                row.dataset.rowIndex = index;
+          <!-- Lines from Top to 3 Mu -->
+          <path d="M 300 50 L 300 75 M 120 75 L 480 75 M 120 75 L 120 100 M 300 75 L 300 100 M 480 75 L 480 100" stroke="#cbd5e1" stroke-width="2" fill="none" />
 
-                for (let i = 0; i < 4; i++) {
-                    const zone = document.createElement('div');
-                    zone.className = 'drop-zone border-2 border-dashed p-2 h-full w-full';
-                    zone.style.borderColor = 'rgba(0,0,0,0.05)';
-                    zone.dataset.rowIndex = index;
-                    zone.dataset.colIndex = i;
-                    zone.dataset.type = ['flux', 'va', 'nvan', 'nvap'][i];
-                    
-                    zone.ondragover = e => { e.preventDefault(); zone.classList.add('drag-over'); };
-                    zone.ondragleave = () => zone.classList.remove('drag-over');
-                    zone.ondrop = e => handleDrop(e, zone);
+          <!-- Mura (Left) -->
+          <rect x="60" y="100" width="120" height="40" rx="8" fill="white" stroke="#f97316" stroke-width="2" />
+          <text x="120" y="125" fill="#f97316" font-family="sans-serif" font-weight="bold" font-size="16" text-anchor="middle">Mura</text>
 
-                    if (i === 0) {
-                        const card = createCard(step, index);
-                        zone.appendChild(card);
-                    }
-                    row.appendChild(zone);
-                }
-                container.appendChild(row);
-            });
+          <!-- Muda (Center to allow branches below) -->
+          <rect x="240" y="100" width="120" height="40" rx="8" fill="white" stroke="#2563eb" stroke-width="2" />
+          <text x="300" y="125" fill="#2563eb" font-family="sans-serif" font-weight="bold" font-size="16" text-anchor="middle">Muda</text>
 
-            setTimeout(drawLinks, 100);
-            updateStats();
+          <!-- Muri (Right) -->
+          <rect x="420" y="100" width="120" height="40" rx="8" fill="white" stroke="#dc2626" stroke-width="2" />
+          <text x="480" y="125" fill="#dc2626" font-family="sans-serif" font-weight="bold" font-size="16" text-anchor="middle">Muri</text>
+
+          <!-- Arrow from Muda to 7 Mudas -->
+          <path d="M 300 140 L 300 165" stroke="#2563eb" stroke-width="2" fill="none" marker-end="url(#arrow)" />
+          
+          <!-- 7 Mudas Category Header -->
+          <rect x="220" y="170" width="160" height="45" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2" />
+          <text x="300" y="190" fill="#2563eb" font-family="sans-serif" font-weight="bold" font-size="15" text-anchor="middle">Les 7 Mudas</text>
+          <text x="300" y="206" fill="#64748b" font-family="sans-serif" font-size="11" text-anchor="middle">(TIMWOOD)</text>
+
+          <!-- Lines from 7 Mudas to individual items -->
+          <path d="M 300 215 L 300 320 M 120 235 L 480 235 M 120 235 L 120 250 M 240 235 L 240 250 M 360 235 L 360 250 M 480 235 L 480 250 M 160 305 L 440 305 M 160 305 L 160 320 M 440 305 L 440 320" stroke="#94a3b8" stroke-width="1.5" fill="none" />
+
+          <!-- Row 1: Transport, Stock, Mouvements, Attente -->
+          <rect x="70" y="250" width="100" height="30" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.5" />
+          <text x="120" y="270" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="12" text-anchor="middle">Transport</text>
+
+          <rect x="190" y="250" width="100" height="30" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.5" />
+          <text x="240" y="270" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="12" text-anchor="middle">Stock</text>
+
+          <rect x="310" y="250" width="100" height="30" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.5" />
+          <text x="360" y="270" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="12" text-anchor="middle">Mouvements</text>
+
+          <rect x="430" y="250" width="100" height="30" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.5" />
+          <text x="480" y="270" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="12" text-anchor="middle">Attente</text>
+
+          <!-- Row 2: Sur-traitement, Surproduction, Défauts -->
+          <rect x="100" y="320" width="120" height="30" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.5" />
+          <text x="160" y="340" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="12" text-anchor="middle">Sur-traitement</text>
+
+          <rect x="240" y="320" width="120" height="30" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.5" />
+          <text x="300" y="340" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="12" text-anchor="middle">Surproduction</text>
+
+          <rect x="380" y="320" width="120" height="30" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.5" />
+          <text x="440" y="340" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="12" text-anchor="middle">Défauts</text>
+        </svg>
+      </div>
+
+      <div class="help-grid">
+        
+        <div class="help-section">
+          <h3>Les 3 Mu (Démons du Lean)</h3>
+          
+          <div class="concept-card" style="border-left: 4px solid var(--blue)">
+            <h4>Muda (Gaspillage)</h4>
+            <p>Toute activité qui consomme des ressources sans créer de valeur aux yeux du client final.</p>
+          </div>
+          <div class="concept-card" style="border-left: 4px solid var(--orange)">
+            <h4>Mura (Irrégularité)</h4>
+            <p>Variation dans le fonctionnement (ex: pics d'activité, planning instable). C'est souvent la cause racine des deux autres Mu.</p>
+          </div>
+          <div class="concept-card" style="border-left: 4px solid var(--red)">
+            <h4>Muri (Surcharge)</h4>
+            <p>Exiger l'impossible d'un équipement ou d'un humain. Entraîne stress, pannes, burn-out et défauts.</p>
+          </div>
+        </div>
+
+        <div class="help-section">
+          <h3>Les 7 Mudas <span style="font-size: 0.9rem; color:var(--muted); font-weight:normal;">(L'acronyme TIMWOOD)</span></h3>
+          
+          <div class="concept-card">
+            <h4>🚚 <span style="color:var(--blue)">T</span>ransport</h4>
+            <p>Déplacement inutile de matériels ou de produits d'un point A à un point B.</p>
+          </div>
+          <div class="concept-card">
+            <h4>📦 <span style="color:var(--blue)">I</span>nventory <span class="badge">Stock</span></h4>
+            <p>Accumulation de matières premières, d'en-cours ou de produits finis (cache les problèmes).</p>
+          </div>
+          <div class="concept-card">
+            <h4>🚶‍♂️ <span style="color:var(--blue)">M</span>otion <span class="badge">Mouvements</span></h4>
+            <p>Déplacements inutiles des opérateurs (chercher un outil, se baisser, marcher).</p>
+          </div>
+          <div class="concept-card">
+            <h4>⏳ <span style="color:var(--blue)">W</span>aiting <span class="badge">Attente</span></h4>
+            <p>Opérateur inactif (attend une pièce, une signature, une fin de cycle machine).</p>
+          </div>
+          <div class="concept-card">
+            <h4>⚙️ <span style="color:var(--blue)">O</span>verprocessing <span class="badge">Sur-traitement</span></h4>
+            <p>Faire de la qualité excessive ou des étapes non demandées/payées par le client.</p>
+          </div>
+          <div class="concept-card">
+            <h4>🏭 <span style="color:var(--blue)">O</span>verproduction <span class="badge">Surproduction</span></h4>
+            <p>Produire trop ou trop tôt. C'est le pire Muda car il génère tous les autres !</p>
+          </div>
+          <div class="concept-card">
+            <h4>❌ <span style="color:var(--blue)">D</span>efects <span class="badge">Défauts</span></h4>
+            <p>Pièces non conformes, erreurs, nécessité de retoucher le travail.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Indicateurs en bas (Masqué sur l'onglet d'aide) -->
+  <footer class="bottom-indicator" style="display: none;">
+    <div class="indicator-content" id="indicator-content">
+      <div class="score-area">
+        <div class="score-badge">
+          Score : <span id="score-display">0</span> / <span id="total-display">0</span>
+        </div>
+        <div class="feedback-msg" id="feedback-msg">À vous de jouer ! Glissez les cartes.</div>
+      </div>
+      <button class="action-btn" onclick="resetCurrentGame()">🔄 Recommencer l'étape</button>
+    </div>
+  </footer>
+
+  <script>
+    // --- Données du jeu ---
+    const data3Mu = [
+      { id: 'q1', text: "L'équipe subit des pics d'activité le matin et n'a rien à faire l'après-midi.", answer: 'mura' },
+      { id: 'q2', text: "Un opérateur porte des caisses de 40 kg à la main toute la journée.", answer: 'muri' },
+      { id: 'q3', text: "On jette 10% de la production à cause de défauts de fabrication.", answer: 'muda' },
+      { id: 'q4', text: "La machine tourne à 150% de sa capacité nominale pour rattraper le retard.", answer: 'muri' },
+      { id: 'q5', text: "Les commandes clients fluctuent de 20 à 200 unités sans aucune prévision.", answer: 'mura' }
+    ];
+
+    const dataMuda = [
+      { id: 'q6', text: "Déplacer des palettes d'un bout à l'autre de l'usine pour faire de la place.", answer: 'transport' },
+      { id: 'q7', text: "Garder 6 mois de matières premières dans l'entrepôt « au cas où ».", answer: 'inventory' },
+      { id: 'q8', text: "L'ouvrier doit se baisser constamment pour ramasser ses outils sous l'établi.", answer: 'motion' },
+      { id: 'q9', text: "L'opérateur regarde la machine de découpe tourner pendant 5 minutes.", answer: 'waiting' },
+      { id: 'q10', text: "Peindre l'intérieur d'une pièce mécanique qui ne se verra jamais.", answer: 'overprocessing' },
+      { id: 'q11', text: "Fabriquer 500 pièces pour amortir la machine alors que la commande est de 100.", answer: 'overproduction' },
+      { id: 'q12', text: "Devoir retoucher des pièces rayées lors de l'étape d'assemblage.", answer: 'defects' }
+    ];
+
+    let currentMode = '3mu'; // Note: ce mode sera activé au premier clic, par défaut on affiche l'aide.
+    let currentData = data3Mu;
+
+    // --- Initialisation ---
+    function initGame() {
+      const bank = document.getElementById('bank');
+      bank.innerHTML = '';
+      
+      // Vider les zones de dépôt
+      document.querySelectorAll('.zone:not(#bank)').forEach(zone => {
+        const cards = zone.querySelectorAll('.card');
+        cards.forEach(card => card.remove());
+      });
+
+      // Créer les cartes
+      currentData.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.draggable = true;
+        card.dataset.id = item.id;
+        card.dataset.answer = item.answer;
+        card.innerHTML = `<div class="card-text">${item.text}</div>`;
+        
+        card.addEventListener('dragstart', dragStart);
+        card.addEventListener('dragend', dragEnd);
+        bank.appendChild(card);
+      });
+
+      updateScore();
+    }
+
+    // --- Logique Drag & Drop ---
+    let draggedCard = null;
+
+    function dragStart(e) {
+      draggedCard = this;
+      setTimeout(() => this.classList.add('dragging'), 0);
+    }
+
+    function dragEnd(e) {
+      this.classList.remove('dragging');
+      draggedCard = null;
+    }
+
+    document.querySelectorAll('.zone, .bank').forEach(zone => {
+      zone.addEventListener('dragover', e => {
+        e.preventDefault();
+        if(zone.id !== 'bank') zone.classList.add('over');
+      });
+
+      zone.addEventListener('dragleave', () => {
+        zone.classList.remove('over');
+      });
+
+      zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.classList.remove('over');
+        
+        if (!draggedCard) return;
+
+        // Retour à la banque
+        if (zone.id === 'bank' || zone.dataset.id === 'bank') {
+          draggedCard.classList.remove('correct', 'incorrect');
+          document.getElementById('bank').appendChild(draggedCard);
+          updateScore();
+          return;
         }
 
-        function createCard(step, index) {
-            const card = document.createElement('div');
-            card.id = `card-${step.id}`;
-            card.className = 'step-card default-color p-3 rounded-xl border-2 w-full text-[10px] font-bold shadow-sm select-none';
-            card.draggable = true;
-            card.dataset.rowIndex = index;
-            card.innerHTML = `
-                <div class="flex justify-between items-center mb-1.5 opacity-40">
-                    <span class="uppercase text-[7px] tracking-widest">Opération ${index + 1}</span>
-                    <span class="px-1.5 py-0.5 rounded-md text-[8px] bg-black text-white">${step.time}m</span>
-                </div>
-                <div class="leading-tight">${step.text}</div>
-            `;
-            card.ondragstart = e => { e.dataTransfer.setData("text", card.id); card.style.opacity = "0.4"; };
-            card.ondragend = () => { card.style.opacity = "1"; };
-            return card;
+        // Dépôt dans une zone
+        zone.appendChild(draggedCard);
+        checkAnswer(draggedCard, zone.dataset.id);
+      });
+    });
+
+    // --- Validation et Score ---
+    function checkAnswer(card, zoneId) {
+      card.classList.remove('correct', 'incorrect');
+      
+      if (card.dataset.answer === zoneId) {
+        card.classList.add('correct');
+        showFeedback("Bonne réponse ! ✅", "var(--green)");
+      } else {
+        card.classList.add('incorrect');
+        showFeedback("Oups, mauvaise catégorie... ❌", "var(--red)");
+      }
+      updateScore();
+    }
+
+    function updateScore() {
+      const correctCards = document.querySelectorAll('#view-' + currentMode + ' .card.correct').length;
+      document.getElementById('score-display').textContent = correctCards;
+      document.getElementById('total-display').textContent = currentData.length;
+
+      if (correctCards === currentData.length) {
+        showFeedback("🎉 Bravo ! Étape complétée avec succès !", "var(--blue)");
+      }
+    }
+
+    function showFeedback(msg, color) {
+      const feedback = document.getElementById('feedback-msg');
+      feedback.textContent = msg;
+      feedback.style.color = color;
+      
+      clearTimeout(window.feedbackTimer);
+      window.feedbackTimer = setTimeout(() => {
+        const correctCards = document.querySelectorAll('#view-' + currentMode + ' .card.correct').length;
+        if (correctCards !== currentData.length) {
+          feedback.textContent = "À vous de jouer ! Glissez les cartes.";
+          feedback.style.color = "var(--muted)";
         }
+      }, 2500);
+    }
 
-        function handleDrop(e, zone) {
-            e.preventDefault();
-            zone.classList.remove('drag-over');
-            const cardId = e.dataTransfer.getData("text");
-            const card = document.getElementById(cardId);
-            
-            if (card.dataset.rowIndex !== zone.dataset.rowIndex) return;
+    // --- Navigation (Onglets) ---
+    function switchMode(mode, event) {
+      // Gérer l'UI des onglets
+      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      if(event) {
+        event.currentTarget.classList.add('active');
+      }
 
-            zone.appendChild(card);
-            updateCardAppearance(card, zone.dataset.type);
-            updateStats();
-            drawLinks();
-        }
+      // Si clic sur Aide
+      if (mode === 'help') {
+        document.getElementById('game-wrapper').classList.add('hidden');
+        document.getElementById('help-wrapper').classList.remove('hidden');
+        // Cacher la barre d'indicateurs de jeu en mode aide
+        document.querySelector('.bottom-indicator').style.display = 'none';
+        return;
+      }
 
-        function updateCardAppearance(card, type) {
-            card.classList.remove('va-color', 'nvan-color', 'nvap-color', 'default-color');
-            if (type === 'va') card.classList.add('va-color');
-            else if (type === 'nvan') card.classList.add('nvan-color');
-            else if (type === 'nvap') card.classList.add('nvap-color');
-            else card.classList.add('default-color');
-        }
+      // Si passage au jeu
+      document.getElementById('game-wrapper').classList.remove('hidden');
+      document.getElementById('help-wrapper').classList.add('hidden');
+      document.querySelector('.bottom-indicator').style.display = 'block';
 
-        function updateStats() {
-            let total = 0, va = 0, nvan = 0, nvap = 0;
+      currentMode = mode;
+      currentData = mode === '3mu' ? data3Mu : dataMuda;
 
-            currentSteps.forEach(step => {
-                total += step.time;
-                const card = document.getElementById(`card-${step.id}`);
-                const type = card.parentElement.dataset.type;
-                if (type === 'va') va += step.time;
-                else if (type === 'nvan') nvan += step.time;
-                else if (type === 'nvap') nvap += step.time;
-            });
+      document.getElementById('view-3mu').classList.add('hidden');
+      document.getElementById('view-muda').classList.add('hidden');
+      document.getElementById(`view-${mode}`).classList.remove('hidden');
 
-            document.getElementById('statTotal').innerText = `Temps Process : ${total} min`;
-            const eff = total > 0 ? Math.round((va / total) * 100) : 0;
-            document.getElementById('efficiencyVal').innerText = eff + "%";
+      initGame();
+      showFeedback("À vous de jouer ! Glissez les cartes.", "var(--muted)");
+    }
 
-            const barVA = document.getElementById('barVA');
-            const barNVAN = document.getElementById('barNVAN');
-            const barNVAP = document.getElementById('barNVAP');
+    function resetCurrentGame() {
+      initGame();
+      showFeedback("Jeu réinitialisé.", "var(--muted)");
+    }
 
-            const pVA = total > 0 ? (va / total) * 100 : 0;
-            const pNVAN = total > 0 ? (nvan / total) * 100 : 0;
-            const pNVAP = total > 0 ? (nvap / total) * 100 : 0;
-
-            barVA.style.width = pVA + "%";
-            barVA.innerText = pVA > 8 ? Math.round(pVA) + "%" : "";
-            barNVAN.style.width = pNVAN + "%";
-            barNVAN.innerText = pNVAN > 8 ? Math.round(pNVAN) + "%" : "";
-            barNVAP.style.width = pNVAP + "%";
-            barNVAP.innerText = pNVAP > 8 ? Math.round(pNVAP) + "%" : "";
-        }
-
-        function drawLinks() {
-            const svg = document.getElementById('svg-canvas');
-            svg.querySelectorAll('path').forEach(p => p.remove());
-            const cards = document.querySelectorAll('.step-card');
-            const rect = svg.getBoundingClientRect();
-
-            for (let i = 0; i < cards.length - 1; i++) {
-                const r1 = cards[i].getBoundingClientRect();
-                const r2 = cards[i+1].getBoundingClientRect();
-
-                const x1 = r1.left + r1.width / 2 - rect.left;
-                const y1 = r1.bottom - rect.top + 5;
-                const x2 = r2.left + r2.width / 2 - rect.left;
-                const y2 = r2.top - rect.top - 10;
-
-                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                const cpY1 = y1 + (y2 - y1) / 2;
-                const cpY2 = y2 - (y2 - y1) / 4;
-                const d = `M ${x1} ${y1} C ${x1} ${cpY1}, ${x2} ${cpY2}, ${x2} ${y2}`;
-                
-                path.setAttribute("d", d);
-                path.setAttribute("stroke", "#cbd5e1");
-                path.setAttribute("stroke-width", "1.5");
-                path.setAttribute("fill", "none");
-                path.setAttribute("marker-end", "url(#arrowhead)");
-                svg.appendChild(path);
-            }
-        }
-
-        function showCorrection() {
-            currentSteps.forEach((step, idx) => {
-                const card = document.getElementById(`card-${step.id}`);
-                const zone = document.querySelector(`[data-row-index="${idx}"] [data-type="${step.type}"]`);
-                if (zone) {
-                    zone.appendChild(card);
-                    updateCardAppearance(card, step.type);
-                    card.classList.add('correct-anim');
-                    setTimeout(() => card.classList.remove('correct-anim'), 500);
-                }
-            });
-            updateStats();
-            drawLinks();
-        }
-
-        function checkAnswers() {
-            let correct = 0, total = 0;
-            currentSteps.forEach(step => {
-                const card = document.getElementById(`card-${step.id}`);
-                const type = card.parentElement.dataset.type;
-                if (type !== 'flux') {
-                    total++;
-                    if (type === step.type) correct++;
-                }
-            });
-
-            const modal = document.getElementById('feedbackModal');
-            if (total < currentSteps.length) {
-                document.getElementById('feedbackIcon').innerText = "⏳";
-                document.getElementById('feedbackTitle').innerText = "Analyse en cours";
-                document.getElementById('feedbackText').innerText = "Veuillez classer toutes les opérations pour finaliser le bilan.";
-            } else if (correct === currentSteps.length) {
-                document.getElementById('feedbackIcon').innerText = "🌟";
-                document.getElementById('feedbackTitle').innerText = "Analyse Validée";
-                document.getElementById('feedbackText').innerText = "Félicitations. Votre diagnostic de performance est parfaitement rigoureux.";
-            } else {
-                document.getElementById('feedbackIcon').innerText = "🧐";
-                document.getElementById('feedbackTitle').innerText = "Diagnostic à affiner";
-                document.getElementById('feedbackText').innerText = `Vous avez identifié ${correct} étapes sur ${currentSteps.length}. Revoyez la définition de la valeur client.`;
-            }
-            modal.classList.remove('hidden');
-        }
-
-        function closeModal() { document.getElementById('feedbackModal').classList.add('hidden'); }
-        function resetScenario() { loadScenario(Object.keys(scenarios).find(k => scenarios[k].steps[0].id === currentSteps[0].id)); }
-
-        window.addEventListener('keydown', (e) => {
-            if (e.shiftKey && e.altKey && e.code === 'KeyL') showCorrection();
-        });
-
-        document.getElementById('theoryToggle').onclick = () => {
-            const content = document.getElementById('theoryContent');
-            const icon = document.getElementById('theoryIcon');
-            content.classList.toggle('hidden');
-            icon.style.transform = content.classList.contains('hidden') ? '' : 'rotate(180deg)';
-            setTimeout(drawLinks, 310);
-        };
-
-        window.onresize = drawLinks;
-        window.onload = () => loadScenario('bike');
-    </script>
+  </script>
 </body>
 </html>
