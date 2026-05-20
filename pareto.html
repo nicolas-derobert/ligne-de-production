@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QualiTools - Diagramme de Pareto</title>
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- html2canvas for PNG export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --dark: #1a1a1a;
+            --gold: #cfa346;
+            --gold-soft: #f8edd2;
+            --gold-light: #fff8e8;
+            --red: #ef4444;
+            --blue: #2563eb;
+            --green: #16a34a;
+            --gray: #6b7280;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            appearance: textfield;
+            -moz-appearance: textfield;
+        }
+
+        .modal-backdrop {
+            background: rgba(15, 23, 42, 0.58);
+            backdrop-filter: blur(3px);
+        }
+
+        .soft-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .soft-scrollbar::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 999px;
+        }
+
+        .soft-scrollbar::-webkit-scrollbar-track {
+            background: #f3f4f6;
+        }
+
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 10mm;
+            }
+
+            body {
+                background: white !important;
+                color: black !important;
+            }
+
+            header,
+            .no-print,
+            .modal-backdrop,
+            .tooltip-layer,
+            .tabs-nav {
+                display: none !important;
+            }
+
+            main {
+                display: block !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+            }
+
+            .print-card {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+                break-inside: avoid;
+            }
+
+            .print-grid {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 12px !important;
+            }
+
+            .print-full {
+                grid-column: 1 / -1 !important;
+            }
+
+            .print-hidden {
+                display: none !important;
+            }
+
+            input,
+            textarea,
+            select {
+                border: none !important;
+                background: transparent !important;
+                box-shadow: none !important;
+                resize: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef } = React;
+
+        const Icon = ({ name, size = 20, className = "" }) => {
+            const [svgHtml, setSvgHtml] = useState(null);
+
+            useEffect(() => {
+                if (window.lucide && window.lucide.icons && window.lucide.icons[name]) {
+                    try {
+                        const elem = window.lucide.createElement(window.lucide.icons[name]);
+                        elem.setAttribute("width", size);
+                        elem.setAttribute("height", size);
+                        const cls = elem.getAttribute("class") || "";
+                        elem.setAttribute("class", `${cls} ${className}`.trim());
+                        setSvgHtml(elem.outerHTML);
+                    } catch (e) {
+                        setSvgHtml(null);
+                    }
+                }
+            }, [name, size, className]);
+
+            if (!svgHtml) {
+                return <span style={{ width: size, height: size }} className="inline-block opacity-40"></span>;
+            }
+
+            return <span dangerouslySetInnerHTML={{ __html: svgHtml }} className="inline-flex items-center justify-center" />;
+        };
+
+        const EXAMPLES = {
+            blank: {
+                title: "Nouveau diagramme",
+                subtitle: "Classement des causes selon leur importance relative",
+                dataType: "Fréquence / nombre d'occurrences",
+                conclusion: "",
+                actionPlan: "",
+                data: [
+                    { id: 1, label: "Catégorie 1", value: 0 },
+                    { id: 2, label: "Catégorie 2", value: 0 },
+                    { id: 3, label: "Catégorie 3", value: 0 },
+                    { id: 4, label: "Catégorie 4", value: 0 },
+                    { id: 5, label: "Catégorie 5", value: 0 }
+                ]
+            },
+            defauts: {
+                title: "Analyse des défauts - Production",
+                subtitle: "Exemple : défauts observés sur une ligne de fabrication",
+                dataType: "Nombre de défauts",
+                conclusion: "Les défauts à traiter en priorité sont les causes situées avant ou au niveau du seuil de 80 %.",
+                actionPlan: "Analyser la première cause avec un 5 Pourquoi ou un diagramme d'Ishikawa, puis définir une action corrective vérifiable.",
+                data: [
+                    { id: 1, label: "Rayures", value: 120 },
+                    { id: 2, label: "Défaut aspect", value: 45 },
+                    { id: 3, label: "Dimension HS", value: 25 },
+                    { id: 4, label: "Emballage", value: 15 },
+                    { id: 5, label: "Manquant", value: 8 }
+                ]
+            },
+            clients: {
+                title: "Réclamations clients",
+                subtitle: "Exemple : motifs de réclamations sur une période donnée",
+                dataType: "Nombre de réclamations",
+                conclusion: "Les réclamations les plus fréquentes doivent être étudiées avant de disperser les actions sur les causes minoritaires.",
+                actionPlan: "Identifier le processus concerné, mesurer l'écart, puis suivre l'évolution du nombre de réclamations après action.",
+                data: [
+                    { id: 1, label: "Retard livraison", value: 85 },
+                    { id: 2, label: "Erreur facture", value: 40 },
+                    { id: 3, label: "Produit abîmé", value: 20 },
+                    { id: 4, label: "Service injoignable", value: 10 },
+                    { id: 5, label: "Autre", value: 5 }
+                ]
+            },
+            maintenance: {
+                title: "Causes d'arrêts machine",
+                subtitle: "Exemple : fréquence ou durée d'arrêt par type de cause",
+                dataType: "Durée d'arrêt / fréquence",
+                conclusion: "Les causes principales d'arrêt orientent le diagnostic maintenance vers les pertes les plus importantes.",
+                actionPlan: "Prioriser les causes majeures, vérifier les standards de maintenance préventive, puis mesurer le temps d'arrêt après action.",
+                data: [
+                    { id: 1, label: "Bourrage papier", value: 150 },
+                    { id: 2, label: "Panne moteur", value: 30 },
+                    { id: 3, label: "Manque matière", value: 15 },
+                    { id: 4, label: "Réglages", value: 10 },
+                    { id: 5, label: "Coupure électrique", value: 2 }
+                ]
+            }
+        };
+
+        const DATA_TYPES = [
+            "Fréquence / nombre d'occurrences",
+            "Nombre de défauts",
+            "Nombre de réclamations",
+            "Coût",
+            "Temps perdu",
+            "Durée d'arrêt",
+            "Quantité rebutée"
+        ];
+
+        const cleanNumericValue = (value) => {
+            const parsed = parseFloat(value);
+            if (Number.isNaN(parsed)) return 0;
+            return Math.max(0, parsed);
+        };
+
+        const escapeHtml = (text) => String(text ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+
+        const formatNumber = (number, decimals = 1) => {
+            return Number(number || 0).toLocaleString("fr-FR", {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            });
+        };
+
+        const App = () => {
+            // Tab state
+            const [activeTab, setActiveTab] = useState("theory"); // 'theory' or 'tool'
+
+            // Data state
+            const [items, setItems] = useState(EXAMPLES.blank.data);
+            const [title, setTitle] = useState(EXAMPLES.blank.title);
+            const [subtitle, setSubtitle] = useState(EXAMPLES.blank.subtitle);
+            const [dataType, setDataType] = useState(EXAMPLES.blank.dataType);
+            const [threshold, setThreshold] = useState(80);
+            const [conclusion, setConclusion] = useState(EXAMPLES.blank.conclusion);
+            const [actionPlan, setActionPlan] = useState(EXAMPLES.blank.actionPlan);
+
+            // UI state
+            const [showInterpretation, setShowInterpretation] = useState(true);
+            const [showSortedTable, setShowSortedTable] = useState(false);
+            const [tooltip, setTooltip] = useState(null);
+            const [modal, setModal] = useState(null);
+            const [pendingExampleKey, setPendingExampleKey] = useState(null);
+            const [errorMsg, setErrorMsg] = useState("");
+
+            // Refs for file handling and PNG export
+            const fileInputRef = useRef(null);
+            const chartCardRef = useRef(null);
+
+            const paretoData = useMemo(() => {
+                const sorted = [...items]
+                    .map(item => ({ ...item, value: cleanNumericValue(item.value) }))
+                    .sort((a, b) => b.value - a.value);
+
+                const total = sorted.reduce((sum, item) => sum + item.value, 0);
+                let currentSum = 0;
+
+                return sorted.map((item, index) => {
+                    const previousCumulative = total === 0 ? 0 : (currentSum / total) * 100;
+                    currentSum += item.value;
+                    const cumulative = total === 0 ? 0 : (currentSum / total) * 100;
+
+                    return {
+                        ...item,
+                        rank: index + 1,
+                        percent: total === 0 ? 0 : (item.value / total) * 100,
+                        previousCumulative,
+                        cumulative,
+                        isPriority: total > 0 && item.value > 0 && previousCumulative < threshold
+                    };
+                });
+            }, [items, threshold]);
+
+            const grandTotal = useMemo(() => {
+                return items.reduce((sum, item) => sum + cleanNumericValue(item.value), 0);
+            }, [items]);
+
+            const priorityItems = useMemo(() => {
+                return paretoData.filter(item => item.isPriority);
+            }, [paretoData]);
+
+            const firstCause = paretoData.find(item => item.value > 0);
+            const hasUsableData = grandTotal > 0 && paretoData.some(item => item.value > 0);
+
+            const automaticInterpretation = useMemo(() => {
+                if (!hasUsableData) {
+                    return "Saisissez au moins une valeur supérieure à 0 pour générer une interprétation.";
+                }
+
+                const priorityPercent = priorityItems.reduce((sum, item) => sum + item.percent, 0);
+                const priorityLabels = priorityItems.map(item => item.label).join(", ");
+                const count = priorityItems.length;
+                const first = firstCause;
+
+                return `Les ${count} cause${count > 1 ? "s" : ""} prioritaire${count > 1 ? "s" : ""} représente${count > 1 ? "nt" : ""} ${formatNumber(priorityPercent, 1)} % du total. La cause principale est « ${first.label} », avec ${formatNumber(first.percent, 1)} % du total. L'analyse doit donc commencer par : ${priorityLabels}.`;
+            }, [hasUsableData, priorityItems, firstCause]);
+
+            const diagnosticQuestions = useMemo(() => {
+                if (!hasUsableData) {
+                    return [
+                        "Quelles données faut-il collecter ?",
+                        "Quelle période d'observation choisir ?",
+                        "Quelle unité de mesure utiliser ?"
+                    ];
+                }
+
+                return [
+                    `Pourquoi « ${firstCause.label} » est-elle la cause la plus importante ?`,
+                    "Le résultat correspond-il à une fréquence, un coût, un temps perdu ou une criticité ?",
+                    "Quelle action corrective peut être engagée sur la première cause ?",
+                    "Quel indicateur permettra de vérifier l'efficacité de l'action ?"
+                ];
+            }, [hasUsableData, firstCause]);
+
+            const displayedRows = showSortedTable ? paretoData : items.map(item => {
+                const found = paretoData.find(row => row.id === item.id);
+                return found || { ...item, percent: 0, cumulative: 0, rank: "-", isPriority: false };
+            });
+
+            const setSafeThreshold = (value) => {
+                const parsed = cleanNumericValue(value);
+                setThreshold(Math.min(100, Math.max(1, parsed)));
+            };
+
+            const handleTooltip = (event, content) => {
+                setTooltip({
+                    x: event.clientX,
+                    y: event.clientY,
+                    ...content
+                });
+            };
+
+            const hideTooltip = () => setTooltip(null);
+
+            const addItem = () => {
+                const newId = Math.max(...items.map(i => i.id), 0) + 1;
+                setItems([...items, { id: newId, label: "Nouvelle catégorie", value: 0 }]);
+            };
+
+            const duplicateItem = (id) => {
+                const source = items.find(item => item.id === id);
+                if (!source) return;
+                const newId = Math.max(...items.map(i => i.id), 0) + 1;
+                setItems([...items, { ...source, id: newId, label: `${source.label} - copie` }]);
+            };
+
+            const updateItem = (id, field, value) => {
+                setItems(items.map(item => {
+                    if (item.id !== id) return item;
+                    if (field === "value") {
+                        return { ...item, value: cleanNumericValue(value) };
+                    }
+                    return { ...item, [field]: value };
+                }));
+            };
+
+            const deleteItem = (id) => {
+                if (items.length <= 1) return;
+                setItems(items.filter(item => item.id !== id));
+            };
+
+            const sortInputTableByPareto = () => {
+                const sortedIds = paretoData.map(item => item.id);
+                const sortedItems = sortedIds.map(id => items.find(item => item.id === id)).filter(Boolean);
+                setItems(sortedItems);
+            };
+
+            const openExampleConfirmation = (key) => {
+                if (!key) return;
+                setPendingExampleKey(key);
+                setModal("loadExample");
+            };
+
+            const confirmLoadExample = () => {
+                const example = EXAMPLES[pendingExampleKey];
+                if (!example) return;
+                setItems(JSON.parse(JSON.stringify(example.data)));
+                setTitle(example.title);
+                setSubtitle(example.subtitle);
+                setDataType(example.dataType);
+                setConclusion(example.conclusion || "");
+                setActionPlan(example.actionPlan || "");
+                setPendingExampleKey(null);
+                setModal(null);
+                setActiveTab("tool");
+            };
+
+            const resetData = () => {
+                setModal("reset");
+            };
+
+            const confirmResetData = () => {
+                const blank = EXAMPLES.blank;
+                setItems(JSON.parse(JSON.stringify(blank.data)));
+                setTitle(blank.title);
+                setSubtitle(blank.subtitle);
+                setDataType(blank.dataType);
+                setConclusion(blank.conclusion || "");
+                setActionPlan(blank.actionPlan || "");
+                setShowSortedTable(false);
+                setModal(null);
+            };
+
+            const buildExportRows = () => {
+                return paretoData.map(row => ({
+                    Rang: row.rank,
+                    Catégorie: row.label,
+                    Valeur: row.value,
+                    Pourcentage: row.percent,
+                    Cumul: row.cumulative,
+                    Prioritaire: row.isPriority ? "Oui" : "Non"
+                }));
+            };
+
+            const exportCSV = () => {
+                const rows = buildExportRows();
+                const headers = Object.keys(rows[0] || {
+                    Rang: "", Catégorie: "", Valeur: "", Pourcentage: "", Cumul: "", Prioritaire: ""
+                });
+
+                const csv = [
+                    [`Titre`, title],
+                    [`Sous-titre`, subtitle],
+                    [`Type de donnée`, dataType],
+                    [`Total`, grandTotal],
+                    [],
+                    headers,
+                    ...rows.map(row => headers.map(header => {
+                        const value = row[header];
+                        if (typeof value === "number") return String(value).replace(".", ",");
+                        return `"${String(value).replaceAll('"', '""')}"`;
+                    }))
+                ].map(line => line.join(";")).join("\n");
+
+                const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `Pareto_${title.replace(/[^a-z0-9]+/gi, "_")}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            };
+
+            const exportExcel = () => {
+                const tableRows = paretoData.map(row => `
+                    <tr>
+                        <td style="border:1px solid #999;padding:6px;">${row.rank}</td>
+                        <td style="border:1px solid #999;padding:6px;">${escapeHtml(row.label)}</td>
+                        <td style="border:1px solid #999;padding:6px;">${row.value}</td>
+                        <td style="border:1px solid #999;padding:6px;">${row.percent.toFixed(2).replace('.', ',')}</td>
+                        <td style="border:1px solid #999;padding:6px;">${row.cumulative.toFixed(2).replace('.', ',')}</td>
+                        <td style="border:1px solid #999;padding:6px;">${row.isPriority ? "Oui" : "Non"}</td>
+                    </tr>
+                `).join("");
+
+                const html = `
+                    <html>
+                    <head><meta charset="utf-8"></head>
+                    <body>
+                        <h1>${escapeHtml(title)}</h1>
+                        <p>${escapeHtml(subtitle)}</p>
+                        <p><strong>Type de donnée :</strong> ${escapeHtml(dataType)}</p>
+                        <p><strong>Total :</strong> ${grandTotal}</p>
+                        <table style="border-collapse:collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="background:#f2f2f2;border:1px solid #999;padding:6px;">Rang</th>
+                                    <th style="background:#f2f2f2;border:1px solid #999;padding:6px;">Catégorie</th>
+                                    <th style="background:#f2f2f2;border:1px solid #999;padding:6px;">Valeur</th>
+                                    <th style="background:#f2f2f2;border:1px solid #999;padding:6px;">Pourcentage (%)</th>
+                                    <th style="background:#f2f2f2;border:1px solid #999;padding:6px;">Cumul (%)</th>
+                                    <th style="background:#f2f2f2;border:1px solid #999;padding:6px;">Zone prioritaire</th>
+                                </tr>
+                            </thead>
+                            <tbody>${tableRows}</tbody>
+                        </table>
+                    </body>
+                    </html>
+                `;
+
+                const blob = new Blob(["\uFEFF" + html], { type: "application/vnd.ms-excel;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `Pareto_${title.replace(/[^a-z0-9]+/gi, "_")}.xls`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            };
+
+            const exportJSON = () => {
+                const data = {
+                    title,
+                    subtitle,
+                    dataType,
+                    threshold,
+                    conclusion,
+                    actionPlan,
+                    items
+                };
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `Pareto_${title.replace(/[^a-z0-9]+/gi, "_")}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            };
+
+            const handleImportJSONClick = () => {
+                if (fileInputRef.current) {
+                    fileInputRef.current.click();
+                }
+            };
+
+            const importJSON = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        if (data.items && Array.isArray(data.items)) setItems(data.items);
+                        if (data.title !== undefined) setTitle(data.title);
+                        if (data.subtitle !== undefined) setSubtitle(data.subtitle);
+                        if (data.dataType !== undefined) setDataType(data.dataType);
+                        if (data.threshold !== undefined) setThreshold(data.threshold);
+                        if (data.conclusion !== undefined) setConclusion(data.conclusion);
+                        if (data.actionPlan !== undefined) setActionPlan(data.actionPlan);
+                        setActiveTab("tool");
+                    } catch (err) {
+                        setErrorMsg("Le fichier sélectionné n'est pas un fichier de sauvegarde Pareto valide.");
+                        setModal("error");
+                    }
+                };
+                reader.readAsText(file);
+                event.target.value = null; // Reset input
+            };
+
+            const exportPNG = async () => {
+                if (!chartCardRef.current) return;
+                
+                // Hide tooltips before capturing just in case
+                hideTooltip();
+
+                try {
+                    const canvas = await window.html2canvas(chartCardRef.current, {
+                        scale: 2, // High resolution
+                        backgroundColor: "#ffffff",
+                        useCORS: true
+                    });
+                    const url = canvas.toDataURL("image/png");
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = `Pareto_Graphique_${title.replace(/[^a-z0-9]+/gi, "_")}.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } catch (err) {
+                    setErrorMsg("Une erreur est survenue lors de la création de l'image PNG.");
+                    setModal("error");
+                }
+            };
+
+            const Modal = ({ title, children, footer, size = "max-w-2xl" }) => (
+                <div className="modal-backdrop fixed inset-0 z-[200] flex items-center justify-center p-4">
+                    <div className={`bg-white rounded-2xl shadow-2xl w-full ${size} max-h-[90vh] overflow-hidden flex flex-col`}>
+                        <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
+                            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                {title === "Erreur" ? <Icon name="AlertTriangle" size={20} className="text-red-500" /> : <Icon name="Info" size={20} className="text-[#cfa346]" />} 
+                                {title}
+                            </h2>
+                            <button onClick={() => setModal(null)} className="p-2 rounded-full hover:bg-gray-200 no-print" aria-label="Fermer">
+                                <Icon name="X" size={20} />
+                            </button>
+                        </div>
+                        <div className="p-5 overflow-y-auto soft-scrollbar">
+                            {children}
+                        </div>
+                        {footer && <div className="px-5 py-4 border-t border-gray-200 bg-gray-50 flex justify-end gap-2 no-print">{footer}</div>}
+                    </div>
+                </div>
+            );
+
+            const InfoPill = ({ label, text }) => (
+                <button
+                    type="button"
+                    className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-[#cfa346] align-middle no-print"
+                    onMouseEnter={(e) => handleTooltip(e, { title: label, lines: [text] })}
+                    onMouseMove={(e) => handleTooltip(e, { title: label, lines: [text] })}
+                    onMouseLeave={hideTooltip}
+                    onClick={() => setModal(label === "Axe horizontal" ? "axes" : "legend")}
+                >
+                    <Icon name="HelpCircle" size={14} />
+                </button>
+            );
+
+            const Chart = () => {
+                if (paretoData.length === 0) {
+                    return <div className="h-[400px] flex items-center justify-center text-gray-400">Aucune donnée</div>;
+                }
+
+                const width = 900;
+                const height = 440;
+                const margin = { top: 48, right: 78, bottom: 88, left: 76 };
+                const chartW = width - margin.left - margin.right;
+                const chartH = height - margin.top - margin.bottom;
+                const maxVal = Math.max(...paretoData.map(d => d.value), 1);
+                const yMax = Math.ceil(maxVal * 1.12) || 10;
+                const step = chartW / Math.max(paretoData.length, 1);
+                const barWidth = Math.max(16, step * 0.72);
+                const thresholdY = chartH - (threshold / 100) * chartH;
+
+                const linePoints = paretoData.map((d, index) => {
+                    const x = (index * step) + (step / 2);
+                    const y = chartH - (d.cumulative / 100) * chartH;
+                    return `${x},${y}`;
+                }).join(" ");
+
+                const yTicks = [0, 0.2, 0.4, 0.6, 0.8, 1];
+
+                if (!hasUsableData) {
+                    return (
+                        <div className="relative">
+                            <svg viewBox={`0 0 ${width} ${height}`} className="w-full min-h-[400px] bg-white rounded-xl border border-gray-200">
+                                <g transform={`translate(${margin.left}, ${margin.top})`}>
+                                    {yTicks.map(t => (
+                                        <line key={t} x1="0" y1={chartH * (1 - t)} x2={chartW} y2={chartH * (1 - t)} stroke="#f0f0f0" />
+                                    ))}
+                                    <line x1="0" y1={chartH} x2={chartW} y2={chartH} stroke="#333" strokeWidth="2" />
+                                    <line x1="0" y1="0" x2="0" y2={chartH} stroke="#333" strokeWidth="2" />
+                                    <line x1={chartW} y1="0" x2={chartW} y2={chartH} stroke="#333" strokeWidth="2" />
+                                    <text x={chartW / 2} y={chartH / 2 - 15} textAnchor="middle" fontSize="20" fontWeight="700" fill="#374151">Aucune valeur exploitable</text>
+                                    <text x={chartW / 2} y={chartH / 2 + 16} textAnchor="middle" fontSize="14" fill="#6b7280">Saisissez au moins une valeur supérieure à 0 pour générer le Pareto.</text>
+                                </g>
+                            </svg>
+                        </div>
+                    );
+                }
+
+                return (
+                    <svg 
+                        viewBox={`0 0 ${width} ${height}`} 
+                        className="w-full min-h-[400px] bg-white rounded-xl border border-gray-200 shadow-sm"
+                        onMouseLeave={hideTooltip}
+                    >
+                        <g transform={`translate(${margin.left}, ${margin.top})`}>
+                            {yTicks.map(t => (
+                                <g key={t}>
+                                    <line x1="0" y1={chartH * (1 - t)} x2={chartW} y2={chartH * (1 - t)} stroke="#f0f0f0" />
+                                    <text x="-12" y={chartH * (1 - t) + 4} textAnchor="end" fontSize="10" fill="#6b7280">{formatNumber(yMax * t, 0)}</text>
+                                    <text x={chartW + 12} y={chartH * (1 - t) + 4} textAnchor="start" fontSize="10" fill="#6b7280">{Math.round(t * 100)}%</text>
+                                </g>
+                            ))}
+
+                            <rect x="0" y="0" width={chartW} height={Math.max(0, thresholdY)} fill="#fef2f2" opacity="0.45" />
+                            <line x1="0" y1={thresholdY} x2={chartW} y2={thresholdY} stroke="#ef4444" strokeWidth="2" strokeDasharray="6,5" />
+                            <text x={chartW + 8} y={thresholdY - 6} fill="#ef4444" fontSize="12" fontWeight="700">{threshold}%</text>
+                            <text x="8" y={thresholdY - 8} fill="#ef4444" fontSize="11" fontWeight="600">Seuil de décision</text>
+
+                            {paretoData.map((d, index) => {
+                                const barHeight = (d.value / yMax) * chartH;
+                                const x = (index * step) + (step - barWidth) / 2;
+                                const y = chartH - barHeight;
+                                const fill = d.isPriority ? "#cfa346" : "#d1d5db";
+                                const textFill = d.isPriority ? "#4b3410" : "#6b7280";
+
+                                return (
+                                    <g key={d.id}>
+                                        <rect
+                                            x={x}
+                                            y={y}
+                                            width={barWidth}
+                                            height={barHeight}
+                                            rx="5"
+                                            fill={fill}
+                                            className="cursor-pointer transition-opacity hover:opacity-80"
+                                            onMouseEnter={(event) => handleTooltip(event, {
+                                                title: d.label,
+                                                lines: [
+                                                    `Rang : ${d.rank}`,
+                                                    `Valeur : ${formatNumber(d.value, 0)}`,
+                                                    `Part : ${formatNumber(d.percent, 1)} %`,
+                                                    `Cumul : ${formatNumber(d.cumulative, 1)} %`,
+                                                    d.isPriority ? "Zone prioritaire" : "Cause secondaire"
+                                                ]
+                                            })}
+                                            onMouseMove={(event) => handleTooltip(event, {
+                                                title: d.label,
+                                                lines: [
+                                                    `Rang : ${d.rank}`,
+                                                    `Valeur : ${formatNumber(d.value, 0)}`,
+                                                    `Part : ${formatNumber(d.percent, 1)} %`,
+                                                    `Cumul : ${formatNumber(d.cumulative, 1)} %`,
+                                                    d.isPriority ? "Zone prioritaire" : "Cause secondaire"
+                                                ]
+                                            })}
+                                        />
+                                        {d.value > 0 && (
+                                            <text x={x + barWidth / 2} y={Math.max(y - 8, 12)} textAnchor="middle" fontSize="12" fill={textFill} fontWeight="700">
+                                                {formatNumber(d.value, 0)}
+                                            </text>
+                                        )}
+                                    </g>
+                                );
+                            })}
+
+                            <polyline points={linePoints} fill="none" stroke="#111827" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+
+                            {paretoData.map((d, index) => {
+                                const x = (index * step) + (step / 2);
+                                const y = chartH - (d.cumulative / 100) * chartH;
+                                return (
+                                    <g key={`point-${d.id}`}>
+                                        <circle
+                                            cx={x}
+                                            cy={y}
+                                            r="5"
+                                            fill="#111827"
+                                            stroke="white"
+                                            strokeWidth="2"
+                                            className="cursor-pointer hover:stroke-[#cfa346]"
+                                            onMouseEnter={(event) => handleTooltip(event, {
+                                                title: `Cumul - ${d.label}`,
+                                                lines: [
+                                                    `Cumul atteint : ${formatNumber(d.cumulative, 1)} %`,
+                                                    `Part de la catégorie : ${formatNumber(d.percent, 1)} %`
+                                                ]
+                                            })}
+                                            onMouseMove={(event) => handleTooltip(event, {
+                                                title: `Cumul - ${d.label}`,
+                                                lines: [
+                                                    `Cumul atteint : ${formatNumber(d.cumulative, 1)} %`,
+                                                    `Part de la catégorie : ${formatNumber(d.percent, 1)} %`
+                                                ]
+                                            })}
+                                        />
+                                    </g>
+                                );
+                            })}
+
+                            <line x1="0" y1={chartH} x2={chartW} y2={chartH} stroke="#333" strokeWidth="2" />
+                            <line x1="0" y1="0" x2="0" y2={chartH} stroke="#333" strokeWidth="2" />
+                            <line x1={chartW} y1="0" x2={chartW} y2={chartH} stroke="#333" strokeWidth="2" />
+
+                            {paretoData.map((d, index) => {
+                                const x = (index * step) + (step / 2);
+                                const label = d.label.length > 18 ? `${d.label.substring(0, 16)}…` : d.label;
+                                return (
+                                    <text
+                                        key={`label-${d.id}`}
+                                        x="0"
+                                        y="0"
+                                        transform={`translate(${x}, ${chartH + 28}) rotate(-35)`}
+                                        textAnchor="end"
+                                        fontSize="12"
+                                        fill="#374151"
+                                        fontWeight="600"
+                                    >
+                                        {label}
+                                    </text>
+                                );
+                            })}
+
+                            <text x={chartW / 2} y={chartH + 78} textAnchor="middle" fontSize="12" fontWeight="700" fill="#374151">
+                                Catégories classées par ordre décroissant
+                            </text>
+                            <text x="-46" y={chartH / 2} textAnchor="middle" transform={`rotate(-90, -46, ${chartH / 2})`} fontSize="12" fontWeight="700" fill="#374151">
+                                {dataType}
+                            </text>
+                            <text x={chartW + 58} y={chartH / 2} textAnchor="middle" transform={`rotate(-90, ${chartW + 58}, ${chartH / 2})`} fontSize="12" fontWeight="700" fill="#374151">
+                                Cumul en %
+                            </text>
+                        </g>
+                    </svg>
+                );
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col relative">
+                    {/* Hidden file input for loading JSON */}
+                    <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        onChange={importJSON} 
+                        accept=".json" 
+                        className="hidden" 
+                    />
+
+                    {tooltip && (
+                        <div
+                            className="tooltip-layer fixed z-[300] bg-gray-950 text-white text-xs rounded-xl py-2 px-3 pointer-events-none transform -translate-x-1/2 -translate-y-full mt-[-14px] shadow-xl max-w-xs"
+                            style={{ left: tooltip.x, top: tooltip.y }}
+                        >
+                            <div className="font-bold border-b border-gray-700 pb-1 mb-1 text-[#f8d37f]">{tooltip.title}</div>
+                            {tooltip.lines.map((line, index) => <div key={index}>{line}</div>)}
+                        </div>
+                    )}
+
+                    {modal === "error" && (
+                        <Modal title="Erreur">
+                            <p className="text-gray-800">{errorMsg}</p>
+                            <div className="mt-4 flex justify-end">
+                                <button onClick={() => setModal(null)} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Fermer</button>
+                            </div>
+                        </Modal>
+                    )}
+
+                    {modal === "legend" && (
+                        <Modal title="Légende du diagramme" size="max-w-3xl">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div className="p-4 rounded-xl border border-amber-200 bg-amber-50">
+                                    <h3 className="font-bold text-amber-900 mb-2 flex items-center gap-2"><span className="w-4 h-4 rounded bg-[#cfa346]"></span> Zone prioritaire</h3>
+                                    <p>Les barres dorées correspondent aux premières causes qui permettent d'atteindre ou de dépasser le seuil de décision. Elles sont à traiter en priorité.</p>
+                                </div>
+                                <div className="p-4 rounded-xl border border-gray-200 bg-gray-50">
+                                    <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2"><span className="w-4 h-4 rounded bg-gray-300"></span> Causes secondaires</h3>
+                                    <p>Les barres grises représentent les causes moins contributrices. Elles ne sont pas ignorées, mais elles passent après les causes prioritaires.</p>
+                                </div>
+                                <div className="p-4 rounded-xl border border-slate-200 bg-white">
+                                    <h3 className="font-bold text-slate-900 mb-2 flex items-center gap-2"><span className="inline-block w-8 h-[3px] bg-slate-900"></span> Courbe cumulée</h3>
+                                    <p>La courbe noire indique le pourcentage cumulé. Elle montre à quel rythme les causes expliquent le total observé.</p>
+                                </div>
+                                <div className="p-4 rounded-xl border border-red-200 bg-red-50">
+                                    <h3 className="font-bold text-red-900 mb-2 flex items-center gap-2"><span className="inline-block w-8 border-t-2 border-dashed border-red-500"></span> Seuil de décision</h3>
+                                    <p>La ligne rouge représente le seuil retenu, généralement 80 %. Ce seuil sert à séparer l'essentiel du secondaire.</p>
+                                </div>
+                            </div>
+                        </Modal>
+                    )}
+
+                    {modal === "axes" && (
+                        <Modal title="Aide sur les axes du graphique" size="max-w-3xl">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                <div className="p-4 rounded-xl border bg-white">
+                                    <h3 className="font-bold mb-2">Axe horizontal</h3>
+                                    <p>Il présente les catégories classées de la plus importante à la moins importante.</p>
+                                </div>
+                                <div className="p-4 rounded-xl border bg-white">
+                                    <h3 className="font-bold mb-2">Axe gauche</h3>
+                                    <p>Il indique la valeur mesurée : nombre de défauts, coût, durée d'arrêt, quantité rebutée, etc.</p>
+                                </div>
+                                <div className="p-4 rounded-xl border bg-white">
+                                    <h3 className="font-bold mb-2">Axe droit</h3>
+                                    <p>Il indique le pourcentage cumulé, utilisé pour repérer le seuil de décision.</p>
+                                </div>
+                            </div>
+                        </Modal>
+                    )}
+
+                    {modal === "loadExample" && (
+                        <Modal
+                            title="Charger un exemple"
+                            footer={
+                                <>
+                                    <button onClick={() => setModal(null)} className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-white">Annuler</button>
+                                    <button onClick={confirmLoadExample} className="px-4 py-2 rounded-lg bg-[#1a1a1a] text-[#cfa346] font-bold hover:bg-black">Charger l'exemple</button>
+                                </>
+                            }
+                        >
+                            <p className="text-sm text-gray-700">Cette action remplacera les données actuelles, le titre, le sous-titre, la conclusion et le plan d'action. Les données non sauvegardées seront perdues.</p>
+                        </Modal>
+                    )}
+
+                    {modal === "reset" && (
+                        <Modal
+                            title="Créer un nouveau diagramme"
+                            footer={
+                                <>
+                                    <button onClick={() => setModal(null)} className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-white">Annuler</button>
+                                    <button onClick={confirmResetData} className="px-4 py-2 rounded-lg bg-red-600 text-white font-bold hover:bg-red-700">Réinitialiser</button>
+                                </>
+                            }
+                        >
+                            <p className="text-sm text-gray-700">Voulez-vous repartir d'un diagramme vierge ? Cette action remplacera les données actuellement saisies.</p>
+                        </Modal>
+                    )}
+
+                    {/* Header */}
+                    <header className="bg-[#1a1a1a] text-[#cfa346] p-4 shadow-md z-20 no-print">
+                        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+                            <div className="flex items-center gap-4">
+                                <a href="index.html" className="text-white hover:text-[#cfa346] transition flex items-center gap-2 font-semibold text-sm">
+                                    <Icon name="ArrowLeft" size={20} /> Accueil
+                                </a>
+                                <div className="h-6 w-px bg-gray-700"></div>
+                                <h1 className="text-xl font-bold tracking-widest uppercase flex items-center gap-2">
+                                    <Icon name="BarChart2" /> Pareto
+                                </h1>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 items-center">
+                                {/* Load & Save JSON Actions */}
+                                <button onClick={handleImportJSONClick} className="p-2 text-gray-300 hover:text-blue-400 transition" title="Ouvrir une sauvegarde JSON">
+                                    <Icon name="UploadCloud" size={20} />
+                                </button>
+                                <button onClick={exportJSON} className="p-2 text-gray-300 hover:text-blue-400 transition" title="Sauvegarder en JSON">
+                                    <Icon name="DownloadCloud" size={20} />
+                                </button>
+                                
+                                <div className="h-5 w-px bg-gray-700 mx-1"></div>
+
+                                {/* Export Actions */}
+                                <button onClick={exportCSV} className="p-2 text-gray-300 hover:text-white transition" title="Exporter les données en CSV">
+                                    <Icon name="FileText" size={20} />
+                                </button>
+                                <button onClick={exportExcel} className="p-2 text-gray-300 hover:text-[#22c55e] transition" title="Exporter les données vers Excel (.xls)">
+                                    <Icon name="FileSpreadsheet" size={20} />
+                                </button>
+                                <button onClick={exportPNG} className="p-2 text-gray-300 hover:text-purple-400 transition" title="Télécharger le graphique en image (PNG)">
+                                    <Icon name="Image" size={20} />
+                                </button>
+                                <button onClick={() => window.print()} className="p-2 text-gray-300 hover:text-red-400 transition" title="Imprimer / Exporter en PDF">
+                                    <Icon name="Printer" size={20} />
+                                </button>
+                                
+                                <div className="h-5 w-px bg-gray-700 mx-1"></div>
+
+                                {/* Examples and Reset */}
+                                <select
+                                    onChange={(e) => { openExampleConfirmation(e.target.value); e.target.value = ""; }}
+                                    className="bg-[#333] text-white text-sm rounded-lg border border-gray-600 px-3 py-2 outline-none focus:border-[#cfa346]"
+                                    defaultValue=""
+                                >
+                                    <option value="" disabled>📂 Exemples...</option>
+                                    <option value="defauts">🏭 Défauts production</option>
+                                    <option value="clients">📞 Réclamations clients</option>
+                                    <option value="maintenance">🔧 Maintenance</option>
+                                </select>
+                                <button onClick={resetData} className="p-2 text-gray-300 hover:text-white transition" title="Nouveau diagramme">
+                                    <Icon name="FilePlus" size={20} />
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Tabs Navigation */}
+                    <div className="tabs-nav bg-white border-b border-gray-200 shadow-sm z-10">
+                        <div className="max-w-7xl mx-auto flex">
+                            <button 
+                                onClick={() => setActiveTab("theory")} 
+                                className={`px-6 py-3 font-bold text-sm uppercase tracking-wide flex items-center gap-2 transition-colors ${activeTab === 'theory' ? 'border-b-4 border-[#cfa346] text-[#1a1a1a]' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50 border-b-4 border-transparent'}`}
+                            >
+                                <Icon name="BookOpen" size={18} /> Théorie & Méthode
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab("tool")} 
+                                className={`px-6 py-3 font-bold text-sm uppercase tracking-wide flex items-center gap-2 transition-colors ${activeTab === 'tool' ? 'border-b-4 border-[#cfa346] text-[#1a1a1a]' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50 border-b-4 border-transparent'}`}
+                            >
+                                <Icon name="PenTool" size={18} /> Créer un Pareto
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Main Content Area */}
+                    <main className="flex-1 max-w-7xl mx-auto w-full p-4 md:p-6">
+                        
+                        {/* TAB 1 : THEORIE */}
+                        {activeTab === "theory" && (
+                            <div className="space-y-6 max-w-4xl mx-auto animate-[fadeIn_0.3s_ease-in-out]">
+                                <section className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200">
+                                    <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
+                                        <div className="w-16 h-16 rounded-2xl bg-[#1a1a1a] text-[#cfa346] flex items-center justify-center">
+                                            <Icon name="Lightbulb" size={32} />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-2xl font-bold text-[#1a1a1a]">Le Diagramme de Pareto</h2>
+                                            <p className="text-gray-500">Comprendre et appliquer la loi des 80/20.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="prose max-w-none text-gray-700 space-y-6">
+                                        <p className="text-lg leading-relaxed">
+                                            <strong>Le diagramme de Pareto</strong> est un outil d'analyse et d'aide à la décision qui permet de classer les causes d'un problème par ordre d'importance. Il repose sur un principe empirique universel : <strong>la loi des 80/20</strong>.
+                                        </p>
+
+                                        <div className="p-5 rounded-xl bg-[#fff8e8] border border-[#f0d79b] text-[#5c4411]">
+                                            <p className="font-bold flex items-center gap-2 mb-2">
+                                                <Icon name="Target" size={20} /> Principe clé
+                                            </p>
+                                            <p>Dans de nombreuses situations, environ <strong>20 % des causes produisent environ 80 % des effets</strong> (conséquences, défauts, coûts, etc.). Le but du Pareto est de séparer "les quelques causes vitales" de "la multitude des causes secondaires".</p>
+                                        </div>
+
+                                        <h3 className="text-xl font-bold text-[#1a1a1a] mt-8 mb-4">Les 5 étapes de la construction</h3>
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                                            {[
+                                                ["1", "Collecter", "Relever les causes, défauts, coûts ou pertes sur une période donnée."],
+                                                ["2", "Compter", "Associer une valeur mesurée à chaque catégorie identifiée."],
+                                                ["3", "Classer", "Trier rigoureusement les catégories par ordre décroissant de valeur."],
+                                                ["4", "Cumuler", "Calculer le pourcentage de chaque cause et le pourcentage cumulé."],
+                                                ["5", "Décider", "Tracer la courbe, placer le seuil (80%) et identifier la zone prioritaire."]
+                                            ].map(step => (
+                                                <div key={step[0]} className="p-4 rounded-xl border border-gray-200 bg-gray-50 flex flex-col">
+                                                    <div className="w-10 h-10 rounded-full bg-white border-2 border-[#cfa346] text-[#1a1a1a] flex items-center justify-center font-bold text-lg mb-3 shadow-sm">{step[0]}</div>
+                                                    <h4 className="font-bold text-gray-900 mb-2">{step[1]}</h4>
+                                                    <p className="text-sm flex-1">{step[2]}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <h3 className="text-xl font-bold text-[#1a1a1a] mt-8 mb-4">La démarche d'amélioration continue</h3>
+                                        <div className="flex gap-4 items-start p-5 rounded-xl bg-blue-50 border border-blue-200">
+                                            <Icon name="Link" size={24} className="text-blue-600 shrink-0 mt-1" />
+                                            <div>
+                                                <p className="mb-2">Le Pareto est rarement utilisé seul. C'est l'outil idéal pour <strong>cibler un diagnostic</strong> avant d'engager des moyens d'analyse plus complexes :</p>
+                                                <ul className="list-disc pl-5 space-y-1 text-blue-900">
+                                                    <li><strong>Avant :</strong> Vous avez un ressenti sur un problème global. Le Pareto vous montre les faits.</li>
+                                                    <li><strong>Pendant :</strong> Le Pareto vous indique sur quelle cause précise faire un <strong>Ishikawa</strong>, un <strong>QQOQCP</strong> ou un <strong>5 Pourquoi</strong>.</li>
+                                                    <li><strong>Après :</strong> Refaire un Pareto plusieurs mois plus tard permet de valider que la cause prioritaire a bien été réduite par vos actions correctives.</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        )}
+
+                        {/* TAB 2 : OUTIL PARETO */}
+                        {activeTab === "tool" && (
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-[fadeIn_0.3s_ease-in-out]">
+                                {/* Colonne de gauche (Saisie) */}
+                                <section className="lg:col-span-1 flex flex-col gap-4">
+                                    <div className="print-card bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Titre du graphique</label>
+                                        <input
+                                            type="text"
+                                            value={title}
+                                            onChange={(e) => setTitle(e.target.value)}
+                                            className="w-full border-b-2 border-gray-200 focus:border-[#cfa346] outline-none py-1 text-lg font-bold text-[#1a1a1a]"
+                                        />
+
+                                        <label className="block text-xs font-bold text-gray-500 uppercase mt-4 mb-1">Sous-titre</label>
+                                        <input
+                                            type="text"
+                                            value={subtitle}
+                                            onChange={(e) => setSubtitle(e.target.value)}
+                                            className="w-full border-b-2 border-gray-200 focus:border-[#cfa346] outline-none py-1 text-sm text-gray-700"
+                                        />
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Type de donnée</label>
+                                                <select
+                                                    value={dataType}
+                                                    onChange={(e) => setDataType(e.target.value)}
+                                                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#cfa346] bg-white"
+                                                >
+                                                    {DATA_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Seuil Pareto</label>
+                                                <div className="flex items-center gap-2">
+                                                    <input
+                                                        type="number"
+                                                        min="1"
+                                                        max="100"
+                                                        value={threshold}
+                                                        onChange={(e) => setSafeThreshold(e.target.value)}
+                                                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#cfa346] text-right font-mono"
+                                                    />
+                                                    <span className="text-sm font-bold text-gray-500">%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="print-card bg-white rounded-xl shadow-sm border border-gray-200 flex-1 flex flex-col overflow-hidden">
+                                        <div className="p-3 bg-gray-50 border-b border-gray-200 flex flex-wrap gap-2 justify-between items-center">
+                                            <h2 className="font-bold text-gray-700 flex items-center gap-2">
+                                                Données
+                                                <InfoPill label="Axe gauche" text="Les valeurs alimentent les barres du graphique : fréquence, coût, temps perdu, quantité rebutée, etc." />
+                                            </h2>
+                                            <span className="text-xs bg-[#cfa346] text-[#1a1a1a] px-2 py-1 rounded font-bold">Total : {formatNumber(grandTotal, 0)}</span>
+                                        </div>
+
+                                        <div className="p-3 border-b border-gray-100 bg-white no-print flex flex-wrap gap-2">
+                                            <button onClick={() => setShowSortedTable(!showSortedTable)} className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold hover:bg-gray-50 flex items-center gap-1">
+                                                <Icon name="ArrowUpDown" size={14} /> {showSortedTable ? "Voir saisie" : "Voir tri Pareto"}
+                                            </button>
+                                            <button onClick={sortInputTableByPareto} className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold hover:bg-gray-50 flex items-center gap-1">
+                                                <Icon name="SortDesc" size={14} /> Réordonner
+                                            </button>
+                                        </div>
+
+                                        <div className="overflow-y-auto soft-scrollbar flex-1 p-2 max-h-[440px]">
+                                            <table className="w-full text-sm">
+                                                <thead>
+                                                    <tr className="text-left text-gray-500 border-b border-gray-100">
+                                                        <th className="pb-2 pl-2 w-10 font-semibold">#</th>
+                                                        <th className="pb-2 font-semibold">Catégorie</th>
+                                                        <th className="pb-2 w-20 font-semibold text-right">Valeur</th>
+                                                        <th className="pb-2 w-16 font-semibold text-right text-xs">%</th>
+                                                        <th className="pb-2 w-16 font-semibold text-right text-xs">Cumul</th>
+                                                        <th className="pb-2 w-16 no-print"></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {displayedRows.map(row => {
+                                                        const original = items.find(item => item.id === row.id) || row;
+                                                        return (
+                                                            <tr key={row.id} className={`group hover:bg-gray-50 ${row.value === 0 ? "print-hidden" : ""}`}>
+                                                                <td className="py-1 pl-2 text-xs text-gray-500 font-mono">{row.rank}</td>
+                                                                <td className="py-1">
+                                                                    <input
+                                                                        type="text"
+                                                                        value={original.label}
+                                                                        onChange={(e) => updateItem(row.id, "label", e.target.value)}
+                                                                        className="w-full bg-transparent border border-transparent hover:border-gray-300 focus:border-[#cfa346] rounded px-2 py-1 outline-none"
+                                                                    />
+                                                                </td>
+                                                                <td className="py-1">
+                                                                    <input
+                                                                        type="number"
+                                                                        min="0"
+                                                                        value={original.value}
+                                                                        onChange={(e) => updateItem(row.id, "value", e.target.value)}
+                                                                        className="w-full bg-transparent border border-transparent hover:border-gray-300 focus:border-[#cfa346] rounded px-2 py-1 outline-none text-right font-mono"
+                                                                    />
+                                                                </td>
+                                                                <td className="py-1 text-right text-xs text-gray-500 font-mono">{formatNumber(row.percent, 1)}%</td>
+                                                                <td className={`py-1 text-right text-xs font-bold font-mono ${row.isPriority ? "text-[#9a6b1f]" : "text-gray-700"}`}>{formatNumber(row.cumulative, 1)}%</td>
+                                                                <td className="py-1 text-center no-print">
+                                                                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                                                        <button onClick={() => duplicateItem(row.id)} className="text-gray-300 hover:text-blue-500" title="Dupliquer">
+                                                                            <Icon name="Copy" size={15} />
+                                                                        </button>
+                                                                        <button onClick={() => deleteItem(row.id)} className="text-gray-300 hover:text-red-500" disabled={items.length <= 1} title="Supprimer">
+                                                                            <Icon name="Trash2" size={15} />
+                                                                        </button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <div className="p-3 border-t border-gray-200 bg-gray-50 no-print">
+                                            <button
+                                                onClick={addItem}
+                                                className="w-full py-2 border-2 border-dashed border-gray-300 text-gray-500 rounded-lg hover:border-[#cfa346] hover:text-[#cfa346] hover:bg-white transition flex items-center justify-center gap-2 font-semibold text-sm"
+                                            >
+                                                <Icon name="Plus" size={16} /> Ajouter une ligne
+                                            </button>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* Colonne de droite (Graphique & Conclusion) */}
+                                <section className="lg:col-span-2 flex flex-col gap-4">
+                                    <div ref={chartCardRef} className="print-card bg-white p-5 md:p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col relative">
+                                        <div className="mb-4 flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                                            <div>
+                                                <h2 className="text-2xl font-bold text-[#1a1a1a]">{title || "Diagramme de Pareto"}</h2>
+                                                <p className="text-gray-500 text-sm">{subtitle}</p>
+                                            </div>
+                                            <div className="no-print flex flex-wrap gap-2 items-center">
+                                                <button onClick={exportPNG} className="px-3 py-2 bg-purple-50 text-purple-700 border border-purple-200 rounded-lg text-sm font-semibold hover:bg-purple-100 flex items-center gap-2" title="Télécharger uniquement le graphique en image">
+                                                    <Icon name="Camera" size={16} /> Capturer
+                                                </button>
+                                                <button onClick={() => setModal("legend")} className="px-3 py-2 border border-gray-200 rounded-lg text-sm font-semibold hover:bg-gray-50 flex items-center gap-2">
+                                                    <Icon name="List" size={16} /> Légende
+                                                </button>
+                                                <button onClick={() => setModal("axes")} className="px-3 py-2 border border-gray-200 rounded-lg text-sm font-semibold hover:bg-gray-50 flex items-center gap-2">
+                                                    <Icon name="HelpCircle" size={16} /> Axes
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="relative">
+                                            <Chart />
+                                        </div>
+
+                                        <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-3 text-sm" data-html2canvas-ignore>
+                                            <div className="p-3 rounded-xl bg-gray-50 border border-gray-200">
+                                                <div className="text-xs text-gray-500 uppercase font-bold">Total</div>
+                                                <div className="text-xl font-bold text-gray-900">{formatNumber(grandTotal, 0)}</div>
+                                            </div>
+                                            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200">
+                                                <div className="text-xs text-amber-700 uppercase font-bold">Causes prioritaires</div>
+                                                <div className="text-xl font-bold text-amber-900">{priorityItems.length}</div>
+                                            </div>
+                                            <div className="p-3 rounded-xl bg-blue-50 border border-blue-200">
+                                                <div className="text-xs text-blue-700 uppercase font-bold">Part prioritaire</div>
+                                                <div className="text-xl font-bold text-blue-900">{formatNumber(priorityItems.reduce((s, item) => s + item.percent, 0), 1)}%</div>
+                                            </div>
+                                            <div className="p-3 rounded-xl bg-red-50 border border-red-200">
+                                                <div className="text-xs text-red-700 uppercase font-bold">Seuil</div>
+                                                <div className="text-xl font-bold text-red-900">{threshold}%</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="print-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                        <div className="p-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                                            <h2 className="font-bold text-gray-700 flex items-center gap-2">
+                                                Diagnostic et interprétation
+                                                <InfoPill label="Diagnostic" text="Le Pareto indique où concentrer l'analyse. Il ne remplace pas la recherche de cause racine." />
+                                            </h2>
+                                            <button
+                                                onClick={() => setShowInterpretation(!showInterpretation)}
+                                                className="no-print px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold hover:bg-white flex items-center gap-1"
+                                            >
+                                                <Icon name={showInterpretation ? "EyeOff" : "Eye"} size={14} />
+                                                {showInterpretation ? "Masquer" : "Afficher"}
+                                            </button>
+                                        </div>
+
+                                        <div className={`${showInterpretation ? "grid" : "hidden print-grid"} grid-cols-1 md:grid-cols-2 gap-4 p-4`}>
+                                            <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
+                                                <h3 className="font-bold text-amber-900 text-sm uppercase mb-2">Zone prioritaire</h3>
+                                                {priorityItems.length > 0 ? (
+                                                    <ul className="text-sm space-y-1">
+                                                        {priorityItems.map(item => (
+                                                            <li key={item.id} className="flex justify-between gap-3 text-amber-950 border-b border-amber-100 pb-1 last:border-b-0">
+                                                                <span>#{item.rank} — {item.label}</span>
+                                                                <span className="font-bold whitespace-nowrap">{formatNumber(item.percent, 1)}%</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                ) : (
+                                                    <p className="text-sm text-amber-900">Aucune cause prioritaire détectée. Renseignez des valeurs supérieures à 0.</p>
+                                                )}
+                                            </div>
+
+                                            <div className="p-4 rounded-xl bg-blue-50 border border-blue-200">
+                                                <h3 className="font-bold text-blue-900 text-sm uppercase mb-2">Interprétation automatique</h3>
+                                                <p className="text-sm text-blue-950">{automaticInterpretation}</p>
+                                            </div>
+
+                                            <div className="p-4 rounded-xl bg-gray-50 border border-gray-200">
+                                                <h3 className="font-bold text-gray-900 text-sm uppercase mb-2">Questions de diagnostic</h3>
+                                                <ul className="text-sm text-gray-700 space-y-1 list-disc pl-5">
+                                                    {diagnosticQuestions.map((question, index) => <li key={index}>{question}</li>)}
+                                                </ul>
+                                            </div>
+
+                                            <div className="p-4 rounded-xl bg-green-50 border border-green-200">
+                                                <h3 className="font-bold text-green-900 text-sm uppercase mb-2">Lien avec les outils qualité</h3>
+                                                <p className="text-sm text-green-950">Après le Pareto, l'analyse peut être approfondie avec un QQOQCP, un Ishikawa, un 5 Pourquoi, une CAPA ou un QRQC. Le Pareto sert à choisir le bon point de départ.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="print-card bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden print-full">
+                                        <div className="p-3 bg-gray-50 border-b border-gray-200">
+                                            <h2 className="font-bold text-gray-700 flex items-center gap-2">
+                                                Conclusion et action corrective
+                                                <InfoPill label="Interprétation" text="Cette zone peut être complétée par l'élève ou le groupe pour formaliser le raisonnement." />
+                                            </h2>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Conclusion</label>
+                                                <textarea
+                                                    value={conclusion}
+                                                    onChange={(e) => setConclusion(e.target.value)}
+                                                    rows="5"
+                                                    placeholder="Exemple : Les causes prioritaires sont... Elles représentent..."
+                                                    className="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-[#cfa346]"
+                                                ></textarea>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Action corrective proposée</label>
+                                                <textarea
+                                                    value={actionPlan}
+                                                    onChange={(e) => setActionPlan(e.target.value)}
+                                                    rows="5"
+                                                    placeholder="Exemple : L'action prioritaire consiste à... L'indicateur de suivi sera..."
+                                                    className="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-[#cfa346]"
+                                                ></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById("root"));
+        root.render(<App />);
+    </script>
+</body>
+</html>

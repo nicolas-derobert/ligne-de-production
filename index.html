@@ -152,6 +152,51 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Résolution de Problèmes -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+                <div class="lg:col-span-3 flex flex-col gap-6 bg-slate-200/50 p-6 rounded-[2.5rem] border border-slate-200/60 shadow-sm">
+                    <h2 class="text-2xl font-extrabold text-slate-900 flex items-center gap-3 px-2">
+                        <span class="bg-violet-100 text-violet-600 p-2 rounded-lg shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35"/></svg>
+                        </span>
+                        Résolution de Problèmes
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                        <!-- Pareto -->
+                        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-violet-50 rounded-full blur-3xl -mr-10 -mt-10 transition-transform duration-500 group-hover:scale-150"></div>
+                            <div class="relative mb-4 bg-violet-50 text-violet-700 w-14 h-14 flex items-center justify-center rounded-2xl shadow-inner group-hover:scale-110 transition-transform duration-300 border border-violet-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
+                            </div>
+                            <h3 class="relative text-xl font-bold text-slate-800 mb-3">Diagramme de Pareto</h3>
+                            <p class="relative text-slate-600 text-sm mb-6 flex-1 leading-relaxed">Appliquez la loi 80/20 : identifiez les quelques causes qui génèrent la majorité des problèmes et concentrez vos efforts là où l'impact est maximal.</p>
+                            <a href="pareto.html" class="relative block w-full mt-auto text-center bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-violet-500/40 active:scale-95">Analyser avec Pareto</a>
+                        </div>
+
+                        <!-- Ishikawa -->
+                        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-full blur-3xl -mr-10 -mt-10 transition-transform duration-500 group-hover:scale-150"></div>
+                            <div class="relative text-3xl mb-4 bg-teal-50 text-teal-700 w-14 h-14 flex items-center justify-center rounded-2xl shadow-inner group-hover:scale-110 transition-transform duration-300 border border-teal-100">🐟</div>
+                            <h3 class="relative text-xl font-bold text-slate-800 mb-3">Diagramme d'Ishikawa</h3>
+                            <p class="relative text-slate-600 text-sm mb-6 flex-1 leading-relaxed">Explorez toutes les causes d'un problème grâce au diagramme en arête de poisson. Classez-les par catégorie (5M) pour ne laisser aucune piste de côté.</p>
+                            <a href="ishikawa.html" class="relative block w-full mt-auto text-center bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-teal-500/40 active:scale-95">Construire l'Ishikawa</a>
+                        </div>
+
+                        <!-- 5 Pourquoi -->
+                        <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full blur-3xl -mr-10 -mt-10 transition-transform duration-500 group-hover:scale-150"></div>
+                            <div class="relative text-3xl mb-4 bg-indigo-50 text-indigo-700 w-14 h-14 flex items-center justify-center rounded-2xl shadow-inner group-hover:scale-110 transition-transform duration-300 border border-indigo-100">❓</div>
+                            <h3 class="relative text-xl font-bold text-slate-800 mb-3">Les 5 Pourquoi</h3>
+                            <p class="relative text-slate-600 text-sm mb-6 flex-1 leading-relaxed">Remontez jusqu'à la cause racine en posant cinq fois la question "Pourquoi ?". Évitez de traiter des symptômes et agissez sur les vraies origines du dysfonctionnement.</p>
+                            <a href="5pourquoi.html" class="relative block w-full mt-auto text-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-indigo-500/40 active:scale-95">Pratiquer les 5 Pourquoi</a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
     

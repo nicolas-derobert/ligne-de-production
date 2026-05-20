@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5 Pourquoi - Arbre Interactif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a1a1a;
+            --accent: #cfa346;
+            --bg-color: #f8f9fa;
+            --line-color: #ccc;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            overflow: hidden; /* Géré par le conteneur de zoom */
+        }
+
+        /* --- CSS TREE STRUCTURE --- */
+        .tree {
+            white-space: nowrap;
+            min-width: 100%;
+            padding: 50px;
+            display: flex;
+            justify-content: center;
+        }
+        .tree ul {
+            padding-top: 20px; 
+            position: relative;
+            transition: all 0.5s;
+            display: flex;
+            justify-content: center;
+        }
+        .tree li {
+            float: left; text-align: center;
+            list-style-type: none;
+            position: relative;
+            padding: 20px 10px 0 10px;
+            transition: all 0.5s;
+        }
+        /* Connecteurs (Lignes) */
+        .tree li::before, .tree li::after {
+            content: ''; position: absolute; top: 0; right: 50%;
+            border-top: 2px solid var(--line-color); width: 50%; height: 20px;
+        }
+        .tree li::after {
+            right: auto; left: 50%; border-left: 2px solid var(--line-color);
+        }
+        .tree li:only-child::after, .tree li:only-child::before {
+            display: none;
+        }
+        .tree li:only-child { padding-top: 0; }
+        .tree li:first-child::before, .tree li:last-child::after {
+            border: 0 none;
+        }
+        .tree li:last-child::before {
+            border-right: 2px solid var(--line-color); border-radius: 0 5px 0 0;
+        }
+        .tree li:first-child::after {
+            border-radius: 5px 0 0 0;
+        }
+        .tree ul ul::before {
+            content: ''; position: absolute; top: 0; left: 50%;
+            border-left: 2px solid var(--line-color); width: 0; height: 20px;
+        }
+
+        /* --- NODE CARD DESIGN --- */
+        .node-card {
+            border: 2px solid var(--primary);
+            padding: 15px;
+            text-decoration: none;
+            color: #333;
+            display: inline-block;
+            border-radius: 8px;
+            transition: all 0.3s;
+            background: white;
+            min-width: 200px;
+            max-width: 280px;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            white-space: normal; /* Permettre le retour à la ligne du texte */
+        }
+        
+        .node-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 10px 20px rgba(207, 163, 70, 0.15);
+            transform: translateY(-3px);
+            z-index: 10;
+        }
+
+        .node-card.root-node {
+            background-color: var(--primary);
+            color: var(--accent);
+            border-color: var(--primary);
+        }
+        .node-card.root-node textarea {
+            color: var(--accent);
+            font-weight: bold;
+        }
+        .node-card.root-node .badge {
+            background: var(--accent);
+            color: var(--primary);
+        }
+
+        /* Input editable */
+        .node-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: none;
+            outline: none;
+            overflow: hidden;
+            min-height: 1.5em;
+        }
+        .node-input:focus {
+            background: rgba(0,0,0,0.03);
+            border-radius: 4px;
+        }
+
+        /* Boutons d'action au survol */
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            height: 0;
+            overflow: hidden;
+        }
+        .node-card:hover .actions {
+            opacity: 1;
+            height: auto;
+            overflow: visible;
+        }
+
+        .btn-action {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border: none; color: white;
+            font-size: 14px;
+            transition: transform 0.1s;
+        }
+        .btn-action:hover { transform: scale(1.1); }
+        .btn-add { background: var(--primary); }
+        .btn-add:hover { background: var(--accent); color: var(--primary); }
+        .btn-del { background: #e74c3c; }
+
+        .badge {
+            position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+            background: #e0e0e0; color: #555;
+            font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 12px;
+            text-transform: uppercase; letter-spacing: 1px;
+            border: 2px solid white;
+        }
+
+        /* Zoom Controls */
+        .zoom-controls {
+            position: fixed; bottom: 20px; right: 20px;
+            background: white; padding: 5px; border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; gap: 5px; z-index: 50;
+        }
+        .zoom-btn {
+            width: 36px; height: 36px; display: flex; justify-content: center; align-items: center;
+            background: #f0f0f0; border-radius: 6px; font-weight: bold; color: #333; cursor: pointer;
+        }
+        .zoom-btn:hover { background: #e0e0e0; }
+    </style>
+</head>
+<body class="flex flex-col h-screen">
+
+    <!-- HEADER -->
+    <header class="bg-[#1a1a1a] text-[#cfa346] p-4 flex justify-between items-center shadow-md z-20 shrink-0">
+        <div class="flex items-center gap-4">
+            <a href="index.html" class="text-white hover:text-[#cfa346] transition flex items-center gap-2 font-semibold text-sm">
+                &larr; Accueil
+            </a>
+            <div class="h-6 w-px bg-gray-700"></div>
+            <h1 class="text-xl font-bold tracking-widest uppercase flex items-center gap-2">
+                <span>🌳</span> 5 Pourquoi
+            </h1>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="app.reset()" class="px-4 py-2 text-sm font-bold text-white hover:text-red-400 transition">
+                Tout effacer
+            </button>
+            <button onclick="app.save()" class="bg-[#cfa346] text-[#1a1a1a] px-4 py-2 rounded font-bold hover:bg-[#e0b050] transition shadow-sm flex items-center gap-2">
+                <span>💾</span> Sauvegarder
+            </button>
+        </div>
+    </header>
+
+    <!-- WORKSPACE -->
+    <main class="flex-1 bg-gray-50 relative overflow-hidden cursor-grab active:cursor-grabbing" id="workspace">
+        <div id="zoom-container" class="origin-top-center transition-transform duration-200 ease-out">
+            <div class="tree">
+                <ul id="tree-root">
+                    <!-- L'arbre sera généré ici -->
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <!-- ZOOM CONTROLS -->
+    <div class="zoom-controls">
+        <button class="zoom-btn" onclick="app.zoomIn()">+</button>
+        <button class="zoom-btn" onclick="app.zoomOut()">-</button>
+        <button class="zoom-btn" onclick="app.resetZoom()" title="Recentrer">⛶</button>
+    </div>
+
+    <script>
+        class FiveWhysApp {
+            constructor() {
+                this.data = this.load() || {
+                    id: 1,
+                    text: "Problème Initial",
+                    children: []
+                };
+                this.zoom = 1;
+                this.container = document.getElementById('zoom-container');
+                this.render();
+                this.setupPan();
+            }
+
+            generateId() { return Date.now() + Math.random(); }
+
+            // --- RENDERING ---
+            render() {
+                const rootUl = document.getElementById('tree-root');
+                rootUl.innerHTML = '';
+                rootUl.appendChild(this.createNodeElement(this.data, 0));
+                this.autoResizeTextareas();
+            }
+
+            createNodeElement(nodeData, level) {
+                const li = document.createElement('li');
+                
+                // Carte du noeud
+                const card = document.createElement('div');
+                card.className = `node-card ${level === 0 ? 'root-node' : ''}`;
+                
+                // Badge (Niveau)
+                const badge = document.createElement('div');
+                badge.className = 'badge';
+                badge.innerText = level === 0 ? 'Problème' : `Pourquoi ${level}`;
+                card.appendChild(badge);
+
+                // Input Texte
+                const textarea = document.createElement('textarea');
+                textarea.className = 'node-input';
+                textarea.value = nodeData.text;
+                textarea.placeholder = "Saisir texte...";
+                textarea.rows = 1;
+                textarea.oninput = (e) => {
+                    nodeData.text = e.target.value;
+                    this.autoResize(e.target);
+                };
+                card.appendChild(textarea);
+
+                // Actions (Boutons)
+                const actions = document.createElement('div');
+                actions.className = 'actions';
+
+                // Bouton Ajouter
+                const btnAdd = document.createElement('button');
+                btnAdd.className = 'btn-action btn-add';
+                btnAdd.innerHTML = '+';
+                btnAdd.title = "Ajouter une cause (Pourquoi ?)";
+                btnAdd.onclick = () => this.addNode(nodeData);
+                actions.appendChild(btnAdd);
+
+                // Bouton Supprimer (sauf racine)
+                if (level > 0) {
+                    const btnDel = document.createElement('button');
+                    btnDel.className = 'btn-action btn-del';
+                    btnDel.innerHTML = '×';
+                    btnDel.title = "Supprimer cette branche";
+                    btnDel.onclick = () => this.deleteNode(nodeData.id);
+                    actions.appendChild(btnDel);
+                }
+
+                card.appendChild(actions);
+                li.appendChild(card);
+
+                // Enfants (Récursif)
+                if (nodeData.children && nodeData.children.length > 0) {
+                    const ul = document.createElement('ul');
+                    nodeData.children.forEach(child => {
+                        ul.appendChild(this.createNodeElement(child, level + 1));
+                    });
+                    li.appendChild(ul);
+                }
+
+                return li;
+            }
+
+            // --- LOGIC ---
+            addNode(parentNode) {
+                if (!parentNode.children) parentNode.children = [];
+                parentNode.children.push({
+                    id: this.generateId(),
+                    text: "",
+                    children: []
+                });
+                this.render();
+                this.save();
+            }
+
+            deleteNode(id) {
+                if (confirm("Supprimer cette branche ?")) {
+                    const removeRecursive = (node) => {
+                        if (!node.children) return false;
+                        const idx = node.children.findIndex(c => c.id === id);
+                        if (idx !== -1) {
+                            node.children.splice(idx, 1);
+                            return true;
+                        }
+                        return node.children.some(child => removeRecursive(child));
+                    };
+                    removeRecursive(this.data);
+                    this.render();
+                    this.save();
+                }
+            }
+
+            reset() {
+                if (confirm("Tout effacer et recommencer ?")) {
+                    this.data = { id: 1, text: "Problème Initial", children: [] };
+                    this.render();
+                    this.save();
+                    this.resetZoom();
+                }
+            }
+
+            // --- UTILS ---
+            autoResize(el) {
+                el.style.height = 'auto';
+                el.style.height = el.scrollHeight + 'px';
+            }
+            autoResizeTextareas() {
+                document.querySelectorAll('textarea').forEach(el => this.autoResize(el));
+            }
+
+            save() {
+                localStorage.setItem('5whys_data', JSON.stringify(this.data));
+            }
+            load() {
+                const s = localStorage.getItem('5whys_data');
+                return s ? JSON.parse(s) : null;
+            }
+
+            // --- ZOOM & PAN ---
+            zoomIn() { this.setZoom(this.zoom + 0.1); }
+            zoomOut() { this.setZoom(this.zoom - 0.1); }
+            resetZoom() { 
+                this.zoom = 1; 
+                this.container.style.transform = `scale(1) translate(0px, 0px)`;
+            }
+            setZoom(val) {
+                this.zoom = Math.max(0.3, Math.min(2, val));
+                // On garde la translation actuelle si possible, sinon reset simple pour l'instant
+                this.container.style.transform = `scale(${this.zoom})`;
+            }
+
+            setupPan() {
+                const workspace = document.getElementById('workspace');
+                let isDown = false;
+                let startX, startY, scrollLeft, scrollTop;
+
+                workspace.addEventListener('mousedown', (e) => {
+                    if(e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') return;
+                    isDown = true;
+                    workspace.classList.add('active');
+                    startX = e.pageX - workspace.offsetLeft;
+                    startY = e.pageY - workspace.offsetTop;
+                    scrollLeft = workspace.scrollLeft;
+                    scrollTop = workspace.scrollTop;
+                });
+                workspace.addEventListener('mouseleave', () => { isDown = false; });
+                workspace.addEventListener('mouseup', () => { isDown = false; });
+                workspace.addEventListener('mousemove', (e) => {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - workspace.offsetLeft;
+                    const y = e.pageY - workspace.offsetTop;
+                    const walkX = (x - startX) * 1.5; 
+                    const walkY = (y - startY) * 1.5;
+                    workspace.scrollLeft = scrollLeft - walkX;
+                    workspace.scrollTop = scrollTop - walkY;
+                });
+            }
+        }
+
+        const app = new FiveWhysApp();
+    </script>
+</body>
+</html>

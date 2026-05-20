@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Générateur Ishikawa 5M - Edition Gold & 5 Pourquoi</title>
+    <style>
+        :root {
+            --primary: #1a1a1a;
+            --accent: #cfa346;
+            --accent-light: #f4e8cb;
+            --bg-color: #f8f9fa;
+            --panel-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --text-color: #2d3436;
+            --danger: #e74c3c;
+            --highlight: #e74c3c;
+            
+            --color-m1: #c0392b;
+            --color-m2: #2980b9;
+            --color-m3: #27ae60;
+            --color-m4: #8e44ad;
+            --color-m5: #d35400;
+        }
+
+        * { box-sizing: border-box; }
+        html { font-size: 16px; }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif;
+            margin: 0; padding: 0;
+            background-color: var(--bg-color); color: var(--text-color);
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        /* --- HEADER --- */
+        header {
+            background-color: var(--primary); color: var(--accent);
+            padding: 0.5rem 1rem; 
+            min-height: 60px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); flex-shrink: 0; z-index: 20;
+            border-bottom: 3px solid var(--accent);
+            flex-wrap: wrap; gap: 10px;
+        }
+
+        h1 { margin: 0; font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        h1 span { color: white; font-weight: 300; font-size: 0.8rem; opacity: 0.8; }
+
+        .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+        .toolbar select {
+            padding: 8px; border-radius: 6px; border: 1px solid var(--accent);
+            background-color: #333; color: white; font-size: 0.85rem;
+            cursor: pointer; outline: none; max-width: 150px;
+        }
+
+        button {
+            border: none; padding: 8px 12px; border-radius: 6px;
+            cursor: pointer; font-size: 0.85rem; font-weight: 600;
+            transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex; align-items: center; gap: 5px; white-space: nowrap;
+        }
+        button:active { transform: translateY(1px); box-shadow: none; }
+        
+        .btn-primary { background: var(--accent); color: var(--primary); }
+        .btn-secondary { background: #34495e; color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-icon { width: 16px; height: 16px; fill: currentColor; }
+        
+        /* Zoom Toolbar */
+        .zoom-toolbar {
+            position: absolute; bottom: 20px; right: 20px;
+            background: white; padding: 5px; border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; gap: 5px; z-index: 100;
+        }
+        .zoom-btn {
+            width: 32px; height: 32px; display: flex; justify-content: center; align-items: center;
+            background: #f0f0f0; border-radius: 4px; font-weight: bold; color: #333; padding: 0;
+        }
+        .zoom-btn:hover { background: #e0e0e0; }
+
+        .btn-sm { padding: 4px 8px; font-size: 0.8rem; margin-right: 5px; background: #eee; color: #333; }
+
+        /* --- LAYOUT --- */
+        .app-container { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+        aside {
+            width: 340px; background: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; padding: 1rem;
+            flex-shrink: 0; z-index: 10; box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            overflow-y: auto;
+        }
+
+        aside h2 {
+            font-size: 1rem; margin: 0 0 0.8rem 0; color: var(--primary);
+            border-bottom: 3px solid var(--accent); padding-bottom: 5px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #eee;
+        }
+        
+        .sidebar-input-group { margin-bottom: 10px; }
+        .sidebar-input-group label {
+            display: block; font-size: 0.85rem; font-weight: bold; color: #555; margin-bottom: 4px;
+        }
+        .sidebar-input-group input, .sidebar-input-group textarea {
+            width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;
+            font-family: inherit; font-size: 0.9rem; background: #fafafa;
+        }
+        .sidebar-input-group textarea { resize: vertical; min-height: 60px; }
+
+        .input-group { display: flex; gap: 5px; margin-bottom: 1rem; }
+        .input-group input {
+            flex: 1; padding: 8px; border: 2px solid var(--border-color); border-radius: 6px; outline: none;
+        }
+
+        #backlog-list {
+            flex: 1; overflow-y: auto; border: 2px dashed #e0e0e0;
+            background: #fdfdfd; padding: 8px; border-radius: 8px; min-height: 100px;
+        }
+        #backlog-list.drag-over { background: var(--accent-light); border-color: var(--accent); }
+
+        #root-causes-list {
+            font-size: 0.9rem; color: var(--danger); font-weight: bold;
+            list-style-type: none; padding: 0; margin: 0;
+        }
+        #root-causes-list li {
+            padding: 5px 0; border-bottom: 1px dashed #eee; display: flex; align-items: center; gap: 5px;
+        }
+
+        .cause-card {
+            background: white; border-left: 4px solid var(--accent);
+            padding: 10px; margin-bottom: 8px; border-radius: 4px;
+            cursor: grab; display: flex; justify-content: space-between;
+            align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-size: 0.95rem;
+        }
+        .cause-card:active { cursor: grabbing; }
+        .cause-text { flex: 1; outline: none; margin-right: 5px; }
+        .card-actions { display: flex; align-items: center; }
+        .card-actions span { cursor: pointer; color: #bdc3c7; font-weight: bold; font-size: 1.2rem; margin-left: 5px;}
+        .card-actions span:hover { color: var(--danger); }
+
+        #workspace {
+            flex: 1; position: relative; background-color: #ffffff;
+            background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
+            background-size: 20px 20px;
+            overflow: auto; 
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #diagram-svg {
+            background: white; box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            border-radius: 8px; 
+            transition: width 0.2s ease, height 0.2s ease;
+            transform-origin: center center;
+        }
+
+        text { font-family: 'Segoe UI', sans-serif; user-select: none; }
+        .svg-spine { stroke: var(--primary); stroke-width: 6; stroke-linecap: round; }
+        .svg-rib { stroke-width: 4; stroke-linecap: round; }
+        .svg-category-label { font-weight: 700; font-size: 16px; text-anchor: middle; text-transform: uppercase; }
+        .drop-zone { fill: transparent; stroke: transparent; }
+        .drop-zone.drag-over { fill: rgba(207, 163, 70, 0.1); stroke: var(--accent); stroke-width: 2; stroke-dasharray: 5; }
+        .cause-group { cursor: pointer; }
+        .cause-text-svg { font-size: 14px; fill: #2d3436; font-weight: 600; pointer-events: none; }
+        .connector-line { stroke-width: 2; }
+        .svg-icon { fill: white; pointer-events: none; }
+        .effect-icon { fill: var(--primary); pointer-events: none; }
+
+        /* Context Menu */
+        .context-menu {
+            display: none; position: absolute; background: white;
+            border: 1px solid #ddd; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 6px; z-index: 3000; min-width: 200px;
+            overflow: hidden; animation: fadeIn 0.1s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .context-menu ul { list-style: none; margin: 0; padding: 0; }
+        .context-menu li {
+            padding: 12px 15px; cursor: pointer; font-size: 1rem;
+            color: var(--text-color); border-bottom: 1px solid #f0f0f0;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .context-menu li:last-child { border-bottom: none; }
+        .context-menu li:hover { background-color: #f8f9fa; color: var(--primary); }
+        .context-menu li.danger { color: var(--danger); }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 4000;
+            display: none; justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: white; padding: 20px; border-radius: 8px; 
+            width: 100%; max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); border-top: 5px solid var(--accent);
+        }
+        .modal h3 { margin-top: 0; color: var(--primary); margin-bottom: 15px; font-size: 1.2rem; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+        .form-group select, .form-group input {
+            width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px;
+            font-family: inherit; font-size: 1rem; background: white;
+        }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+        .modal-actions button { padding: 10px 20px; font-size: 1rem; }
+
+        /* 5 Whys Styles in Modal (Indented) */
+        .why-input-container { 
+            margin-bottom: 12px; 
+            opacity: 0.5; 
+            pointer-events: none; 
+            transition: all 0.3s; 
+            position: relative;
+        }
+        .why-input-container.active { opacity: 1; pointer-events: auto; }
+        .why-input-container label { font-size: 0.85rem; color: var(--primary); font-weight: bold; display: block; margin-bottom: 4px;}
+        .why-input-container input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        
+        .why-input-container:not(:first-child)::before {
+            content: "↳";
+            position: absolute;
+            left: -15px;
+            top: 28px;
+            font-size: 1.2rem;
+            color: var(--accent);
+        }
+
+        /* --- 5 WHYS TOOLTIP (HOVER) --- */
+        #whys-tooltip {
+            position: fixed;
+            background: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 10000;
+            pointer-events: none; /* Allows hover through */
+            display: none;
+            width: 320px;
+            font-size: 0.9rem;
+            color: #333;
+        }
+        .whys-tooltip-header { font-weight: bold; margin-bottom: 8px; color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 4px; }
+        .whys-tree-item {
+            margin-top: 6px;
+            padding-left: 10px;
+            border-left: 2px solid #ccc;
+            position: relative;
+        }
+        .whys-tree-item::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: -2px;
+            width: 8px;
+            height: 2px;
+            background: #ccc;
+        }
+        .whys-question { font-size: 0.75rem; color: #888; text-transform: uppercase; font-weight: bold; margin-bottom: 2px; }
+        .whys-answer { font-weight: 500; color: #2d3436; }
+
+        #toast {
+            visibility: hidden; min-width: 250px; background-color: var(--primary);
+            color: var(--accent); text-align: center; border-radius: 50px;
+            padding: 12px 24px; position: fixed; z-index: 5000; bottom: 30px;
+            left: 50%; transform: translateX(-50%); font-weight: 600; opacity: 0;
+            transition: opacity 0.3s, bottom 0.3s;
+        }
+        #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
+
+        @media (max-width: 768px) {
+            html { font-size: 14px; }
+            h1 span { display: none; } 
+            .app-container { flex-direction: column; overflow-y: auto; }
+            aside { width: 100%; min-height: 40vh; order: 1; border-right: none; border-bottom: 2px solid var(--border-color); box-shadow: none; }
+            #workspace { height: 60vh; min-height: 350px; order: 2; align-items: flex-start; overflow-x: auto; }
+            .toolbar { width: 100%; justify-content: space-between; padding-top: 5px;}
+            .toolbar select { max-width: 100%; flex-grow: 1; margin-bottom: 5px; }
+            .toolbar button { flex-grow: 1; justify-content: center; }
+            .card-actions span { padding: 10px; font-size: 1.5rem; }
+            button { padding: 12px; }
+            .zoom-toolbar { bottom: 10px; right: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Ishikawa<span>5M</span></h1>
+    <div class="toolbar">
+        <button class="btn-secondary" onclick="window.location.href='index.html'">
+            &larr; Accueil
+        </button>
+        <select id="example-selector" onchange="app.loadExample(this.value)">
+            <option value="">📂 Exemples...</option>
+            <option value="pizza">🍕 Pizza Brûlée</option>
+            <option value="livraison">🚚 Retard Livraison</option>
+        </select>
+        <button class="btn-secondary" onclick="app.requestReset()">
+            <svg class="btn-icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Nouveau
+        </button>
+        <button class="btn-primary" onclick="app.exportImage()">
+            <svg class="btn-icon" viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/><circle cx="12" cy="9" r="3.2"/></svg> JPEG
+        </button>
+        <button class="btn-primary" onclick="app.exportExcel()">
+            <svg class="btn-icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg> Excel
+        </button>
+    </div>
+</header>
+
+<div class="app-container">
+    <aside>
+        <div class="sidebar-section">
+            <h2>1. Définir le Problème</h2>
+            <div class="sidebar-input-group">
+                <input type="text" id="sb-effect-title" placeholder="Titre du problème..." oninput="app.updateEffectFromSidebar()">
+            </div>
+            <div class="sidebar-input-group">
+                <textarea id="sb-effect-desc" placeholder="Détails (QQOQCP)..." oninput="app.updateEffectFromSidebar()"></textarea>
+            </div>
+        </div>
+        <div class="sidebar-section">
+            <h2>2. Réserve de Causes</h2>
+            <div class="input-group">
+                <input type="text" id="new-cause-input" placeholder="Nouvelle cause..." onkeypress="if(event.key === 'Enter') app.addToBacklog()">
+                <button class="btn-primary" onclick="app.addToBacklog()">+</button>
+            </div>
+            <div id="backlog-list" ondragover="event.preventDefault()" ondrop="app.handleDropBacklog(event)"></div>
+            <div style="margin-top: 10px; font-size: 0.8rem; color: #95a5a6; text-align: center;">Utilisez ➡️ pour classer sur mobile.</div>
+        </div>
+        <div class="sidebar-section">
+            <h2>3. Sélection des causes probables</h2>
+            <p style="font-size:0.85rem; color:#666; margin-bottom:10px;">Utilisez le menu (clic) sur une cause pour la sélectionner.</p>
+            <ul id="root-causes-list"></ul>
+        </div>
+    </aside>
+
+    <div id="workspace">
+        <svg id="diagram-svg" viewBox="0 0 1350 700" preserveAspectRatio="xMidYMid meet">
+            <!-- Diagramme JS -->
+        </svg>
+        <div class="zoom-toolbar">
+            <button class="zoom-btn" onclick="app.zoomIn()">+</button>
+            <button class="zoom-btn" onclick="app.zoomOut()">-</button>
+            <button class="zoom-btn" onclick="app.fitToScreen()" title="Ajuster">⛶</button>
+        </div>
+    </div>
+</div>
+
+<div id="context-menu" class="context-menu">
+    <ul>
+        <li onclick="app.ctxToggleRoot()">👑 Définir comme Cause Probable</li>
+        <li onclick="app.ctx5Whys()">❓ Analyse 5 Pourquoi</li>
+        <li onclick="app.ctxEdit()">✏️ Modifier</li>
+        <li onclick="app.ctxMove()">➡️ Déplacer...</li>
+        <li onclick="app.ctxToBacklog()">↩️ Renvoyer en réserve</li>
+        <li onclick="app.ctxDelete()" class="danger">🗑️ Supprimer</li>
+    </ul>
+</div>
+
+<div id="modal-move" class="modal-overlay">
+    <div class="modal">
+        <h3 id="move-modal-title">Déplacer la cause</h3>
+        <p id="move-cause-label" style="font-style:italic; color:#777; margin-bottom: 15px; font-size: 1rem;"></p>
+        <div class="form-group">
+            <label>Vers la catégorie :</label>
+            <select id="move-category-select"></select>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-secondary" onclick="app.closeMoveModal()">Annuler</button>
+            <button class="btn-primary" onclick="app.confirmMove()">Valider</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 5 POURQUOI (SAISIE) -->
+<div id="modal-5whys" class="modal-overlay">
+    <div class="modal">
+        <h3>Analyse des 5 Pourquoi</h3>
+        <p style="font-size:0.9rem; color:#666; margin-bottom:15px;">Pour la cause : <strong id="whys-cause-label"></strong></p>
+        <div id="whys-container" style="max-height: 400px; overflow-y: auto;">
+            <!-- Généré par JS -->
+        </div>
+        <div class="modal-actions">
+            <button class="btn-secondary" onclick="app.close5WhysModal()">Fermer</button>
+            <button class="btn-primary" onclick="app.save5Whys()">Enregistrer</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOOLTIP 5 POURQUOI (AFFICHAGE SURVOL) -->
+<div id="whys-tooltip"></div>
+
+<div id="modal-confirm" class="modal-overlay">
+    <div class="modal">
+        <h3 id="confirm-title">Confirmation</h3>
+        <p id="confirm-message">Êtes-vous sûr ?</p>
+        <div class="modal-actions">
+            <button class="btn-secondary" onclick="app.closeConfirmModal()">Annuler</button>
+            <button class="btn-primary" onclick="app.onConfirmYes()">Oui, continuer</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast">Action effectuée</div>
+
+<script>
+/**
+ * APPLICATION ISHIKAWA 5M - Gold Final with Zoom, 5 Whys & Tooltip Tree
+ */
+const CONSTANTS = {
+    CATEGORIES: ["Main-d'œuvre", "Méthode", "Matière", "Milieu", "Moyens"],
+    CAT_COLORS: ["#c0392b", "#2980b9", "#27ae60", "#8e44ad", "#d35400"],
+    SVG_W: 1350, SVG_H: 700, 
+    SPINE_Y: 350, SPINE_START: 50, SPINE_END: 1050, 
+    ICONS: {
+        "Main-d'œuvre": "M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z", 
+        "Méthode": "M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z",
+        "Matière": "M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18-.21 0-.41-.06-.57-.18l-7.9-4.44A.991.991 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.32-.18.78-.18 1.14 0l7.9 4.44c.32.17.53.5.53.88v9zM12 4.15 6.04 7.5 12 10.85l5.96-3.35L12 4.15zM5 15.91l6 3.38v-6.71L5 9.21v6.7z", 
+        "Milieu": "M19.36 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.64-4.96z", 
+        "Moyens": "M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z",
+        "Effect": "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" 
+    }
+};
+
+const EXAMPLES = {
+    pizza: {
+        effect: "Pizza Brûlée", details: "La pizza est sortie calcinée après 15min.",
+        causes: { "Main-d'œuvre": ["Inattention", "Oubli minuteur", "Fatigue"], "Méthode": ["Cuisson trop longue", "Température max"], "Matière": ["Pâte trop fine", "Sauce sucrée"], "Milieu": ["Cuisine sombre"], "Moyens": ["Four déréglé", "Thermostat HS"] }
+    },
+    livraison: {
+        effect: "Retard Livraison", details: "Le colis client est arrivé avec 48h de retard.",
+        causes: { "Main-d'œuvre": ["Chauffeur malade", "Erreur d'adresse"], "Méthode": ["Trajet non optimisé"], "Matière": ["Colis fragile", "Étiquette illisible"], "Milieu": ["Embouteillages", "Neige"], "Moyens": ["Camion en panne", "GPS défectueux"] }
+    }
+};
+
+class IshikawaApp {
+    constructor() {
+        this.data = {
+            effect: "Problème à analyser...",
+            effectDetails: "",
+            causes: {}, backlog: [], nextId: 1
+        };
+        CONSTANTS.CATEGORIES.forEach(c => this.data.causes[c] = []);
+        this.dragSource = null;
+        this.ctxItem = null;
+        this.ctxCategory = null;
+        this.confirmCallback = null;
+        this.moveFromBacklog = false; 
+        
+        // Zoom State
+        this.zoomLevel = 1.0;
+
+        document.addEventListener('click', () => {
+            document.getElementById('context-menu').style.display = 'none';
+        });
+
+        this.syncSidebarInputs();
+        this.renderBacklog();
+        this.renderDiagram();
+    }
+
+    generateId() { return this.data.nextId++; }
+
+    // --- ZOOM FUNCTIONS ---
+    zoomIn() { this.setZoom(this.zoomLevel + 0.1); }
+    zoomOut() { this.setZoom(this.zoomLevel - 0.1); }
+    fitToScreen() {
+        const workspace = document.getElementById('workspace');
+        const ratio = (workspace.clientWidth - 40) / CONSTANTS.SVG_W;
+        this.setZoom(Math.min(Math.max(ratio, 0.4), 1.5));
+    }
+    setZoom(level) {
+        this.zoomLevel = Math.max(0.4, Math.min(2.0, level));
+        const svg = document.getElementById('diagram-svg');
+        svg.style.width = `${CONSTANTS.SVG_W * this.zoomLevel}px`;
+        svg.style.height = `${CONSTANTS.SVG_H * this.zoomLevel}px`;
+    }
+
+    // --- 5 WHYS FUNCTIONS & TOOLTIP ---
+    ctx5Whys() {
+        document.getElementById('context-menu').style.display = 'none';
+        if(!this.ctxItem) return;
+        this.open5WhysModal(this.ctxItem);
+    }
+
+    open5WhysModal(item) {
+        const modal = document.getElementById('modal-5whys');
+        document.getElementById('whys-cause-label').textContent = item.text;
+        const container = document.getElementById('whys-container');
+        container.innerHTML = '';
+
+        if(!item.whys) item.whys = ["", "", "", "", ""];
+
+        for(let i=0; i<5; i++) {
+            const div = document.createElement('div');
+            div.className = 'why-input-container';
+            const prevVal = i > 0 ? item.whys[i-1] : "start";
+            if(prevVal !== "" || item.whys[i] !== "") div.classList.add('active');
+            div.id = `why-box-${i}`;
+            
+            // Indentation visuelle (padding left)
+            div.style.paddingLeft = (i * 20) + 'px';
+            
+            const label = document.createElement('label'); label.textContent = `Pourquoi n°${i+1} ?`;
+            const input = document.createElement('input'); input.type = "text"; input.value = item.whys[i] || ""; input.placeholder = "Réponse...";
+            
+            input.oninput = (e) => {
+                item.whys[i] = e.target.value;
+                if(e.target.value.trim() !== "" && i < 4) { document.getElementById(`why-box-${i+1}`).classList.add('active'); }
+            };
+            div.appendChild(label); div.appendChild(input); container.appendChild(div);
+        }
+        modal.classList.add('open');
+    }
+
+    close5WhysModal() { document.getElementById('modal-5whys').classList.remove('open'); }
+    
+    save5Whys() {
+        this.renderDiagram();
+        this.close5WhysModal();
+        this.showToast("Analyse 5 Pourquoi sauvegardée");
+    }
+
+    // Affichage Info-bulle au survol (Position intelligente)
+    showWhysTooltip(e, item) {
+        if (!item.whys || !item.whys.some(w => w && w.trim() !== "")) return;
+        
+        const tooltip = document.getElementById('whys-tooltip');
+        let html = `<div class="whys-tooltip-header">${item.text}</div>`;
+        
+        item.whys.forEach((w, index) => {
+            if(w && w.trim()) {
+                const marginLeft = index * 15;
+                html += `<div class="whys-tree-item" style="margin-left:${marginLeft}px;">
+                            <div class="whys-question">Pourquoi ${index+1}?</div>
+                            <div class="whys-answer">${w}</div>
+                         </div>`;
+            }
+        });
+        
+        tooltip.innerHTML = html;
+        tooltip.style.display = 'block'; // Afficher pour mesurer
+        
+        // Calcul position intelligente
+        const tooltipWidth = tooltip.offsetWidth;
+        const tooltipHeight = tooltip.offsetHeight;
+        
+        // Position initiale (bas droite du curseur)
+        let left = e.clientX + 20;
+        let top = e.clientY + 20;
+        
+        // Si dépasse à droite, mettre à gauche du curseur
+        if (left + tooltipWidth > window.innerWidth) {
+            left = e.clientX - tooltipWidth - 20;
+        }
+        
+        // Si dépasse en bas, mettre au-dessus du curseur
+        if (top + tooltipHeight > window.innerHeight) {
+            top = e.clientY - tooltipHeight - 20;
+        }
+        
+        // Sécurité pour ne pas être hors écran en haut/gauche
+        if (left < 0) left = 10;
+        if (top < 0) top = 10;
+        
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = top + 'px';
+    }
+
+    hideWhysTooltip() {
+        document.getElementById('whys-tooltip').style.display = 'none';
+    }
+
+    // --- MODAL CONFIRM ---
+    openConfirmModal(msg, actionFn) {
+        document.getElementById('confirm-message').textContent = msg;
+        document.getElementById('modal-confirm').classList.add('open');
+        this.confirmCallback = actionFn;
+    }
+    closeConfirmModal() {
+        document.getElementById('modal-confirm').classList.remove('open');
+        this.confirmCallback = null;
+        const sel = document.getElementById('example-selector');
+        if(sel && sel.value !== "") sel.value = "";
+    }
+    onConfirmYes() { if(this.confirmCallback) this.confirmCallback(); this.closeConfirmModal(); }
+
+    // --- EXAMPLE LOADING ---
+    loadExample(key) {
+        if(!key) return;
+        const example = EXAMPLES[key];
+        if(!example) return;
+        
+        this.openConfirmModal("Charger cet exemple écrasera vos données actuelles. Continuer ?", () => {
+            this.data = { effect: example.effect, effectDetails: example.details, causes: {}, backlog: [], nextId: 1 };
+            CONSTANTS.CATEGORIES.forEach(c => this.data.causes[c] = []);
+            const exCauses = example.causes;
+            for (const [catName, list] of Object.entries(exCauses)) {
+                const targetCat = CONSTANTS.CATEGORIES.find(c => c === catName);
+                if(targetCat && Array.isArray(list)) {
+                    list.forEach(txt => {
+                        this.data.causes[targetCat].push({ id: this.generateId(), text: txt, children: [], isRoot: false, whys: [] });
+                    });
+                }
+            }
+            this.syncSidebarInputs(); this.renderBacklog(); this.renderDiagram(); this.updateRootCauseList();
+            document.getElementById('example-selector').value = ""; this.showToast("Exemple chargé !");
+        });
+    }
+
+    requestReset() {
+        this.openConfirmModal("Voulez-vous vraiment tout effacer et créer un nouveau diagramme ?", () => {
+            this.data = { effect: "Problème à analyser...", effectDetails: "", causes: {}, backlog: [], nextId: 1 };
+            CONSTANTS.CATEGORIES.forEach(c => this.data.causes[c] = []);
+            this.syncSidebarInputs(); this.renderBacklog(); this.renderDiagram(); this.updateRootCauseList();
+            this.showToast("Nouveau diagramme prêt");
+        });
+    }
+
+    // --- LOGIC ---
+    syncSidebarInputs() {
+        const titleInput = document.getElementById('sb-effect-title');
+        const descInput = document.getElementById('sb-effect-desc');
+        if(titleInput) titleInput.value = this.data.effect;
+        if(descInput) descInput.value = this.data.effectDetails;
+    }
+    updateEffectFromSidebar() {
+        const title = document.getElementById('sb-effect-title').value;
+        const desc = document.getElementById('sb-effect-desc').value;
+        this.data.effect = title || "Problème...";
+        this.data.effectDetails = desc;
+        this.renderDiagram();
+    }
+    focusEffectEdit() {
+        const titleInput = document.getElementById('sb-effect-title');
+        if(titleInput) { titleInput.focus(); titleInput.select(); this.showToast("Édition du problème activée"); }
+    }
+
+    showContextMenu(e, item, category) {
+        e.preventDefault(); e.stopPropagation();
+        this.ctxItem = item; this.ctxCategory = category;
+        const menu = document.getElementById('context-menu');
+        if (window.innerWidth < 768) {
+            menu.style.left = '50%'; menu.style.top = '50%'; menu.style.transform = 'translate(-50%, -50%)'; menu.style.position = 'fixed';
+        } else {
+            menu.style.left = `${e.pageX}px`; menu.style.top = `${e.pageY}px`; menu.style.transform = 'none'; menu.style.position = 'absolute';
+        }
+        menu.style.display = 'block';
+    }
+
+    ctxEdit() {
+        document.getElementById('context-menu').style.display = 'none';
+        if(!this.ctxItem) return;
+        const newTxt = prompt("Modifier le texte :", this.ctxItem.text);
+        if(newTxt !== null && newTxt.trim() !== "") {
+            this.ctxItem.text = newTxt.trim();
+            this.renderDiagram(); this.renderBacklog(); this.updateRootCauseList();
+        }
+    }
+    ctxToggleRoot() {
+        document.getElementById('context-menu').style.display = 'none';
+        if(!this.ctxItem) return;
+        this.ctxItem.isRoot = !this.ctxItem.isRoot;
+        this.renderDiagram(); this.updateRootCauseList();
+        this.showToast(this.ctxItem.isRoot ? "Cause probable identifiée !" : "Cause probable retirée");
+    }
+    ctxDelete() {
+        document.getElementById('context-menu').style.display = 'none';
+        if(!this.ctxItem) return;
+        if(confirm(`Supprimer "${this.ctxItem.text}" ?`)) {
+            this.removeItemFromDiagram(this.ctxItem.id);
+            this.renderDiagram(); this.updateRootCauseList();
+        }
+    }
+    ctxToBacklog() {
+        document.getElementById('context-menu').style.display = 'none';
+        if(!this.ctxItem) return;
+        const removed = this.removeItemFromDiagram(this.ctxItem.id);
+        if(removed) {
+            removed.isRoot = false; this.data.backlog.push(removed);
+            this.renderBacklog(); this.renderDiagram(); this.updateRootCauseList();
+            this.showToast("Renvoyé en réserve");
+        }
+    }
+    ctxMove() {
+        document.getElementById('context-menu').style.display = 'none';
+        if(!this.ctxItem) return;
+        this.moveFromBacklog = false;
+        this.openMoveModalCommon(this.ctxItem, this.ctxCategory);
+    }
+    openMoveModalForBacklog(id) {
+        const item = this.data.backlog.find(i => i.id === id);
+        if(!item) return;
+        this.ctxItem = item; this.moveFromBacklog = true;
+        this.openMoveModalCommon(item, null);
+    }
+    openMoveModalCommon(item, currentCategory) {
+        const modal = document.getElementById('modal-move');
+        const select = document.getElementById('move-category-select');
+        document.getElementById('move-cause-label').textContent = `"${item.text}"`;
+        document.getElementById('move-modal-title').textContent = this.moveFromBacklog ? "Classer la cause" : "Déplacer la cause";
+        select.innerHTML = '';
+        CONSTANTS.CATEGORIES.forEach(cat => {
+            const opt = document.createElement('option'); opt.value = cat; opt.textContent = cat;
+            if(currentCategory && cat === currentCategory) opt.disabled = true;
+            select.appendChild(opt);
+        });
+        modal.classList.add('open');
+    }
+    closeMoveModal() { document.getElementById('modal-move').classList.remove('open'); }
+    confirmMove() {
+        const select = document.getElementById('move-category-select');
+        const targetCat = select.value;
+        if(!this.ctxItem || !targetCat) return;
+        let itemToMove = null;
+        if (this.moveFromBacklog) {
+            this.removeFromBacklog(this.ctxItem.id); itemToMove = this.ctxItem;
+        } else {
+            itemToMove = this.removeItemFromDiagram(this.ctxItem.id);
+        }
+        if(itemToMove) {
+            this.data.causes[targetCat].push(itemToMove);
+            this.renderDiagram(); this.renderBacklog(); this.updateRootCauseList();
+            this.showToast(`Classé dans ${targetCat}`);
+        }
+        this.closeMoveModal();
+    }
+
+    addToBacklog() {
+        const input = document.getElementById('new-cause-input');
+        const text = input.value.trim();
+        if (!text) return;
+        this.data.backlog.push({ id: this.generateId(), text: text, children: [], isRoot: false, whys: [] });
+        input.value = "";
+        this.renderBacklog();
+    }
+    removeFromBacklog(id) { this.data.backlog = this.data.backlog.filter(i => i.id !== id); this.renderBacklog(); }
+    updateBacklogItem(id, newText) {
+        const item = this.data.backlog.find(i => i.id === id); if (item) item.text = newText;
+    }
+    findAndRemove(list, id) {
+        const idx = list.findIndex(i => i.id === id);
+        if (idx !== -1) return list.splice(idx, 1)[0];
+        for (let item of list) {
+            if (item.children) { const found = this.findAndRemove(item.children, id); if (found) return found; }
+        }
+        return null;
+    }
+    removeItemFromDiagram(id) {
+        for (let cat of CONSTANTS.CATEGORIES) { const removed = this.findAndRemove(this.data.causes[cat], id); if (removed) return removed; }
+        return null;
+    }
+    findItem(list, id) {
+        for(let item of list) {
+            if(item.id === id) return item;
+            if(item.children) { const found = this.findItem(item.children, id); if(found) return found; }
+        }
+        return null;
+    }
+    updateRootCauseList() {
+        const listEl = document.getElementById('root-causes-list');
+        listEl.innerHTML = '';
+        let found = false;
+        const scan = (list) => {
+            list.forEach(item => {
+                if(item.isRoot) {
+                    found = true; const li = document.createElement('li'); li.innerHTML = `🎯 ${item.text}`; listEl.appendChild(li);
+                }
+                if(item.children) scan(item.children);
+            });
+        };
+        CONSTANTS.CATEGORIES.forEach(c => scan(this.data.causes[c]));
+        if(!found) listEl.innerHTML = '<li style="color:#aaa; font-weight:normal;">Aucune cause probable sélectionnée</li>';
+    }
+
+    handleDragStart(e, source, item) {
+        this.dragSource = { source, item }; e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', JSON.stringify(item));
+        document.querySelectorAll('.drop-zone').forEach(z => z.style.stroke = "var(--accent)");
+    }
+    handleDragEnd(e) { document.querySelectorAll('.drop-zone').forEach(z => z.style.stroke = "transparent"); this.clearHighlights(); }
+    handleDropCategory(e, category) {
+        e.preventDefault(); e.stopPropagation(); this.clearHighlights();
+        if (!this.dragSource) return;
+        const { source, item } = this.dragSource;
+        let itemToMove = null;
+        if (source === 'backlog') { this.removeFromBacklog(item.id); itemToMove = item; } 
+        else { const removed = this.removeItemFromDiagram(item.id); if(removed) itemToMove = removed; }
+        if(itemToMove) {
+            this.data.causes[category].push(itemToMove);
+            this.renderDiagram(); this.renderBacklog(); this.updateRootCauseList();
+        }
+        this.dragSource = null;
+    }
+    handleDropOnCause(e, targetId, currentDepth, category) {
+        e.preventDefault(); e.stopPropagation(); this.clearHighlights();
+        if (!this.dragSource) return;
+        const { source, item } = this.dragSource;
+        if (source === 'diagram' && item.id === targetId) return;
+        if (currentDepth >= 1) { this.handleDropCategory(e, category); return; }
+        let targetItem = null;
+        for(let cat of CONSTANTS.CATEGORIES) { targetItem = this.findItem(this.data.causes[cat], targetId); if(targetItem) break; }
+        if(!targetItem) return;
+        let itemToMove = null;
+        if (source === 'backlog') { this.removeFromBacklog(item.id); itemToMove = item; } 
+        else { itemToMove = this.removeItemFromDiagram(item.id); }
+        if(itemToMove) {
+            if(!targetItem.children) targetItem.children = [];
+            targetItem.children.push(itemToMove);
+            this.renderDiagram(); this.renderBacklog(); this.updateRootCauseList();
+        }
+        this.dragSource = null;
+    }
+    handleDropBacklog(e) {
+        e.preventDefault(); document.getElementById('backlog-list').classList.remove('drag-over');
+        if (!this.dragSource || this.dragSource.source === 'backlog') return;
+        const removed = this.removeItemFromDiagram(this.dragSource.item.id);
+        if(removed) {
+            removed.isRoot = false; this.data.backlog.push(removed);
+            this.renderBacklog(); this.renderDiagram(); this.updateRootCauseList();
+        }
+        this.dragSource = null;
+    }
+    handleDragOverZone(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+    handleDragLeaveZone(e) { e.currentTarget.classList.remove('drag-over'); }
+    clearHighlights() { document.querySelectorAll('.drop-zone').forEach(el => el.classList.remove('drag-over')); }
+
+    renderBacklog() {
+        const list = document.getElementById('backlog-list');
+        list.innerHTML = '';
+        this.data.backlog.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'cause-card'; div.draggable = true;
+            div.ondragstart = (e) => this.handleDragStart(e, 'backlog', item);
+            div.ondragend = (e) => this.handleDragEnd(e);
+            div.innerHTML = `
+                <div style="display:flex; align-items:center; flex:1; overflow:hidden;">
+                    <button class="btn-sm" onclick="app.openMoveModalForBacklog(${item.id})">➡️</button>
+                    <div class="cause-text" contenteditable="true" onblur="app.updateBacklogItem(${item.id}, this.innerText)">${item.text}</div>
+                </div>
+                <div class="card-actions"><span onclick="app.removeFromBacklog(${item.id})">×</span></div>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    renderDiagram() {
+        const svg = document.getElementById('diagram-svg');
+        while (svg.firstChild) svg.removeChild(svg.firstChild);
+        svg.setAttribute('viewBox', `0 0 ${CONSTANTS.SVG_W} ${CONSTANTS.SVG_H}`);
+        
+        const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+        marker.setAttribute("id", "arrowhead"); marker.setAttribute("markerWidth", "10");
+        marker.setAttribute("markerHeight", "7"); marker.setAttribute("refX", "9"); marker.setAttribute("refY", "3.5");
+        marker.setAttribute("orient", "auto");
+        const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        polygon.setAttribute("points", "0 0, 10 3.5, 0 7"); polygon.setAttribute("fill", "#1a1a1a");
+        marker.appendChild(polygon); defs.appendChild(marker); svg.appendChild(defs);
+
+        this.drawSvgLine(svg, CONSTANTS.SPINE_START, CONSTANTS.SPINE_Y, CONSTANTS.SPINE_END, CONSTANTS.SPINE_Y, 'svg-spine', "#1a1a1a", 'url(#arrowhead)');
+
+        const headGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        headGroup.setAttribute("class", "effect-group");
+        headGroup.setAttribute("transform", `translate(${CONSTANTS.SPINE_END + 10}, ${CONSTANTS.SPINE_Y - 90})`);
+        headGroup.onclick = (e) => { e.stopPropagation(); this.focusEffectEdit(); };
+
+        const headRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        headRect.setAttribute("width", 260); headRect.setAttribute("height", 180);
+        headRect.setAttribute("fill", "white"); headRect.setAttribute("stroke", "#1a1a1a");
+        headRect.setAttribute("stroke-width", "3"); headRect.setAttribute("rx", "8");
+        
+        const iconPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        iconPath.setAttribute("d", CONSTANTS.ICONS["Effect"]);
+        iconPath.setAttribute("transform", "translate(15, 78) scale(1)");
+        iconPath.setAttribute("fill", "#1a1a1a");
+
+        const effectTitle = this.data.effect && this.data.effect.trim() !== "" ? (this.data.effect.length > 25 ? this.data.effect.substring(0,23)+"..." : this.data.effect) : "Saisir un effet...";
+        const headTitle = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        headTitle.textContent = effectTitle;
+        headTitle.setAttribute("x", 130); headTitle.setAttribute("y", 40); 
+        headTitle.setAttribute("text-anchor", "middle"); headTitle.setAttribute("fill", "#1a1a1a");
+        headTitle.setAttribute("font-weight", "bold"); headTitle.setAttribute("font-size", "15px");
+
+        // Helper pour wrap
+        const headDesc = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        headDesc.setAttribute("x", 130); 
+        headDesc.setAttribute("y", 70); 
+        headDesc.setAttribute("text-anchor", "middle"); 
+        headDesc.setAttribute("fill", "#555");
+        headDesc.setAttribute("font-size", "14px");
+        
+        const details = this.data.effectDetails || "Détails (QQOQCP)...";
+        // Simple wrap logic
+        const maxChars = 32; 
+        const words = details.split(' ');
+        let line = '';
+        let dy = 0;
+        
+        words.forEach(word => {
+            const testLine = line + word + ' ';
+            if (testLine.length > maxChars) {
+                const tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+                tspan.setAttribute("x", 130);
+                tspan.setAttribute("dy", dy === 0 ? "0" : "1.2em");
+                tspan.textContent = line;
+                headDesc.appendChild(tspan);
+                line = word + ' ';
+                dy += 1;
+            } else {
+                line = testLine;
+            }
+        });
+        const tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+        tspan.setAttribute("x", 130);
+        tspan.setAttribute("dy", dy === 0 ? "0" : "1.2em");
+        tspan.textContent = line;
+        headDesc.appendChild(tspan);
+
+        headGroup.appendChild(headRect); headGroup.appendChild(iconPath);
+        headGroup.appendChild(headTitle); headGroup.appendChild(headDesc);
+        svg.appendChild(headGroup);
+
+        const spacing = 190; const startX = 200;
+        CONSTANTS.CATEGORIES.forEach((cat, index) => {
+            const isTop = (index % 2 === 0);
+            const color = CONSTANTS.CAT_COLORS[index];
+            const xBase = startX + (index * spacing);
+            const yBase = CONSTANTS.SPINE_Y;
+            const xEnd = xBase - 50;
+            const yEnd = isTop ? 60 : 640;
+
+            this.drawSvgLine(svg, xEnd, yEnd, xBase, yBase, 'svg-rib', color);
+
+            const zone = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            zone.setAttribute("x", xEnd - 100); zone.setAttribute("y", isTop ? 0 : 350);
+            zone.setAttribute("width", 220); zone.setAttribute("height", 350);
+            zone.setAttribute("class", "drop-zone");
+            zone.ondragover = (e) => this.handleDragOverZone(e);
+            zone.ondragleave = (e) => this.handleDragLeaveZone(e);
+            zone.ondrop = (e) => this.handleDropCategory(e, cat);
+            svg.insertBefore(zone, svg.firstChild);
+
+            const labelGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            const rectW = 160; const rectH = 34;
+            const labelRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            labelRect.setAttribute("x", xEnd - rectW/2); labelRect.setAttribute("y", isTop ? yEnd - 40 : yEnd + 10);
+            labelRect.setAttribute("width", rectW); labelRect.setAttribute("height", rectH);
+            labelRect.setAttribute("fill", color); labelRect.setAttribute("rx", "4"); labelRect.setAttribute("class", "svg-category-rect");
+            
+            const catIcon = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            catIcon.setAttribute("d", CONSTANTS.ICONS[cat] || "");
+            catIcon.setAttribute("transform", `translate(${xEnd - rectW/2 + 10}, ${isTop ? yEnd - 35 : yEnd + 15}) scale(1)`);
+            catIcon.setAttribute("fill", "white");
+
+            const labelText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            labelText.setAttribute("x", xEnd + 10); labelText.setAttribute("y", isTop ? yEnd - 18 : yEnd + 33);
+            labelText.textContent = cat;
+            labelText.setAttribute("fill", "white"); labelText.setAttribute("font-weight", "bold");
+            labelText.setAttribute("font-size", "16px"); labelText.setAttribute("text-anchor", "middle");
+
+            labelGroup.appendChild(labelRect); labelGroup.appendChild(catIcon);
+            labelGroup.appendChild(labelText);
+            svg.appendChild(labelGroup);
+
+            this.renderCausesRecursive(svg, this.data.causes[cat], xEnd, yEnd, xBase, yBase, isTop, 0, color, cat);
+        });
+    }
+
+    renderCausesRecursive(svg, items, x1, y1, x2, y2, isTop, depth, color, category) {
+        if (!items || items.length === 0) return;
+        const count = items.length;
+        const xStep = (x2 - x1) / (count + 1);
+        items.forEach((item, i) => {
+            const cx = x1 + xStep * (i + 1);
+            const cy = y1 + (y2 - y1)/(count+1)*(i+1);
+            const lineLen = 145; const lx = cx + lineLen; 
+            this.drawSvgLine(svg, cx, cy, lx, cy, 'connector-line', color);
+            this.drawCauseBox(svg, item, lx, cy, depth, color, category);
+            if (item.children && item.children.length > 0) {
+                item.children.forEach((child, j) => {
+                    const sx = cx + 20 + (j * 30);
+                    const sy = cy;
+                    const syEnd = isTop ? cy + 45 : cy - 45;
+                    this.drawSvgLine(svg, sx, sy, sx, syEnd, 'connector-line', color);
+                    this.drawCauseBox(svg, child, sx, syEnd, depth + 1, color, category);
+                });
+            }
+        });
+    }
+
+    drawCauseBox(svg, item, x, y, depth, color, category) {
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("transform", `translate(${x}, ${y})`);
+        g.setAttribute("class", "cause-group");
+        g.draggable = true;
+        g.ondragstart = (e) => { e.stopPropagation(); this.handleDragStart(e, 'diagram', item); };
+        g.ondragend = (e) => this.handleDragEnd(e);
+        g.onclick = (e) => { e.stopPropagation(); app.showContextMenu(e, item, category); };
+        g.oncontextmenu = (e) => { e.preventDefault(); e.stopPropagation(); app.showContextMenu(e, item, category); };
+        
+        g.onmouseenter = (e) => app.showWhysTooltip(e, item);
+        g.onmouseleave = () => app.hideWhysTooltip();
+
+        if (depth < 1) {
+            g.ondragover = (e) => { e.preventDefault(); e.stopPropagation(); };
+            g.ondrop = (e) => this.handleDropOnCause(e, item.id, depth, category);
+        }
+
+        const padding = 8; const charWidth = 8.5; 
+        const width = Math.max(90, item.text.length * charWidth + padding * 2); 
+        const height = 30; 
+        
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", -5); rect.setAttribute("y", -height/2);
+        rect.setAttribute("width", width); rect.setAttribute("height", height);
+        
+        if(item.isRoot) {
+            rect.setAttribute("fill", "#fff5f5");
+            rect.setAttribute("stroke", "#e74c3c");
+            rect.setAttribute("stroke-width", "3");
+        } else {
+            rect.setAttribute("fill", "white");
+            rect.setAttribute("stroke", color);
+            rect.setAttribute("stroke-width", "1");
+        }
+        rect.setAttribute("rx", "4");
+        
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.textContent = item.text.length > 25 ? item.text.substring(0,23)+"..." : item.text;
+        text.setAttribute("dy", 5); text.setAttribute("dx", 5);
+        text.setAttribute("fill", "#2d3436");
+        text.setAttribute("font-size", "14px"); 
+        text.setAttribute("font-weight", item.isRoot ? "800" : "600");
+        text.setAttribute("pointer-events", "none");
+
+        // INDICATEUR VISUEL (ICON) pour cause probable
+        if(item.isRoot) {
+            const rootIcon = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            rootIcon.textContent = "🎯";
+            rootIcon.setAttribute("x", width - 20);
+            rootIcon.setAttribute("y", 5);
+            rootIcon.setAttribute("font-size", "14px");
+            g.appendChild(rootIcon);
+        }
+
+        // Indicateur 5 pourquoi
+        if(item.whys && item.whys.some(w => w !== "")) {
+            const whyIndicator = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            whyIndicator.textContent = "❓";
+            whyIndicator.setAttribute("x", item.isRoot ? width - 40 : width - 15); // Décalé si icône racine présente
+            whyIndicator.setAttribute("y", -5);
+            whyIndicator.setAttribute("font-size", "12px");
+            g.appendChild(whyIndicator);
+        }
+
+        g.appendChild(rect); g.appendChild(text);
+        g.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "title")).textContent = item.text;
+        svg.appendChild(g);
+    }
+
+    drawSvgLine(svg, x1, y1, x2, y2, className, color=null, markerEnd=null) {
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+        line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+        if(className === 'svg-spine') { line.setAttribute("stroke", "#1a1a1a"); line.setAttribute("stroke-width", "6"); } 
+        else if(className === 'svg-rib') { line.setAttribute("stroke-width", "4"); } 
+        else { line.setAttribute("stroke-width", "2"); }
+        if(color) line.setAttribute("stroke", color);
+        if(markerEnd) line.setAttribute("marker-end", markerEnd);
+        svg.appendChild(line);
+    }
+
+    showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg; t.className = "show";
+        setTimeout(() => t.className = "", 3000);
+    }
+
+    exportImage() {
+        const svg = document.getElementById('diagram-svg');
+        const clone = svg.cloneNode(true); 
+        clone.style.transform = "none"; 
+        clone.style.width = `${CONSTANTS.SVG_W}px`;
+        clone.style.height = `${CONSTANTS.SVG_H}px`;
+        
+        const dropZones = clone.querySelectorAll('.drop-zone');
+        dropZones.forEach(el => el.remove());
+
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(clone);
+        const img = new Image();
+        const svgBlob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+        const url = URL.createObjectURL(svgBlob);
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = CONSTANTS.SVG_W * 1.5; 
+            canvas.height = CONSTANTS.SVG_H * 1.5;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = "white"; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const a = document.createElement('a');
+            a.download = "ishikawa.jpg"; 
+            a.href = canvas.toDataURL("image/jpeg", 0.9);
+            a.click(); 
+            URL.revokeObjectURL(url);
+            this.showToast("Image JPEG générée");
+        };
+        img.src = url;
+    }
+
+    exportExcel() {
+        let rows = "";
+        const scan = (cat, item, d) => {
+            let row = `<Row><Cell><Data ss:Type="String">${cat}</Data></Cell>`;
+            row += `<Cell><Data ss:Type="String">${d===0?item.text:''}</Data></Cell>`;
+            row += `<Cell><Data ss:Type="String">${d===1?item.text:''}</Data></Cell>`;
+            row += `<Cell><Data ss:Type="String">${item.isRoot ? "OUI" : ""}</Data></Cell>`;
+            const whysText = item.whys ? item.whys.filter(w=>w).join(" -> ") : "";
+            row += `<Cell><Data ss:Type="String">${whysText}</Data></Cell></Row>`;
+            rows += row;
+            if(item.children) item.children.forEach(c => scan(cat, c, d+1));
+        };
+        CONSTANTS.CATEGORIES.forEach(cat => this.data.causes[cat].forEach(i => scan(cat, i, 0)));
+        const tmpl = `<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Ishikawa"><Table><Row><Cell><Data ss:Type="String">Effet: ${this.data.effect}</Data></Cell></Row><Row><Cell><Data ss:Type="String">QQOQCP: ${this.data.effectDetails}</Data></Cell></Row><Row><Cell><Data ss:Type="String">Famille</Data></Cell><Cell><Data ss:Type="String">Cause</Data></Cell><Cell><Data ss:Type="String">Sous-cause</Data></Cell><Cell><Data ss:Type="String">Racine?</Data></Cell><Cell><Data ss:Type="String">5 Pourquoi</Data></Cell></Row>${rows}</Table></Worksheet></Workbook>`;
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([tmpl], {type: "application/vnd.ms-excel"}));
+        a.download = "ishikawa.xls"; a.click();
+    }
+}
+const app = new IshikawaApp();
+// Init default fit
+window.onload = () => { setTimeout(() => app.fitToScreen(), 100); };
+</script>
+</body>
+</html>
