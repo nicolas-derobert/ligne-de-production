@@ -188,6 +188,12 @@
             <button onclick="loadScenario('pizza')" class="px-4 py-2 bg-white border text-xs rounded-lg hover:border-[var(--accent)] transition-all font-bold shadow-sm flex items-center gap-2" style="border-color: var(--border-color); color: var(--primary);">
                 <span>🍕</span> Services
             </button>
+            <button onclick="loadScenario('health')" class="px-4 py-2 bg-white border text-xs rounded-lg hover:border-[var(--accent)] transition-all font-bold shadow-sm flex items-center gap-2" style="border-color: var(--border-color); color: var(--primary);">
+                <span>🏥</span> Santé
+            </button>
+            <button onclick="loadScenario('logistics')" class="px-4 py-2 bg-white border text-xs rounded-lg hover:border-[var(--accent)] transition-all font-bold shadow-sm flex items-center gap-2" style="border-color: var(--border-color); color: var(--primary);">
+                <span>📦</span> Logistique
+            </button>
         </div>
 
         <!-- Description scénario -->
@@ -316,6 +322,48 @@
                       hint: "Nécessaire pour acheminer la pizza, mais conduire n'améliore pas le produit en lui-même." },
                     { id: 'p6', text: "Erreur adresse GPS", time: 10, type: 'nvap',
                       hint: "Erreur évitable : le livreur tourne en rond. Le client attend, la pizza refroidit." }
+                ]
+            },
+            health: {
+                label: '🏥 Santé — Consultation médicale',
+                description: '📋 Contexte : Consultation médicale dans un cabinet de médecine générale. Le patient vient pour obtenir un diagnostic et une ordonnance. Analysez chaque étape du point de vue du patient.',
+                steps: [
+                    { id: 'h1', text: "Prise de rendez-vous", time: 5, type: 'nvan',
+                      hint: "Étape nécessaire pour organiser la consultation, mais elle n'a aucun effet thérapeutique sur le patient." },
+                    { id: 'h2', text: "Attente salle d'attente", time: 25, type: 'nvap',
+                      hint: "Le patient attend sans aucun soin. Ce délai ne contribue pas à son traitement — pure perte." },
+                    { id: 'h3', text: "Ouverture dossier médical", time: 4, type: 'nvan',
+                      hint: "Obligatoire pour assurer le suivi et respecter les obligations légales, mais ce n'est pas encore un acte de soin." },
+                    { id: 'h4', text: "Examen clinique", time: 15, type: 'va',
+                      hint: "Le médecin examine le patient : c'est l'acte médical direct que le patient est venu chercher." },
+                    { id: 'h5', text: "Rédaction ordonnance", time: 5, type: 'va',
+                      hint: "Le résultat concret attendu : le patient repart avec le traitement adapté à son état." },
+                    { id: 'h6', text: "Recherche formulaire CPAM", time: 8, type: 'nvap',
+                      hint: "Le médecin perd du temps à trouver un formulaire mal rangé. Organisation défaillante, aucune valeur." },
+                    { id: 'h7', text: "Mise à jour dossier", time: 6, type: 'nvan',
+                      hint: "Nécessaire pour assurer la continuité des soins et la traçabilité, mais le patient n'en ressent pas directement les bénéfices." }
+                ]
+            },
+            logistics: {
+                label: '📦 Logistique — Préparation colis',
+                description: '📋 Contexte : Préparation et expédition d\'une commande e-commerce dans un entrepôt. Le client a commandé un article en ligne et attend de recevoir son colis rapidement et en bon état.',
+                steps: [
+                    { id: 'l1', text: "Réception bon de commande", time: 2, type: 'nvan',
+                      hint: "Nécessaire pour déclencher le traitement, mais lire un bon de commande n'améliore pas l'article commandé." },
+                    { id: 'l2', text: "Déplacements dans l'entrepôt", time: 18, type: 'nvap',
+                      hint: "18 min de marche dues à une mauvaise implantation des stocks. Le client ne paye pas pour ces trajets inutiles." },
+                    { id: 'l3', text: "Prélèvement de l'article", time: 3, type: 'va',
+                      hint: "L'article est physiquement prélevé et mis de côté pour le client — transformation directe du flux." },
+                    { id: 'l4', text: "Emballage du colis", time: 5, type: 'va',
+                      hint: "L'article est conditionné pour être livré intact. Le client paye pour recevoir un produit protégé." },
+                    { id: 'l5', text: "Recherche ruban adhésif", time: 4, type: 'nvap',
+                      hint: "Perte de temps pour trouver un consommable non rangé à sa place. Pur gaspillage organisationnel." },
+                    { id: 'l6', text: "Étiquetage expédition", time: 2, type: 'nvan',
+                      hint: "L'étiquette transporteur est obligatoire pour la livraison, mais n'améliore pas le produit commandé." },
+                    { id: 'l7', text: "Mise en zone expédition", time: 3, type: 'nvan',
+                      hint: "Nécessaire pour que le transporteur enlève le colis, mais le client n'en voit pas encore les bénéfices." },
+                    { id: 'l8', text: "Attente enlèvement transporteur", time: 240, type: 'nvap',
+                      hint: "Le colis est prêt depuis des heures mais attend l'unique passage du transporteur. Pure perte de délai." }
                 ]
             }
         };

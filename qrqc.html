@@ -96,11 +96,11 @@
     }
 
     .pyramid-n3{
-      width:46%;
+      width:54%;
       background:linear-gradient(135deg,#0f2f56,#184b83);
-      clip-path:polygon(50% 0%,100% 100%,0% 100%);
-      min-height:170px;
-      padding-top:52px;
+      clip-path:polygon(12% 0%, 88% 0%, 100% 100%, 0% 100%);
+      min-height:130px;
+      padding:20px 36px;
       border-radius:0;
     }
 
@@ -211,7 +211,10 @@
 </head>
 <body>
   <div class="app">
-    <header class="hero">
+    <header class="hero" style="position:relative">
+      <a href="index.html" title="Retour à l'accueil" style="position:absolute;top:18px;left:18px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.32);color:#fff;text-decoration:none;transition:background .2s" onmouseover="this.style.background='rgba(255,255,255,.32)'" onmouseout="this.style.background='rgba(255,255,255,.18)'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><polyline points="9 21 9 12 15 12 15 21"/></svg>
+      </a>
       <div class="hero-grid hero-grid-clean"><div><span class="eyebrow">01 · Théorie</span><h1>Comprendre le <span class="accent">QRQC</span></h1></div></div></header>
     <nav class="tabs" aria-label="Navigation principale"><button class="tab-btn active" data-tab="theorie">1. Théorie QRQC</button><button class="tab-btn" data-tab="simulation">2. Simulation</button><button class="tab-btn" data-tab="exercice">3. Exercice de classement</button><button class="tab-btn" data-tab="quiz">4. Quiz théorie</button></nav>
     <main>
@@ -338,7 +341,7 @@
 
 <section id="exercice" class="panel">
         <article class="card"><span class="section-label">03 · Exercice</span><h2>Classer les étapes d’une résolution de problème</h2><p class="lead">Déplacez les cartes pour reconstituer un ordre logique. Vous pouvez glisser-déposer les cartes ou utiliser les flèches.</p><div class="callout"><b>Consigne élève :</b> classe les étapes, vérifie l’ordre, puis justifie deux choix : une étape de sécurisation et une étape de vérification.</div><div id="sortList" class="sort-list" aria-live="polite"></div><div class="btn-row"><button class="secondary" id="checkOrder">Vérifier l’ordre</button><button class="ghost" id="shuffleOrder">Mélanger</button><button class="ghost" id="showCorrection">Afficher la correction</button></div><div id="orderResult" class="result">Aucun résultat pour le moment.</div></article>
-        <article class="card" style="margin-top:18px"><h2>Correction attendue</h2><p>L’ordre proposé respecte une logique pédagogique : alerter, protéger, comprendre, traiter la cause, vérifier et capitaliser.</p><ol id="correctionList"></ol></article>
+        <article class="card" style="margin-top:18px;display:none"><h2>Correction attendue</h2><p>L’ordre proposé respecte une logique pédagogique : alerter, protéger, comprendre, traiter la cause, vérifier et capitaliser.</p><ol id="correctionList"></ol></article>
       </section>
 
       <section id="quiz" class="panel">
