@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QRQC — Théorie intégrée, simulation et résolution de problème</title>
+  <style>
+    :root{
+      --bg:#f4f7fb;--card:#fff;--ink:#162033;--muted:#627084;--line:#d9e3f0;
+      --primary:#0f2f56;--primary2:#1f5fae;--blueSoft:#eaf2ff;
+      --gold:#b7791f;--goldSoft:#fff4d8;--green:#0f7a45;--greenSoft:#eaf8f0;
+      --red:#b42318;--redSoft:#fff0ef;--orangeSoft:#fff4e6;
+      --shadow:0 18px 44px rgba(15,23,42,.10);--radius:22px;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;font-family:Arial,Verdana,sans-serif;color:var(--ink);line-height:1.55;background:radial-gradient(circle at 8% 8%,rgba(31,95,174,.14),transparent 27%),radial-gradient(circle at 92% 6%,rgba(183,121,31,.13),transparent 24%),linear-gradient(135deg,#f8fbff,#edf3fa 72%,#f7fafc)}
+    .app{width:min(1240px,94vw);margin:24px auto 48px}
+    .hero{position:relative;overflow:hidden;border-radius:30px;background:linear-gradient(135deg,var(--primary),#07182c);color:#fff;padding:30px;box-shadow:var(--shadow)}
+    .hero:before{content:"";position:absolute;right:-80px;bottom:-110px;width:360px;height:360px;border-radius:50%;background:rgba(245,193,90,.20)}
+    .hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:1.45fr .55fr;gap:24px;align-items:center}
+    .eyebrow{display:inline-flex;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);font-weight:800;font-size:.92rem;margin-bottom:14px}
+    h1{margin:0;font-size:clamp(2.1rem,4.6vw,4.8rem);line-height:.98;letter-spacing:-.045em}.accent{color:#f8c967}
+    .subtitle{max-width:870px;margin:14px 0 0;color:#edf4ff;font-size:1.1rem}.hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+    .pill{display:inline-flex;gap:7px;padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);font-weight:800;font-size:.88rem}
+    .progress-card{border:1px solid rgba(255,255,255,.26);background:rgba(255,255,255,.12);border-radius:24px;padding:18px;backdrop-filter:blur(5px)}
+    .progress-card strong{display:block;color:#f8c967;font-size:2.6rem;line-height:1;letter-spacing:-.04em}.progress-card span{color:#edf4ff;font-size:.92rem}
+    .bar,.activity-bar{height:12px;border-radius:999px;overflow:hidden;margin-top:12px}.bar{background:rgba(255,255,255,.22)}.activity-bar{background:#e7eef8;margin:10px 0}
+    .bar>span,.activity-bar>span{display:block;height:100%;width:0%;border-radius:999px;transition:.25s ease}.bar>span{background:linear-gradient(90deg,#f8c967,#fff)}.activity-bar>span{background:linear-gradient(90deg,var(--primary2),var(--gold))}
+    .tabs{display:flex;gap:10px;overflow:auto;padding:4px 2px 11px;margin:18px 0}.tab-btn{border:1px solid var(--line);background:#fff;color:var(--primary);border-radius:999px;padding:11px 16px;font-weight:900;white-space:nowrap;cursor:pointer;box-shadow:0 8px 18px rgba(15,23,42,.06)}.tab-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .panel{display:none;animation:fade .22s ease both}.panel.active{display:block}@keyframes fade{from{opacity:.45;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+    .grid{display:grid;gap:18px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:0 12px 28px rgba(15,23,42,.07)}
+    h2{margin:0 0 12px;font-size:clamp(1.65rem,2.7vw,2.35rem);line-height:1.08;letter-spacing:-.03em;color:#10213a}h3{margin:0 0 8px;font-size:1.28rem;color:#162033}h4{margin:0 0 6px;font-size:1.05rem}p{margin:0 0 12px}.lead{color:#334155;font-size:1.08rem}.muted{color:var(--muted)}.mini{font-size:.9rem}.small{font-size:.86rem}
+    .section-label{display:inline-flex;align-items:center;gap:8px;color:var(--gold);font-weight:900;text-transform:uppercase;letter-spacing:.08em;font-size:.78rem;margin-bottom:8px}
+    .callout{border:1px solid var(--line);border-radius:18px;padding:15px;background:var(--blueSoft);margin-top:12px}.callout.gold{background:var(--goldSoft)}.callout.green{background:var(--greenSoft)}.callout.red{background:var(--redSoft)}.callout.orange{background:var(--orangeSoft)}
+    .number-card{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:flex-start}.big-number,.num{display:grid;place-items:center;background:var(--primary);color:#fff;font-weight:900;box-shadow:0 8px 16px rgba(15,47,86,.20)}.big-number{width:56px;height:56px;border-radius:19px;font-size:1.25rem}.num{width:40px;height:40px;border-radius:14px}.num.gold{background:var(--gold)}.num.green{background:var(--green)}.num.red{background:var(--red)}.num.circle{border-radius:999px}
+    .san-card{border:1px solid var(--line);background:linear-gradient(180deg,#fff,#fbfdff);border-radius:20px;padding:18px;min-height:220px;position:relative;overflow:hidden}.san-card:after{content:"";position:absolute;width:100px;height:100px;right:-36px;top:-36px;border-radius:50%;background:rgba(31,95,174,.09)}.kanji{display:block;color:var(--gold);font-size:1.5rem;font-weight:900;margin:2px 0}.translation{display:block;font-weight:900;color:var(--primary);margin-bottom:5px}
+    .logic-card{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:16px;border:1px solid var(--line);border-radius:20px;background:#fff}.level-card{border:1px solid var(--line);border-radius:20px;padding:18px;background:#fff;position:relative}.level-card:before{content:"";position:absolute;left:18px;right:18px;top:0;height:5px;background:linear-gradient(90deg,var(--primary2),var(--gold));border-radius:0 0 99px 99px}.level-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:8px}.tag{display:inline-flex;padding:4px 8px;border-radius:999px;background:#eef2f7;color:#334155;font-weight:900;font-size:.78rem;white-space:nowrap}
+    .benefit-list,.trap-list{list-style:none;padding:0;margin:0;display:grid;gap:10px}.benefit-list li,.trap-list li{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:14px;background:#fff;border:1px solid var(--line)}.benefit-list li:before,.trap-list li:before{width:24px;height:24px;display:grid;place-items:center;border-radius:999px;color:#fff;font-weight:900;flex:0 0 auto}.benefit-list li:before{content:"+";background:var(--green)}.trap-list li:before{content:"!";background:var(--red)}
+    .method-flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.flow-step{border:1px solid var(--line);background:#fff;border-radius:18px;padding:14px;min-height:150px}.flow-id{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:999px;background:var(--blueSoft);color:var(--primary);font-weight:900;margin-bottom:8px}
+    details{border:1px solid var(--line);border-radius:17px;background:#fff;padding:13px 15px;margin:10px 0}summary{cursor:pointer;list-style:none;font-weight:900;color:var(--primary)}summary::-webkit-details-marker{display:none}summary:before{content:"+";display:inline-grid;place-items:center;width:24px;height:24px;border-radius:999px;background:var(--blueSoft);margin-right:8px;color:var(--primary);font-weight:900}details[open] summary:before{content:"–"}
+    .tool-table,.rubric{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border:1px solid var(--line);border-radius:18px;background:#fff}.tool-table th,.tool-table td,.rubric th,.rubric td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}.tool-table th,.rubric th{background:var(--primary);color:#fff;font-size:.92rem}.tool-table tr:last-child td,.rubric tr:last-child td{border-bottom:0}
+    .sim-stage{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}.scenario-box{background:linear-gradient(180deg,#fff,#f8fbff);border:1px solid var(--line);border-radius:22px;padding:18px}.fact-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.fact{padding:12px;border-radius:14px;background:#f8fafc;border:1px solid var(--line)}
+    .choice-list{display:grid;gap:10px;margin-top:12px}.choice{width:100%;border:1px solid var(--line);border-radius:16px;background:#fff;color:#22304a;text-align:left;padding:13px 14px;font-weight:800;cursor:pointer}.choice:hover{border-color:var(--primary2);background:#f8fbff}.choice.correct{background:var(--greenSoft);border-color:#8bc8a4;color:#0a5d33}.choice.wrong{background:var(--redSoft);border-color:#e1a19c;color:#7d1a13}.feedback{min-height:50px;border:1px solid var(--line);border-radius:16px;background:#f8fafc;padding:12px;margin-top:12px;color:#334155}
+    .btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}button.primary,button.secondary,button.ghost{border:0;border-radius:14px;padding:11px 14px;cursor:pointer;font-weight:900;font-family:inherit}button.primary{background:var(--primary);color:#fff}button.secondary{background:var(--gold);color:#fff}button.ghost{background:#eef2f7;color:#172033}button:disabled{opacity:.45;cursor:not-allowed}
+    .sort-list{display:grid;gap:10px;margin-top:14px}.sort-card{display:grid;grid-template-columns:46px 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:18px;background:#fff;padding:12px;box-shadow:0 8px 18px rgba(15,23,42,.06);cursor:grab}.sort-card.dragging{opacity:.45;border:2px dashed var(--primary2)}.rank{width:34px;height:34px;border-radius:999px;background:var(--primary2);color:#fff;display:grid;place-items:center;font-weight:900}.sort-actions{display:flex;gap:6px}.icon-btn{border:1px solid var(--line);background:#f8fafc;border-radius:10px;padding:7px 9px;color:var(--primary);cursor:pointer;font-weight:900}.result{margin-top:14px;border-radius:18px;padding:14px;background:#f8fafc;border:1px solid var(--line)}.idea{border-left:6px solid var(--gold)}.footer-note{color:var(--muted);text-align:center;margin-top:24px;font-size:.9rem}
+
+    .scenario-select-wrap{display:grid;gap:8px;margin:14px 0 16px}
+    .scenario-select-wrap label{font-weight:900;color:var(--primary)}
+    .scenario-select{width:100%;border:1px solid var(--line);border-radius:15px;background:#fff;color:var(--ink);padding:12px 14px;font-weight:800;font-family:inherit;font-size:1rem}
+    .scenario-context{border:1px solid var(--line);border-radius:16px;background:#fff;padding:13px;margin-top:12px}
+    .scenario-context b{color:var(--primary)}
+
+
+    .hero-grid-clean{
+      grid-template-columns:1fr;
+    }
+
+    .pyramid-wrap{
+      display:grid;
+      gap:10px;
+      margin-top:18px;
+      justify-items:center;
+    }
+
+    .pyramid-level{
+      position:relative;
+      color:#fff;
+      border-radius:20px;
+      padding:18px 22px;
+      box-shadow:0 14px 28px rgba(15,23,42,.12);
+      border:1px solid rgba(255,255,255,.34);
+      text-align:center;
+      min-height:118px;
+      display:grid;
+      align-content:center;
+      gap:6px;
+    }
+
+    .pyramid-level h3{
+      color:#fff;
+      margin:0;
+      font-size:1.25rem;
+    }
+
+    .pyramid-level p{
+      margin:0;
+      color:#f8fbff;
+    }
+
+    .pyramid-level .tag{
+      background:rgba(255,255,255,.18);
+      color:#fff;
+      justify-self:center;
+      border:1px solid rgba(255,255,255,.25);
+    }
+
+    .pyramid-n3{
+      width:46%;
+      background:linear-gradient(135deg,#0f2f56,#184b83);
+      clip-path:polygon(50% 0%,100% 100%,0% 100%);
+      min-height:170px;
+      padding-top:52px;
+      border-radius:0;
+    }
+
+    .pyramid-n2{
+      width:68%;
+      background:linear-gradient(135deg,#1f5fae,#2e73c7);
+    }
+
+    .pyramid-n1{
+      width:90%;
+      background:linear-gradient(135deg,#b7791f,#d59631);
+    }
+
+    .pyramid-arrow{
+      color:var(--primary);
+      font-weight:900;
+      font-size:1.4rem;
+      line-height:1;
+    }
+
+    .pyramid-note{
+      width:min(90%,900px);
+      text-align:center;
+      color:var(--muted);
+      font-size:.95rem;
+      margin-top:6px;
+    }
+
+    @media(max-width:780px){
+      .pyramid-n3,.pyramid-n2,.pyramid-n1{width:100%;clip-path:none;border-radius:20px;min-height:auto;padding:18px}
+      .pyramid-arrow{transform:rotate(90deg)}
+    }
+
+
+    .quiz-grid{
+      display:grid;
+      gap:14px;
+      margin-top:16px;
+    }
+
+    .quiz-card{
+      border:1px solid var(--line);
+      border-radius:20px;
+      background:#fff;
+      padding:16px;
+      box-shadow:0 8px 18px rgba(15,23,42,.05);
+    }
+
+    .quiz-card h3{
+      margin-bottom:10px;
+    }
+
+    .quiz-options{
+      display:grid;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .quiz-option{
+      display:flex;
+      gap:9px;
+      align-items:flex-start;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 12px;
+      background:#f8fafc;
+      cursor:pointer;
+      font-weight:700;
+    }
+
+    .quiz-option input{
+      margin-top:4px;
+    }
+
+    .quiz-option.correct{
+      background:var(--greenSoft);
+      border-color:#8bc8a4;
+      color:#0a5d33;
+    }
+
+    .quiz-option.wrong{
+      background:var(--redSoft);
+      border-color:#e1a19c;
+      color:#7d1a13;
+    }
+
+    .quiz-explain{
+      display:none;
+      margin-top:10px;
+      border-radius:14px;
+      padding:10px 12px;
+      background:var(--blueSoft);
+      border:1px solid var(--line);
+      color:#334155;
+    }
+
+    .quiz-explain.visible{
+      display:block;
+    }
+
+    .quiz-score{
+      font-size:1.15rem;
+      font-weight:900;
+    }
+
+    @media(max-width:1040px){.hero-grid,.grid.two,.grid.three,.grid.four,.sim-stage,.method-flow{grid-template-columns:1fr}.fact-grid{grid-template-columns:1fr}}@media(max-width:680px){.hero{padding:22px}.sort-card{grid-template-columns:38px 1fr}.sort-actions{grid-column:1/-1;justify-content:flex-end}}@media print{body{background:#fff}.tabs,.btn-row,.progress-card{display:none!important}.panel{display:block!important;page-break-inside:avoid}.card,.hero{box-shadow:none}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="hero">
+      <div class="hero-grid hero-grid-clean"><div><span class="eyebrow">01 · Théorie</span><h1>Comprendre le <span class="accent">QRQC</span></h1></div></div></header>
+    <nav class="tabs" aria-label="Navigation principale"><button class="tab-btn active" data-tab="theorie">1. Théorie QRQC</button><button class="tab-btn" data-tab="simulation">2. Simulation</button><button class="tab-btn" data-tab="exercice">3. Exercice de classement</button><button class="tab-btn" data-tab="quiz">4. Quiz théorie</button></nav>
+    <main>
+      <section id="theorie" class="panel active">
+        <article class="card"><span class="section-label">01 · Théorie</span><h2>Comprendre le QRQC</h2><p class="lead">Le <b>Quick Response Quality Control</b> est une méthode d’animation et de résolution rapide des problèmes qualité, issue de pratiques industrielles japonaises et largement diffusée dans des industries exigeantes, notamment l’automobile, l’aéronautique, l’horlogerie et la microtechnique.</p><div class="callout gold"><b>Définition courte :</b> le QRQC est une démarche structurée d’analyse et de traitement des problèmes qualité au plus près du terrain, en s’appuyant sur la réalité concrète plutôt que sur des suppositions ou des rapports écrits. Il combine réaction rapide, animation visuelle, implication du terrain et rigueur méthodologique.</div></article>
+
+        <article class="card" style="margin-top:18px">
+          <span class="section-label">Équilibre fondamental</span>
+          <h2>Les deux dimensions du QRQC</h2>
+          <div class="grid two" style="margin-top:14px">
+            <div class="callout gold">
+              <h3>Quick Response</h3>
+              <p>
+                Réagir vite pour protéger le client, éviter la propagation du défaut
+                et rendre le problème visible.
+              </p>
+            </div>
+            <div class="callout green">
+              <h3>Quality Control</h3>
+              <p>
+                Comprendre le phénomène, trouver la cause racine, agir sur le processus
+                et vérifier le résultat.
+              </p>
+            </div>
+          </div>
+          <div class="callout" style="margin-top:14px">
+            <p style="margin-bottom:0">
+              Une réaction rapide sans analyse peut produire des <b>“rustines”</b>.
+              Une analyse profonde sans réaction rapide laisse le client exposé.
+              Le QRQC cherche l’équilibre entre les deux.
+            </p>
+          </div>
+        </article>
+
+        <div class="grid two" style="margin-top:18px"><article class="card number-card"><div class="big-number">01</div><div><h3>Définition</h3><p>Le QRQC cherche à réduire le délai entre l’apparition d’un problème et sa prise en charge. Il rend le problème visible, mobilise les personnes proches du terrain et suit les actions jusqu’à preuve d’efficacité.</p><p class="muted">Une action immédiate protège le client. Une action corrective durable empêche le retour du problème.</p></div></article><article class="card number-card"><div class="big-number">02</div><div><h3>Origine</h3><p>Le QRQC est généralement associé à <b>Kazuo Kawashima</b> chez <b>Nissan</b> dans les années 1990, puis à sa diffusion dans l’industrie européenne, en particulier via des équipementiers comme Valeo au début des années 2000.</p><p class="muted">Il s’inscrit dans la lignée du <b>Toyota Production System</b>, de la culture du <b>Gemba</b>, du management visuel et de l’amélioration continue.</p></div></article></div>
+        <article class="card" style="margin-top:18px"><span class="section-label">Pilier fondamental</span><h2>San Gen Shugi — 三現主義 — les 3 réels</h2><p class="lead">Ne jamais analyser un problème depuis un bureau. Aller voir, toucher, mesurer.</p><div class="grid three" style="margin-top:14px"><div class="san-card"><div class="num circle">1</div><h3>GENBA</h3><span class="kanji">現場</span><span class="translation">Lieu réel · Real Place</span><p>Se rendre physiquement sur le lieu où le problème s’est produit. Pas de diagnostic uniquement par mail, téléphone ou souvenir : le terrain d’abord.</p></div><div class="san-card"><div class="num circle gold">2</div><h3>GENBUTSU</h3><span class="kanji">現物</span><span class="translation">Pièce réelle · Real Part</span><p>Observer, manipuler et analyser la pièce défectueuse elle-même. La conserver, la photographier, la mesurer et la comparer à une pièce conforme.</p></div><div class="san-card"><div class="num circle green">3</div><h3>GENJITSU</h3><span class="kanji">現実</span><span class="translation">Données réelles · Real Data</span><p>Travailler à partir de données factuelles, chiffrées et mesurées, et non d’intuitions, de jugements ou de souvenirs imprécis.</p></div></div></article>
+        <article class="card" style="margin-top:18px"><span class="section-label">Logiques clés</span><h2>Les 3 logiques du QRQC</h2><div class="grid three"><div class="logic-card"><div class="num circle">①</div><div><h3>Réaction rapide</h3><p>Traiter le problème au plus tôt, avec une animation quotidienne courte et des actions de protection immédiates pour le client.</p></div></div><div class="logic-card"><div class="num circle gold">②</div><div><h3>Logique terrain</h3><p>Appliquer strictement le San Gen Shugi : aller voir, toucher, mesurer. Le problème se comprend là où il naît.</p></div></div><div class="logic-card"><div class="num circle green">③</div><div><h3>Rigueur d’analyse</h3><p>Utiliser les outils qualité : QQOQCCP, 5 pourquoi, Ishikawa, PDCA. Pas d’action durable sans causes racines identifiées.</p></div></div></div></article>
+        
+        <article class="card" style="margin-top:18px">
+          <span class="section-label">Animation</span>
+          <h2>Les 3 niveaux d’animation</h2>
+          <p class="lead">
+            La pyramide montre la logique d’escalade : un problème non résolu au niveau terrain remonte vers
+            un niveau capable de décider, d’arbitrer ou de fournir des moyens.
+          </p>
+
+          <div class="pyramid-wrap" aria-label="Pyramide des niveaux d’animation QRQC">
+            <div class="pyramid-level pyramid-n3">
+              <h3>Niveau 03 · Usine / Site</h3>
+              <span class="tag">Mensuel</span>
+              <p>Direction · problèmes systémiques, transverses ou nécessitant des arbitrages importants.</p>
+            </div>
+
+            <div class="pyramid-arrow">↑ Escalade si non résolu</div>
+
+            <div class="pyramid-level pyramid-n2">
+              <h3>Niveau 02 · Atelier / Workshop</h3>
+              <span class="tag">Hebdomadaire</span>
+              <p>Responsable d’atelier · problèmes récurrents, inter-postes ou non résolus en N1.</p>
+            </div>
+
+            <div class="pyramid-arrow">↑ Escalade si non résolu</div>
+
+            <div class="pyramid-level pyramid-n1">
+              <h3>Niveau 01 · Ligne / UAP</h3>
+              <span class="tag">Quotidien · ≈ 15 min</span>
+              <p>Chef d’équipe et opérateurs · problème vu au poste, pièce présentée, actions immédiates décidées.</p>
+            </div>
+
+            <p class="pyramid-note">
+              Lecture de bas en haut : le QRQC démarre au plus près du terrain. Si le problème dépasse le niveau ligne,
+              il est escaladé vers l’atelier, puis vers le site.
+            </p>
+          </div>
+        </article>
+
+        <div class="grid two" style="margin-top:18px"><article class="card"><span class="section-label">+ Bénéfices</span><h2>Apports du QRQC</h2><ul class="benefit-list"><li>Réduction drastique des délais de résolution.</li><li>Implication directe du terrain et des opérateurs.</li><li>Diminution des récurrences grâce aux causes racines traitées.</li><li>Culture qualité partagée, visible et factuelle.</li><li>Capitalisation des bonnes pratiques.</li><li>Amélioration des indicateurs SQDC : Sécurité, Qualité, Délais, Coûts.</li></ul></article><article class="card"><span class="section-label">! Pièges</span><h2>Erreurs à éviter</h2><ul class="trap-list"><li>Animer le QRQC depuis une salle de réunion sans aller au Gemba.</li><li>Sauter l’étape causes racines pour aller directement aux actions.</li><li>Décider sans pièce réelle ou sans données mesurées.</li><li>Confondre action curative immédiate et action corrective durable.</li><li>Ne pas standardiser après résolution.</li><li>Laisser la réunion s’éterniser et perdre l’effet “Quick”.</li></ul></article></div>
+        
+      </section>
+
+      <section id="simulation" class="panel">
+        <article class="card">
+          <span class="section-label">02 · Simulation</span>
+          <h2>Simulation QRQC avec choix du cas</h2>
+          <p class="lead">
+            Choisissez une situation dans la liste, puis prenez les décisions QRQC les plus adaptées.
+            Les questions s’adaptent automatiquement au cas sélectionné.
+          </p>
+
+          <div class="scenario-select-wrap">
+            <label for="scenarioSelect">Choisir un exemple de simulation</label>
+            <select id="scenarioSelect" class="scenario-select" aria-label="Choisir un exemple de simulation"></select>
+          </div>
+
+          <div class="sim-stage" style="margin-top:14px">
+            <div class="scenario-box">
+              <h3 id="scenarioTitle">Données de départ</h3>
+              <p id="scenarioDescription" class="lead"></p>
+
+              <div class="fact-grid" id="scenarioFacts"></div>
+
+              <div class="scenario-context">
+                <p><b>Mission QRQC :</b> <span id="scenarioMission"></span></p>
+                <p style="margin-bottom:0"><b>Données à rechercher :</b> <span id="scenarioData"></span></p>
+              </div>
+
+              <div class="activity-bar"><span id="simBar"></span></div>
+              <p class="mini muted" id="simStepLabel">Étape 1 sur 5</p>
+            </div>
+
+            <div class="scenario-box">
+              <h3 id="simTitle">Étape</h3>
+              <p id="simQuestion" class="lead"></p>
+              <div id="simChoices" class="choice-list"></div>
+              <div id="simFeedback" class="feedback">Choisissez une réponse.</div>
+              <div class="btn-row">
+                <button class="primary" id="nextSim" disabled>Étape suivante</button>
+                <button class="ghost" id="resetSim">Recommencer ce cas</button>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+<section id="exercice" class="panel">
+        <article class="card"><span class="section-label">03 · Exercice</span><h2>Classer les étapes d’une résolution de problème</h2><p class="lead">Déplacez les cartes pour reconstituer un ordre logique. Vous pouvez glisser-déposer les cartes ou utiliser les flèches.</p><div class="callout"><b>Consigne élève :</b> classe les étapes, vérifie l’ordre, puis justifie deux choix : une étape de sécurisation et une étape de vérification.</div><div id="sortList" class="sort-list" aria-live="polite"></div><div class="btn-row"><button class="secondary" id="checkOrder">Vérifier l’ordre</button><button class="ghost" id="shuffleOrder">Mélanger</button><button class="ghost" id="showCorrection">Afficher la correction</button></div><div id="orderResult" class="result">Aucun résultat pour le moment.</div></article>
+        <article class="card" style="margin-top:18px"><h2>Correction attendue</h2><p>L’ordre proposé respecte une logique pédagogique : alerter, protéger, comprendre, traiter la cause, vérifier et capitaliser.</p><ol id="correctionList"></ol></article>
+      </section>
+
+      <section id="quiz" class="panel">
+        <article class="card">
+          <span class="section-label">04 · Quiz théorie</span>
+          <h2>Vérifier la compréhension du QRQC</h2>
+          <p class="lead">
+            Répondez aux questions. Le quiz porte sur la définition du QRQC, les 3 réels,
+            les deux dimensions Quick Response / Quality Control, les niveaux d’animation
+            et les pièges à éviter.
+          </p>
+          <div class="callout gold">
+            <b>Consigne :</b> choisissez une seule réponse par question, puis cliquez sur
+            <b>Corriger le quiz</b>. La correction détaillée s’affiche sous chaque question.
+          </div>
+
+          <div id="theoryQuiz" class="quiz-grid"></div>
+
+          <div class="btn-row">
+            <button class="secondary" id="checkTheoryQuiz">Corriger le quiz</button>
+            <button class="ghost" id="resetTheoryQuiz">Réinitialiser</button>
+          </div>
+
+          <div id="theoryQuizResult" class="result">Aucun résultat pour le moment.</div>
+        </article>
+      </section>
+
+</main>
+    
+  </div>
+  <script>
+    "use strict";
+    const activityState={simulationDone:false,orderDone:false,quizDone:false};
+    function updateGlobalScore(){
+      const scoreElement=document.getElementById("globalScore");
+      const barElement=document.getElementById("globalBar");
+      if(!scoreElement || !barElement) return;
+      const values=Object.values(activityState);
+      const done=values.filter(Boolean).length;
+      const percent=Math.round(done/values.length*100);
+      scoreElement.textContent=percent+"%";
+      barElement.style.width=percent+"%";
+    }
+    document.querySelectorAll(".tab-btn").forEach(button=>{button.addEventListener("click",()=>{document.querySelectorAll(".tab-btn").forEach(btn=>btn.classList.remove("active"));document.querySelectorAll(".panel").forEach(panel=>panel.classList.remove("active"));button.classList.add("active");document.getElementById(button.dataset.tab).classList.add("active");window.scrollTo({top:0,behavior:"smooth"})})});
+
+    const simScenarios=[
+      {
+        id:"bavure",
+        label:"Défaut d’usinage · Bavure sur arête fonctionnelle",
+        title:"Défaut d’usinage : bavure sur arête fonctionnelle",
+        description:"Au contrôle final, 12 pièces sur 120 présentent une bavure visible sur une arête fonctionnelle. Le lot doit partir aujourd’hui.",
+        mission:"protéger le client, comprendre l’apparition de la bavure et éviter la récurrence.",
+        data:"dernière pièce conforme, outil utilisé, changement d’outil, programme, opérateur, heure d’apparition, contrôle de démarrage, pièces bonnes et mauvaises.",
+        facts:[
+          ["Défaut","Bavure sur arête fonctionnelle"],
+          ["Quantité","12 pièces non conformes / 120"],
+          ["Moment","Détection au contrôle final"],
+          ["Risque","Expédition prévue le jour même"]
+        ],
+        steps:[
+          {
+            title:"1. Formuler le problème",
+            question:"Quelle formulation est la plus adaptée pour démarrer le QRQC ?",
+            choices:[
+              "La production a encore mal travaillé, il faut être plus vigilant.",
+              "12 pièces sur 120 présentent une bavure sur l’arête fonctionnelle, défaut détecté au contrôle final à 10h20.",
+              "Il faut refaire les pièces sans perdre de temps.",
+              "La machine n’est probablement pas stable."
+            ],
+            correct:1,
+            explain:"La formulation est factuelle, mesurable, localisée et datée."
+          },
+          {
+            title:"2. Sécuriser immédiatement",
+            question:"Quelle action est prioritaire avant l’analyse détaillée ?",
+            choices:[
+              "Attendre la prochaine réunion hebdomadaire.",
+              "Modifier tout de suite le programme sans conserver les preuves.",
+              "Bloquer le lot suspect, suspendre l’expédition et définir un tri des pièces concernées.",
+              "Demander à l’opérateur de faire plus attention."
+            ],
+            correct:2,
+            explain:"La sécurisation protège le client et évite la propagation du défaut."
+          },
+          {
+            title:"3. Appliquer les 3 réels",
+            question:"Quel comportement correspond le mieux à l’esprit QRQC ?",
+            choices:[
+              "Analyser le problème uniquement à partir d’un mail.",
+              "Aller au poste, observer les pièces bonnes et mauvaises, relever les données réelles.",
+              "Faire une hypothèse rapide puis chercher des arguments pour la confirmer.",
+              "Confier le sujet uniquement au service qualité sans impliquer le terrain."
+            ],
+            correct:1,
+            explain:"Le QRQC exige de partir du terrain, des pièces et des faits."
+          },
+          {
+            title:"4. Identifier une cause racine",
+            question:"Quelle phrase ressemble le plus à une cause racine exploitable ?",
+            choices:[
+              "L’opérateur n’a pas été assez attentif.",
+              "Le défaut arrive parfois, ce n’est pas grave.",
+              "L’outil a dépassé la durée d’utilisation prévue et le contrôle de démarrage de série n’a pas détecté la bavure.",
+              "Le client est trop exigeant."
+            ],
+            correct:2,
+            explain:"La cause est reliée au processus et permet de définir une action corrective vérifiable."
+          },
+          {
+            title:"5. Vérifier et standardiser",
+            question:"Quelle clôture QRQC est la plus robuste ?",
+            choices:[
+              "Noter que le problème est terminé parce que la production a repris.",
+              "Contrôler les lots suivants, vérifier l’absence de bavure, mettre à jour le standard et former les personnes concernées.",
+              "Supprimer le défaut de la liste des problèmes visibles.",
+              "Changer d’opérateur sur le poste."
+            ],
+            correct:1,
+            explain:"On vérifie l’efficacité, on modifie le standard et on capitalise."
+          }
+        ]
+      },
+      {
+        id:"rayure",
+        label:"Défaut esthétique · Rayure après polissage",
+        title:"Défaut esthétique : rayure après polissage",
+        description:"Après polissage, 8 pièces présentent une rayure visible. Les pièces sont destinées à un assemblage horloger visible.",
+        mission:"isoler les pièces suspectes, comprendre l’origine de la rayure et éviter sa réapparition.",
+        data:"heure d’apparition, poste, chiffon, pâte de polissage, protection des pièces, manipulation, pièces conformes et non conformes, photos.",
+        facts:[
+          ["Défaut","Rayure visible après polissage"],
+          ["Quantité","8 pièces concernées"],
+          ["Zone","Surface visible"],
+          ["Risque","Non-conformité esthétique client"]
+        ],
+        steps:[
+          {
+            title:"1. Formuler le problème",
+            question:"Quelle formulation est la plus factuelle ?",
+            choices:[
+              "Le polissage est mal fait.",
+              "8 pièces présentent une rayure visible après polissage sur la surface extérieure, détectée au contrôle esthétique.",
+              "Le client est trop sévère sur l’esthétique.",
+              "Il faut changer de polisseur."
+            ],
+            correct:1,
+            explain:"On décrit le défaut, la quantité, l’opération et le lieu de détection sans jugement."
+          },
+          {
+            title:"2. Sécuriser",
+            question:"Quelle sécurisation est la plus adaptée ?",
+            choices:[
+              "Laisser partir les pièces car la rayure est peut-être acceptable.",
+              "Retoucher toutes les pièces sans les identifier.",
+              "Isoler les 8 pièces, identifier le lot et contrôler les pièces produites depuis le dernier contrôle conforme.",
+              "Nettoyer le poste et reprendre la production sans autre action."
+            ],
+            correct:2,
+            explain:"On protège le client et on délimite le périmètre suspect."
+          },
+          {
+            title:"3. Chercher les faits",
+            question:"Quelle donnée est la plus utile pour commencer l’analyse terrain ?",
+            choices:[
+              "L’avis général de l’atelier sur le polissage.",
+              "La comparaison entre pièces bonnes et rayées, avec poste, consommables, gestes et heure d’apparition.",
+              "Le nombre total de salariés dans l’atelier.",
+              "Le ressenti du client sur les pièces anciennes."
+            ],
+            correct:1,
+            explain:"Le QRQC s’appuie sur les pièces réelles, le lieu réel et les données réelles."
+          },
+          {
+            title:"4. Cause racine possible",
+            question:"Quelle cause est exploitable pour agir durablement ?",
+            choices:[
+              "L’opérateur n’est pas soigneux.",
+              "Le défaut esthétique arrive souvent dans ce métier.",
+              "Un chiffon contaminé par des particules dures a été utilisé après une opération précédente.",
+              "La pièce est difficile à polir."
+            ],
+            correct:2,
+            explain:"Cette cause est vérifiable et permet une action sur le processus."
+          },
+          {
+            title:"5. Pérenniser",
+            question:"Quelle action évite le mieux la récurrence ?",
+            choices:[
+              "Dire aux opérateurs de faire attention.",
+              "Créer une règle de séparation des chiffons, ajouter un contrôle visuel de consommable et former les opérateurs.",
+              "Ajouter seulement un tri final.",
+              "Changer toutes les pièces rayées."
+            ],
+            correct:1,
+            explain:"L’action agit sur la méthode, la prévention et la standardisation."
+          }
+        ]
+      },
+      {
+        id:"dimension",
+        label:"Défaut dimensionnel · Cote hors tolérance",
+        title:"Défaut dimensionnel : cote hors tolérance",
+        description:"Une cote contrôlée au micromètre dépasse la tolérance sur 5 pièces consécutives. La production est en cours.",
+        mission:"décider si la production doit être stoppée, vérifier le moyen de mesure et identifier l’origine de la dérive.",
+        data:"valeurs mesurées, tolérance, moyen de mesure, étalonnage, dernier contrôle conforme, changement d’outil, correction machine, température.",
+        facts:[
+          ["Défaut","Cote hors tolérance"],
+          ["Quantité","5 pièces consécutives"],
+          ["Moyen","Micromètre"],
+          ["Risque","Production de pièces non conformes"]
+        ],
+        steps:[
+          {
+            title:"1. Formuler le problème",
+            question:"Quelle formulation convient le mieux ?",
+            choices:[
+              "La machine dérive.",
+              "5 pièces consécutives ont une cote supérieure à la tolérance, mesurée au micromètre au poste de contrôle.",
+              "Le micromètre est sûrement faux.",
+              "L’opérateur règle mal la machine."
+            ],
+            correct:1,
+            explain:"La phrase décrit le constat mesuré sans conclure trop vite."
+          },
+          {
+            title:"2. Sécuriser",
+            question:"Quelle action immédiate est la plus robuste ?",
+            choices:[
+              "Continuer la production pour ne pas perdre de temps.",
+              "Stopper ou isoler la production depuis la dernière pièce conforme et identifier le périmètre suspect.",
+              "Corriger la machine sans noter l’ancienne valeur.",
+              "Reprendre la mesure avec un autre opérateur seulement."
+            ],
+            correct:1,
+            explain:"La priorité est de bloquer le risque et de définir le périmètre."
+          },
+          {
+            title:"3. Vérifier les données",
+            question:"Quel contrôle est nécessaire avant de conclure à une dérive machine ?",
+            choices:[
+              "Vérifier le moyen de mesure, la méthode de mesure et comparer avec une pièce témoin.",
+              "Demander au chef d’équipe son impression.",
+              "Changer directement l’outil.",
+              "Contrôler uniquement une pièce conforme."
+            ],
+            correct:0,
+            explain:"Un défaut dimensionnel peut venir de la pièce, du moyen ou de la méthode de mesure."
+          },
+          {
+            title:"4. Cause racine possible",
+            question:"Quelle cause est la plus exploitable ?",
+            choices:[
+              "La machine est vieille.",
+              "L’usure d’outil dépasse le seuil prévu et la fréquence de contrôle n’a pas détecté la dérive à temps.",
+              "L’opérateur n’a pas eu de chance.",
+              "La cote est trop difficile."
+            ],
+            correct:1,
+            explain:"La cause relie la dérive à un mécanisme vérifiable et à un standard insuffisant."
+          },
+          {
+            title:"5. Vérifier l’efficacité",
+            question:"Quelle preuve permet de clôturer le QRQC ?",
+            choices:[
+              "La production a repris.",
+              "Les 30 pièces suivantes sont conformes, la fréquence de contrôle est ajustée et le standard d’usure outil est mis à jour.",
+              "Le micromètre est rangé.",
+              "Le problème a été expliqué oralement."
+            ],
+            correct:1,
+            explain:"La clôture demande une preuve mesurée et une mise à jour du standard."
+          }
+        ]
+      },
+      {
+        id:"melange",
+        label:"Flux · Mélange de références",
+        title:"Flux : mélange de références dans un bac",
+        description:"Deux références proches visuellement sont retrouvées dans le même bac en zone d’attente avant assemblage.",
+        mission:"sécuriser le flux sans bloquer inutilement toute la production et supprimer le risque de mélange.",
+        data:"traçabilité, étiquettes, bacs, poste d’origine, chemin de flux, opérateurs concernés, références similaires, séparation physique.",
+        facts:[
+          ["Défaut","Mélange de deux références"],
+          ["Lieu","Zone d’attente avant assemblage"],
+          ["Risque","Assemblage avec mauvaise référence"],
+          ["Particularité","Références visuellement proches"]
+        ],
+        steps:[
+          {
+            title:"1. Formuler le problème",
+            question:"Quelle formulation est la plus précise ?",
+            choices:[
+              "Les bacs sont mal rangés.",
+              "Deux références proches visuellement sont présentes dans le même bac en zone d’attente avant assemblage.",
+              "La logistique ne fait pas attention.",
+              "Il y a trop de références."
+            ],
+            correct:1,
+            explain:"La formulation décrit le mélange, le lieu et le risque sans accuser."
+          },
+          {
+            title:"2. Sécuriser",
+            question:"Quelle action immédiate est prioritaire ?",
+            choices:[
+              "Vider tous les bacs de l’atelier.",
+              "Isoler le bac concerné, identifier les pièces, vérifier les bacs proches et prévenir l’assemblage.",
+              "Continuer si les pièces se ressemblent beaucoup.",
+              "Changer toutes les étiquettes plus tard."
+            ],
+            correct:1,
+            explain:"On cible le périmètre à risque et on évite la propagation au poste aval."
+          },
+          {
+            title:"3. Collecter les faits",
+            question:"Quelle donnée permet de comprendre l’origine du mélange ?",
+            choices:[
+              "Le plan de charge annuel.",
+              "Le parcours réel des bacs, les étiquettes, les postes traversés et le dernier point de séparation des références.",
+              "Le nombre total de références de l’entreprise.",
+              "Le ressenti des opérateurs sur la logistique."
+            ],
+            correct:1,
+            explain:"Le flux réel permet d’identifier le point où la séparation a échoué."
+          },
+          {
+            title:"4. Cause racine possible",
+            question:"Quelle cause racine est la plus robuste ?",
+            choices:[
+              "Les opérateurs sont distraits.",
+              "Les deux références utilisent des bacs identiques et une étiquette peu visible au point de transfert.",
+              "Le poste aval est trop exigeant.",
+              "Il faut interdire les références proches."
+            ],
+            correct:1,
+            explain:"La cause cible le système de distinction et de transfert."
+          },
+          {
+            title:"5. Standardiser",
+            question:"Quelle action corrective est la plus pertinente ?",
+            choices:[
+              "Demander de mieux regarder.",
+              "Différencier physiquement les bacs, renforcer l’étiquetage et ajouter une vérification au point de transfert.",
+              "Créer un tri final uniquement.",
+              "Faire un rappel oral une seule fois."
+            ],
+            correct:1,
+            explain:"L’action rend l’erreur plus difficile et modifie le standard de flux."
+          }
+        ]
+      },
+      {
+        id:"retard",
+        label:"Flux · Retard de livraison interne",
+        title:"Flux : retard de livraison interne",
+        description:"Un poste aval attend des pièces depuis 45 minutes alors que l’encours amont semble élevé.",
+        mission:"comprendre si le problème vient d’une priorité mal définie, d’un blocage de flux ou d’une capacité insuffisante.",
+        data:"ordre de priorité, OF, encours, temps d’attente, files, déplacement, disponibilité machine, règles FIFO.",
+        facts:[
+          ["Écart","Attente poste aval"],
+          ["Durée","45 minutes"],
+          ["Observation","Encours amont élevé"],
+          ["Risque","Retard et rupture de flux"]
+        ],
+        steps:[
+          {
+            title:"1. Formuler le problème",
+            question:"Quelle formulation est la meilleure ?",
+            choices:[
+              "L’amont ne travaille pas assez vite.",
+              "Le poste aval attend des pièces depuis 45 minutes alors qu’un encours est visible en amont.",
+              "Il faut produire plus.",
+              "Le planning est mauvais."
+            ],
+            correct:1,
+            explain:"On décrit l’attente, la durée et l’observation terrain."
+          },
+          {
+            title:"2. Sécuriser le flux",
+            question:"Quelle action immédiate est la plus adaptée ?",
+            choices:[
+              "Changer tout le planning.",
+              "Identifier les pièces nécessaires au poste aval et organiser une alimentation temporaire maîtrisée.",
+              "Accélérer toutes les opérations.",
+              "Laisser le poste aval attendre."
+            ],
+            correct:1,
+            explain:"On protège le flux aval sans désorganiser tout le système."
+          },
+          {
+            title:"3. Observer le flux réel",
+            question:"Quelle observation est la plus utile ?",
+            choices:[
+              "Le nombre de machines dans l’atelier.",
+              "Le chemin réel des pièces, la file d’attente, les priorités OF et les règles FIFO réellement appliquées.",
+              "Le taux horaire de l’atelier.",
+              "Le nom du dernier opérateur."
+            ],
+            correct:1,
+            explain:"Le retard de flux se comprend en observant le flux réel."
+          },
+          {
+            title:"4. Cause racine possible",
+            question:"Quelle cause est la plus exploitable ?",
+            choices:[
+              "Les gens ne communiquent pas.",
+              "La règle de priorité entre OF urgents et FIFO n’est pas définie au point de dispatch.",
+              "Le poste aval est impatient.",
+              "Il y a toujours des retards."
+            ],
+            correct:1,
+            explain:"La cause identifie une règle manquante ou ambiguë dans le processus."
+          },
+          {
+            title:"5. Vérifier l’efficacité",
+            question:"Quelle preuve permet de valider l’action ?",
+            choices:[
+              "Le poste aval ne s’est pas plaint.",
+              "Le temps d’attente aval reste inférieur au seuil défini pendant plusieurs cycles, avec règle de priorité affichée et appliquée.",
+              "L’encours semble plus propre.",
+              "Le responsable a validé oralement."
+            ],
+            correct:1,
+            explain:"Une preuve d’efficacité doit être observable ou mesurable."
+          }
+        ]
+      },
+      {
+        id:"controle",
+        label:"Système qualité · Contrôle non renseigné",
+        title:"Système qualité : contrôle non renseigné",
+        description:"Une opération de contrôle prévue au plan de surveillance n’a pas été renseignée sur une série en cours.",
+        mission:"décider si le lot peut continuer, doit être bloqué ou doit être recontrôlé.",
+        data:"criticité de la cote, plan de surveillance, historique de contrôle, signature, traçabilité, pièces déjà livrées, moyen utilisé.",
+        facts:[
+          ["Écart","Contrôle prévu non renseigné"],
+          ["Document","Plan de surveillance"],
+          ["Statut","Série en cours"],
+          ["Risque","Preuve de conformité absente"]
+        ],
+        steps:[
+          {
+            title:"1. Formuler le problème",
+            question:"Quelle formulation convient le mieux ?",
+            choices:[
+              "L’opérateur a oublié son travail.",
+              "Le contrôle prévu au plan de surveillance n’est pas renseigné pour la série en cours.",
+              "Les documents qualité sont trop lourds.",
+              "La série est sûrement bonne."
+            ],
+            correct:1,
+            explain:"On décrit l’écart documentaire et qualité sans conclure sur la personne."
+          },
+          {
+            title:"2. Sécuriser",
+            question:"Quelle action immédiate est la plus adaptée ?",
+            choices:[
+              "Laisser continuer car il ne s’agit que d’un document.",
+              "Identifier le lot concerné, bloquer si nécessaire et réaliser le contrôle manquant selon la criticité.",
+              "Remplir la case après coup sans vérifier les pièces.",
+              "Supprimer le contrôle du plan."
+            ],
+            correct:1,
+            explain:"L’absence de preuve peut masquer un risque produit."
+          },
+          {
+            title:"3. Collecter les faits",
+            question:"Quelle information est prioritaire ?",
+            choices:[
+              "Le temps passé à remplir les documents.",
+              "La criticité du contrôle, le nombre de pièces concernées et l’existence de mesures ou preuves alternatives.",
+              "Le nombre de contrôles dans l’entreprise.",
+              "L’avis général des opérateurs sur la qualité."
+            ],
+            correct:1,
+            explain:"La décision dépend du risque produit et de la traçabilité disponible."
+          },
+          {
+            title:"4. Cause racine possible",
+            question:"Quelle cause est la plus utile pour agir durablement ?",
+            choices:[
+              "La personne est négligente.",
+              "Le point de contrôle n’est pas intégré au déroulé opératoire et aucun rappel visuel ne signale l’obligation de saisie.",
+              "Il y a trop de qualité.",
+              "Le contrôle n’est pas important."
+            ],
+            correct:1,
+            explain:"La cause porte sur le système de travail et peut être corrigée."
+          },
+          {
+            title:"5. Standardiser",
+            question:"Quelle action corrective est la plus robuste ?",
+            choices:[
+              "Faire un rappel oral.",
+              "Intégrer le contrôle dans le standard opératoire, ajouter un point bloquant ou visuel, et vérifier les séries suivantes.",
+              "Demander une signature supplémentaire seulement.",
+              "Contrôler uniquement en fin de mois."
+            ],
+            correct:1,
+            explain:"L’action réduit le risque d’oubli et vérifie l’efficacité."
+          }
+        ]
+      },
+      {
+        id:"recurrent",
+        label:"Récurrence · Même défaut répété",
+        title:"Récurrence : même défaut répété",
+        description:"Le même défaut revient trois fois en deux semaines malgré des tris successifs et des rappels aux opérateurs.",
+        mission:"comprendre pourquoi les actions précédentes n’ont pas empêché la récurrence.",
+        data:"actions anciennes, preuves d’efficacité, standards modifiés ou non, formation, date de retour du défaut, cause racine validée.",
+        facts:[
+          ["Écart","Même défaut répété"],
+          ["Fréquence","3 fois en 2 semaines"],
+          ["Actions passées","Tris et rappels"],
+          ["Risque","Cause racine non traitée"]
+        ],
+        steps:[
+          {
+            title:"1. Formuler le problème",
+            question:"Quelle formulation est la plus utile pour un QRQC ?",
+            choices:[
+              "Les opérateurs ne comprennent pas.",
+              "Le même défaut est réapparu trois fois en deux semaines malgré deux tris et un rappel oral.",
+              "Ce défaut est impossible à supprimer.",
+              "Il faut refaire une réunion."
+            ],
+            correct:1,
+            explain:"On caractérise la récurrence et les actions déjà tentées."
+          },
+          {
+            title:"2. Sécuriser",
+            question:"Quelle action immédiate faut-il garder ?",
+            choices:[
+              "Arrêter toute analyse et refaire seulement un tri.",
+              "Sécuriser les lots concernés, mais ouvrir aussi une analyse sur l’inefficacité des actions précédentes.",
+              "Ignorer le défaut puisqu’il est connu.",
+              "Changer les opérateurs."
+            ],
+            correct:1,
+            explain:"La sécurisation reste nécessaire, mais la récurrence impose une analyse plus profonde."
+          },
+          {
+            title:"3. Examiner les actions passées",
+            question:"Quelle question est la plus importante ?",
+            choices:[
+              "Qui a été rappelé à l’ordre ?",
+              "Quelle preuve montrait que les actions précédentes avaient réellement supprimé la cause ?",
+              "Combien de réunions ont eu lieu ?",
+              "Qui était absent ?"
+            ],
+            correct:1,
+            explain:"Une action clôturée sans preuve d’efficacité peut laisser la cause active."
+          },
+          {
+            title:"4. Cause racine possible",
+            question:"Quelle cause explique le mieux la récurrence ?",
+            choices:[
+              "Le tri n’a pas supprimé la cause racine et le standard de travail n’a pas été modifié.",
+              "Le défaut revient parce que c’est normal.",
+              "La qualité contrôle trop.",
+              "Les opérateurs ont oublié volontairement."
+            ],
+            correct:0,
+            explain:"Le tri est curatif ; il ne modifie pas nécessairement le processus."
+          },
+          {
+            title:"5. Capitaliser",
+            question:"Quelle clôture est la plus robuste ?",
+            choices:[
+              "Refaire un rappel oral.",
+              "Valider la cause racine, modifier le standard, former, vérifier plusieurs séries et partager le retour d’expérience.",
+              "Ajouter un contrôle final uniquement.",
+              "Attendre de voir si le défaut revient."
+            ],
+            correct:1,
+            explain:"La capitalisation transforme l’incident en apprentissage collectif."
+          }
+        ]
+      },
+      {
+        id:"panne_moyen",
+        label:"Moyen de contrôle · Comparateur bloqué",
+        title:"Moyen de contrôle : comparateur bloqué",
+        description:"Un comparateur utilisé au contrôle en cours de production reste bloqué sur une valeur. Plusieurs pièces ont été validées avant la détection.",
+        mission:"sécuriser les pièces contrôlées avec un moyen douteux, vérifier le moyen et restaurer la confiance dans le contrôle.",
+        data:"numéro d’inventaire, date de vérification, pièces contrôlées depuis le dernier contrôle sûr, état mécanique du comparateur, méthode utilisée, étalon de référence.",
+        facts:[
+          ["Écart","Comparateur bloqué"],
+          ["Moment","Détection en cours de production"],
+          ["Risque","Pièces acceptées avec un moyen douteux"],
+          ["Besoin","Recontrôle du périmètre suspect"]
+        ],
+        steps:[
+          {
+            title:"1. Formuler le problème",
+            question:"Quelle formulation est la plus adaptée ?",
+            choices:[
+              "Le contrôleur n’a pas vu que le comparateur était bloqué.",
+              "Le comparateur utilisé en contrôle en cours reste bloqué sur une valeur ; des pièces ont été validées avant la détection.",
+              "Le moyen de mesure est vieux.",
+              "Il faut changer tout le matériel de contrôle."
+            ],
+            correct:1,
+            explain:"La formulation décrit le moyen, le défaut observé et le risque qualité sans jugement."
+          },
+          {
+            title:"2. Sécuriser",
+            question:"Quelle action immédiate est prioritaire ?",
+            choices:[
+              "Continuer avec le même comparateur en faisant attention.",
+              "Isoler le comparateur, bloquer les pièces contrôlées depuis le dernier point sûr et organiser un recontrôle avec un moyen conforme.",
+              "Jeter toutes les pièces de la journée.",
+              "Noter l’incident et reprendre la production."
+            ],
+            correct:1,
+            explain:"On sécurise à la fois le moyen et les pièces potentiellement concernées."
+          },
+          {
+            title:"3. Collecter les faits",
+            question:"Quelle donnée est indispensable ?",
+            choices:[
+              "La marque préférée des opérateurs.",
+              "Le dernier moment où le comparateur fonctionnait correctement et la liste des pièces contrôlées depuis ce point.",
+              "Le nombre de comparateurs dans l’atelier.",
+              "Le coût d’un comparateur neuf uniquement."
+            ],
+            correct:1,
+            explain:"Le périmètre suspect dépend du dernier point de contrôle fiable."
+          },
+          {
+            title:"4. Cause racine possible",
+            question:"Quelle cause permet une action corrective durable ?",
+            choices:[
+              "Le comparateur est capricieux.",
+              "La tige du comparateur est encrassée et aucune vérification fonctionnelle rapide n’est prévue au démarrage de poste.",
+              "L’opérateur aurait dû deviner.",
+              "Les pièces sont trop complexes."
+            ],
+            correct:1,
+            explain:"La cause relie un phénomène technique à une faiblesse du standard de contrôle."
+          },
+          {
+            title:"5. Vérifier et standardiser",
+            question:"Quelle clôture est la plus robuste ?",
+            choices:[
+              "Remettre le comparateur en place après nettoyage.",
+              "Recontrôler le périmètre suspect, vérifier le moyen, ajouter un test fonctionnel au démarrage et former les utilisateurs.",
+              "Acheter un nouveau comparateur sans changer la méthode.",
+              "Faire une information orale."
+            ],
+            correct:1,
+            explain:"La clôture traite le produit, le moyen, la méthode et la formation."
+          }
+        ]
+      },
+      {
+        id:"fournisseur",
+        label:"Fournisseur · Matière reçue non conforme",
+        title:"Fournisseur : matière reçue non conforme",
+        description:"À la réception, une barre matière présente un état de surface différent du certificat et des lots précédents.",
+        mission:"bloquer le risque fournisseur, vérifier l’impact sur la production et décider d’une action avec preuves.",
+        data:"certificat fournisseur, numéro de lot, état de surface mesuré, lots déjà consommés, exigences d’achat, historique fournisseur, photos.",
+        facts:[
+          ["Écart","État de surface différent"],
+          ["Lieu","Contrôle réception"],
+          ["Document","Certificat fournisseur"],
+          ["Risque","Matière non conforme utilisée en production"]
+        ],
+        steps:[
+          {
+            title:"1. Formuler le problème",
+            question:"Quelle formulation est la plus factuelle ?",
+            choices:[
+              "Le fournisseur a envoyé de la mauvaise matière.",
+              "La barre matière du lot reçu présente un état de surface différent du certificat et des lots précédents au contrôle réception.",
+              "La réception n’a pas confiance dans le fournisseur.",
+              "Il faut changer de fournisseur."
+            ],
+            correct:1,
+            explain:"La formulation distingue le constat, le lot, le document et le lieu de détection."
+          },
+          {
+            title:"2. Sécuriser",
+            question:"Quelle action immédiate est prioritaire ?",
+            choices:[
+              "Mettre la matière en production pour tester.",
+              "Bloquer le lot reçu, vérifier si des lots similaires sont déjà consommés et informer achats/qualité.",
+              "Renvoyer tout sans analyse.",
+              "Modifier le certificat interne."
+            ],
+            correct:1,
+            explain:"On évite l’utilisation d’une matière suspecte et on vérifie le périmètre."
+          },
+          {
+            title:"3. Données réelles",
+            question:"Quelle preuve est la plus pertinente ?",
+            choices:[
+              "Une impression visuelle uniquement.",
+              "Des mesures ou photos comparatives avec exigences, certificat et lots précédents.",
+              "Le souvenir d’une réception ancienne.",
+              "Un avis verbal du fournisseur."
+            ],
+            correct:1,
+            explain:"La décision doit s’appuyer sur des preuves comparables et traçables."
+          },
+          {
+            title:"4. Cause racine possible",
+            question:"Quelle cause est exploitable ?",
+            choices:[
+              "Le fournisseur est mauvais.",
+              "L’exigence d’état de surface n’est pas suffisamment explicite dans la commande ou le plan d’achat.",
+              "La matière est différente parce que cela arrive.",
+              "La réception est trop stricte."
+            ],
+            correct:1,
+            explain:"Cette cause permet d’agir sur la spécification, la commande ou la relation fournisseur."
+          },
+          {
+            title:"5. Action durable",
+            question:"Quelle action corrective est la plus complète ?",
+            choices:[
+              "Accepter exceptionnellement le lot sans trace.",
+              "Clarifier l’exigence d’achat, demander une réponse fournisseur, définir un critère de réception et vérifier les prochaines livraisons.",
+              "Ne plus contrôler la matière.",
+              "Changer uniquement l’emplacement de stockage."
+            ],
+            correct:1,
+            explain:"L’action renforce la prévention et la maîtrise fournisseur."
+          }
+        ]
+      },
+      {
+        id:"etiquetage",
+        label:"Traçabilité · Étiquette de lot incorrecte",
+        title:"Traçabilité : étiquette de lot incorrecte",
+        description:"Une étiquette de lot indique une référence correcte mais un numéro d’OF incohérent avec le dossier de fabrication.",
+        mission:"éviter une rupture de traçabilité, vérifier le lot réel et corriger le processus d’étiquetage.",
+        data:"dossier de fabrication, OF, référence, opérateur, heure d’édition de l’étiquette, bacs concernés, système informatique, historique d’impression.",
+        facts:[
+          ["Écart","OF incohérent sur étiquette"],
+          ["Risque","Rupture de traçabilité"],
+          ["Lieu","Bac de production"],
+          ["Document","Dossier de fabrication"]
+        ],
+        steps:[
+          {
+            title:"1. Formuler le problème",
+            question:"Quelle formulation est correcte ?",
+            choices:[
+              "L’étiquetage est mal fait.",
+              "L’étiquette du bac indique une référence correcte mais un numéro d’OF incohérent avec le dossier de fabrication.",
+              "Le système informatique est nul.",
+              "Quelqu’un s’est trompé."
+            ],
+            correct:1,
+            explain:"La formulation précise l’écart entre l’étiquette et le dossier."
+          },
+          {
+            title:"2. Sécuriser",
+            question:"Quelle action immédiate faut-il faire ?",
+            choices:[
+              "Corriger l’étiquette sans vérifier le contenu.",
+              "Isoler le bac, vérifier la cohérence pièces-document-étiquette et rechercher les bacs imprimés au même moment.",
+              "Laisser continuer car la référence est bonne.",
+              "Détruire l’étiquette."
+            ],
+            correct:1,
+            explain:"On protège la traçabilité et on cherche les autres lots potentiellement concernés."
+          },
+          {
+            title:"3. Chercher les faits",
+            question:"Quelle donnée permet de comprendre l’origine ?",
+            choices:[
+              "Le nombre total d’étiquettes imprimées dans l’année.",
+              "L’historique d’impression, l’OF actif au moment de l’édition et la procédure de changement de série.",
+              "La couleur de l’étiquette.",
+              "Le temps de pause de l’opérateur."
+            ],
+            correct:1,
+            explain:"L’origine probable est dans le processus d’édition ou de changement de série."
+          },
+          {
+            title:"4. Cause racine possible",
+            question:"Quelle cause est la plus exploitable ?",
+            choices:[
+              "L’opérateur n’est pas concentré.",
+              "Le système conserve l’ancien OF par défaut lors du changement de référence et aucune vérification croisée n’est demandée.",
+              "Les étiquettes sont trop petites.",
+              "Le dossier papier est inutile."
+            ],
+            correct:1,
+            explain:"La cause pointe une faiblesse du système et du standard de vérification."
+          },
+          {
+            title:"5. Standardiser",
+            question:"Quelle action corrective est la plus robuste ?",
+            choices:[
+              "Demander de mieux relire.",
+              "Ajouter une vérification croisée OF-référence au changement de série et modifier le paramétrage ou l’écran d’impression si possible.",
+              "Mettre deux étiquettes au lieu d’une.",
+              "Changer la police de caractère uniquement."
+            ],
+            correct:1,
+            explain:"L’action empêche ou détecte l’erreur au moment critique."
+          }
+        ]
+      }
+    ];
+
+    let currentScenario=simScenarios[0];
+    let simSteps=currentScenario.steps;
+    let simIndex=0,simCorrect=0,simLocked=false;
+
+    const scenarioSelect=document.getElementById("scenarioSelect"),
+      scenarioTitle=document.getElementById("scenarioTitle"),
+      scenarioDescription=document.getElementById("scenarioDescription"),
+      scenarioFacts=document.getElementById("scenarioFacts"),
+      scenarioMission=document.getElementById("scenarioMission"),
+      scenarioData=document.getElementById("scenarioData"),
+      simTitle=document.getElementById("simTitle"),
+      simQuestion=document.getElementById("simQuestion"),
+      simChoices=document.getElementById("simChoices"),
+      simFeedback=document.getElementById("simFeedback"),
+      nextSim=document.getElementById("nextSim"),
+      simBar=document.getElementById("simBar"),
+      simStepLabel=document.getElementById("simStepLabel");
+
+    function populateScenarioSelect(){
+      scenarioSelect.innerHTML="";
+      simScenarios.forEach(scenario=>{
+        const option=document.createElement("option");
+        option.value=scenario.id;
+        option.textContent=scenario.label;
+        scenarioSelect.appendChild(option);
+      });
+    }
+
+    function renderScenarioInfo(){
+      scenarioTitle.textContent=currentScenario.title;
+      scenarioDescription.textContent=currentScenario.description;
+      scenarioMission.textContent=currentScenario.mission;
+      scenarioData.textContent=currentScenario.data;
+      scenarioFacts.innerHTML="";
+      currentScenario.facts.forEach(([label,value])=>{
+        const fact=document.createElement("div");
+        fact.className="fact";
+        fact.innerHTML=`<b>${label}</b><br>${value}`;
+        scenarioFacts.appendChild(fact);
+      });
+    }
+
+    function resetSimulationForScenario(markIncomplete=true){
+      simSteps=currentScenario.steps;
+      simIndex=0;
+      simCorrect=0;
+      simLocked=false;
+      if(markIncomplete){
+        activityState.simulationDone=false;
+        updateGlobalScore();
+      }
+      renderScenarioInfo();
+      renderSimulation();
+    }
+
+    function renderSimulation(){
+      simLocked=false;
+      const step=simSteps[simIndex];
+      simTitle.textContent=step.title;
+      simQuestion.textContent=step.question;
+      simChoices.innerHTML="";
+      simFeedback.textContent="Choisissez une réponse.";
+      nextSim.disabled=true;
+      simBar.style.width=Math.round(simIndex/simSteps.length*100)+"%";
+      simStepLabel.textContent="Étape "+(simIndex+1)+" sur "+simSteps.length;
+
+      step.choices.forEach((choiceText,choiceIndex)=>{
+        const button=document.createElement("button");
+        button.type="button";
+        button.className="choice";
+        button.textContent=choiceText;
+        button.addEventListener("click",()=>selectSimulationChoice(choiceIndex));
+        simChoices.appendChild(button);
+      });
+    }
+
+    function selectSimulationChoice(choiceIndex){
+      if(simLocked)return;
+      simLocked=true;
+      const step=simSteps[simIndex];
+
+      simChoices.querySelectorAll(".choice").forEach((button,index)=>{
+        if(index===step.correct)button.classList.add("correct");
+        if(index===choiceIndex&&index!==step.correct)button.classList.add("wrong");
+      });
+
+      if(choiceIndex===step.correct){
+        simCorrect++;
+        simFeedback.innerHTML="✅ "+step.explain;
+      }else{
+        simFeedback.innerHTML="❌ Ce choix est fragile. "+step.explain;
+      }
+
+      nextSim.disabled=false;
+    }
+
+    nextSim.addEventListener("click",()=>{
+      simIndex++;
+
+      if(simIndex>=simSteps.length){
+        simTitle.textContent="Simulation terminée";
+        simQuestion.textContent="Cas traité : "+currentScenario.label;
+        simChoices.innerHTML="";
+        simFeedback.innerHTML=simCorrect>=4
+          ? "✅ Score : "+simCorrect+" / "+simSteps.length+". Très bon raisonnement QRQC pour ce cas."
+          : "Score : "+simCorrect+" / "+simSteps.length+". À retravailler : sécuriser, observer les faits, traiter la cause et vérifier.";
+        nextSim.disabled=true;
+        simBar.style.width="100%";
+        simStepLabel.textContent="Simulation terminée";
+        activityState.simulationDone=true;
+        updateGlobalScore();
+        return;
+      }
+
+      renderSimulation();
+    });
+
+    document.getElementById("resetSim").addEventListener("click",()=>{
+      resetSimulationForScenario(true);
+    });
+
+    scenarioSelect.addEventListener("change",()=>{
+      const selected=simScenarios.find(scenario=>scenario.id===scenarioSelect.value);
+      if(selected){
+        currentScenario=selected;
+        resetSimulationForScenario(true);
+      }
+    });
+
+    const correctOrder=[{id:"detect",title:"Détecter l’écart au standard",desc:"Identifier clairement qu’un problème existe : défaut, retard, panne, non-conformité, écart de performance."},{id:"alert",title:"Alerter et rendre le problème visible",desc:"Informer les personnes concernées, ouvrir le sujet sur un support visuel QRQC."},{id:"secure",title:"Sécuriser le client et le flux",desc:"Bloquer, trier, isoler, contrôler temporairement ou arrêter si nécessaire."},{id:"facts",title:"Aller voir les 3 réels",desc:"Observer le lieu réel, la pièce ou le phénomène réel, et collecter les données réelles."},{id:"define",title:"Définir précisément le problème",desc:"Utiliser QQOQCCP / 5W2H : quoi, où, quand, combien, comment, qui, pourquoi."},{id:"scope",title:"Mesurer le périmètre et l’impact",desc:"Quantifier les pièces, lots, clients, postes, délais, coûts ou risques concernés."},{id:"causes",title:"Rechercher les causes possibles",desc:"Utiliser Ishikawa, 5M, est/n’est pas, comparaison bon/mauvais."},{id:"root",title:"Identifier la cause racine",desc:"Valider la cause par des faits, par exemple avec les 5 pourquoi et des preuves terrain."},{id:"actions",title:"Définir et réaliser les actions correctives",desc:"Traiter la cause, préciser responsable, délai, preuve attendue et statut."},{id:"check",title:"Vérifier, standardiser et former",desc:"Prouver l’efficacité, mettre à jour les standards et partager l’apprentissage."}];
+    let currentOrder=[];function shuffle(items){const copy=[...items];for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]]}return copy}const sortList=document.getElementById("sortList");
+    function renderSortList(){sortList.innerHTML="";currentOrder.forEach((item,index)=>{const card=document.createElement("div");card.className="sort-card";card.draggable=true;card.dataset.id=item.id;card.innerHTML=`<div class="rank">${index+1}</div><div><b>${item.title}</b><div class="mini muted">${item.desc}</div></div><div class="sort-actions"><button class="icon-btn" type="button" aria-label="Monter">↑</button><button class="icon-btn" type="button" aria-label="Descendre">↓</button></div>`;const [upButton,downButton]=card.querySelectorAll(".icon-btn");upButton.addEventListener("click",()=>moveSortItem(index,-1));downButton.addEventListener("click",()=>moveSortItem(index,1));card.addEventListener("dragstart",()=>card.classList.add("dragging"));card.addEventListener("dragend",()=>{card.classList.remove("dragging");syncOrderFromDom()});sortList.appendChild(card)})}
+    sortList.addEventListener("dragover",event=>{event.preventDefault();const dragging=document.querySelector(".sort-card.dragging");if(!dragging)return;const afterElement=getDragAfterElement(sortList,event.clientY);if(afterElement===null){sortList.appendChild(dragging)}else{sortList.insertBefore(dragging,afterElement)}});
+    function getDragAfterElement(container,y){const cards=[...container.querySelectorAll(".sort-card:not(.dragging)")];return cards.reduce((closest,child)=>{const box=child.getBoundingClientRect();const offset=y-box.top-box.height/2;if(offset<0&&offset>closest.offset){return{offset,element:child}}return closest},{offset:Number.NEGATIVE_INFINITY,element:null}).element}
+    function syncOrderFromDom(){const ids=[...sortList.querySelectorAll(".sort-card")].map(card=>card.dataset.id);currentOrder=ids.map(id=>correctOrder.find(item=>item.id===id));renderSortList()}function moveSortItem(index,direction){const targetIndex=index+direction;if(targetIndex<0||targetIndex>=currentOrder.length)return;[currentOrder[index],currentOrder[targetIndex]]=[currentOrder[targetIndex],currentOrder[index]];renderSortList()}
+    function checkOrder(){let score=0;currentOrder.forEach((item,index)=>{if(item.id===correctOrder[index].id)score++});const percent=Math.round(score/correctOrder.length*100);const result=document.getElementById("orderResult");let message=`<b>Score : ${score} / ${correctOrder.length} (${percent}%)</b><br>`;if(score===correctOrder.length){message+="✅ Ordre complet. La logique de résolution est maîtrisée.";activityState.orderDone=true}else if(score>=7){message+="Bien. Quelques inversions restent possibles autour de la caractérisation ou de l’analyse causale.";activityState.orderDone=true}else{message+="À retravailler. Gardez la logique : alerter → sécuriser → observer → définir → analyser → agir → vérifier.";activityState.orderDone=false}result.innerHTML=message;updateGlobalScore()}
+    document.getElementById("checkOrder").addEventListener("click",checkOrder);document.getElementById("shuffleOrder").addEventListener("click",()=>{currentOrder=shuffle(correctOrder);activityState.orderDone=false;updateGlobalScore();renderSortList();document.getElementById("orderResult").textContent="Cartes mélangées. Recommencez le classement."});document.getElementById("showCorrection").addEventListener("click",()=>{currentOrder=[...correctOrder];renderSortList();document.getElementById("orderResult").textContent="Correction affichée. Relisez la logique de chaque étape."});
+    function renderCorrection(){const list=document.getElementById("correctionList");list.innerHTML="";correctOrder.forEach(item=>{const li=document.createElement("li");li.innerHTML=`<b>${item.title}</b> — ${item.desc}`;list.appendChild(li)})}
+
+    const theoryQuizQuestions=[
+      {
+        question:"Quelle définition correspond le mieux au QRQC ?",
+        choices:[
+          "Une méthode de contrôle final uniquement utilisée par le service qualité.",
+          "Une démarche structurée d’analyse et de traitement rapide des problèmes au plus près du terrain.",
+          "Un logiciel de gestion des réclamations clients.",
+          "Une réunion mensuelle de suivi des indicateurs."
+        ],
+        answer:1,
+        explain:"Le QRQC combine réaction rapide, animation visuelle, implication du terrain et rigueur méthodologique."
+      },
+      {
+        question:"Quel est le rôle principal du Quick Response ?",
+        choices:[
+          "Réagir vite pour protéger le client, éviter la propagation du défaut et rendre le problème visible.",
+          "Rédiger un rapport complet avant toute action.",
+          "Remplacer systématiquement l’opérateur concerné.",
+          "Attendre que le défaut se reproduise pour confirmer."
+        ],
+        answer:0,
+        explain:"La réponse rapide vise d’abord la protection du client et la maîtrise immédiate du risque."
+      },
+      {
+        question:"Quel est le rôle principal du Quality Control dans le QRQC ?",
+        choices:[
+          "Faire uniquement du tri en fin de production.",
+          "Comprendre le phénomène, trouver la cause racine, agir sur le processus et vérifier le résultat.",
+          "Créer plus de documents qualité.",
+          "Accélérer la production même si le défaut n’est pas compris."
+        ],
+        answer:1,
+        explain:"Le Quality Control apporte la rigueur d’analyse et la vérification d’efficacité."
+      },
+      {
+        question:"Que signifie Genba dans le San Gen Shugi ?",
+        choices:[
+          "La pièce réelle.",
+          "Le lieu réel.",
+          "La donnée réelle.",
+          "La cause racine."
+        ],
+        answer:1,
+        explain:"Genba désigne le lieu réel : il faut aller là où le problème s’est produit."
+      },
+      {
+        question:"Que signifie Genbutsu ?",
+        choices:[
+          "Observer et analyser la pièce ou le phénomène réel.",
+          "Faire une réunion en salle.",
+          "Lire uniquement le rapport qualité.",
+          "Standardiser après action."
+        ],
+        answer:0,
+        explain:"Genbutsu signifie travailler sur l’objet réel : pièce, produit, défaut ou phénomène observé."
+      },
+      {
+        question:"Que signifie Genjitsu ?",
+        choices:[
+          "L’intuition du responsable.",
+          "La donnée réelle, factuelle, mesurée.",
+          "Le nom du client.",
+          "La fréquence de réunion."
+        ],
+        answer:1,
+        explain:"Genjitsu renvoie aux faits réels : mesures, quantités, dates, observations vérifiables."
+      },
+      {
+        question:"Pourquoi le QRQC utilise-t-il des niveaux d’animation ?",
+        choices:[
+          "Pour multiplier les réunions sans objectif.",
+          "Pour escalader les problèmes non résolus vers un niveau capable de décider ou d’apporter des moyens.",
+          "Pour traiter tous les problèmes uniquement au niveau direction.",
+          "Pour supprimer le rôle des opérateurs."
+        ],
+        answer:1,
+        explain:"La logique N1 / N2 / N3 évite qu’un problème reste bloqué au mauvais niveau."
+      },
+      {
+        question:"Quel exemple correspond à une action curative ?",
+        choices:[
+          "Modifier le standard pour empêcher le retour du défaut.",
+          "Former durablement les opérateurs après analyse de cause.",
+          "Trier ou bloquer immédiatement un lot suspect.",
+          "Installer un poka-yoke validé."
+        ],
+        answer:2,
+        explain:"Une action curative traite l’effet immédiat. Elle protège, mais ne supprime pas forcément la cause."
+      },
+      {
+        question:"Quel exemple correspond plutôt à une action corrective durable ?",
+        choices:[
+          "Isoler les pièces non conformes.",
+          "Informer le client que le sujet est pris en charge.",
+          "Mettre à jour le standard, former et vérifier l’absence de récurrence.",
+          "Faire un tri supplémentaire sans analyse."
+        ],
+        answer:2,
+        explain:"Une action corrective agit sur la cause et doit être vérifiée dans le temps."
+      },
+      {
+        question:"Quel piège faut-il éviter dans un QRQC ?",
+        choices:[
+          "Aller au terrain.",
+          "Travailler avec la pièce réelle.",
+          "Décider sans données ni cause racine.",
+          "Vérifier l’efficacité après action."
+        ],
+        answer:2,
+        explain:"Décider sans faits peut conduire à une rustine ou à une action inefficace."
+      },
+      {
+        question:"Quelle phrase résume le mieux l’équilibre recherché par le QRQC ?",
+        choices:[
+          "Réagir vite suffit toujours.",
+          "Analyser longtemps suffit, même si le client reste exposé.",
+          "Réagir vite pour protéger, puis analyser pour corriger durablement.",
+          "Traiter uniquement les problèmes visibles par la direction."
+        ],
+        answer:2,
+        explain:"Le QRQC équilibre la protection immédiate et la suppression durable de la cause."
+      },
+      {
+        question:"Quel outil est adapté pour décrire précisément un problème au départ ?",
+        choices:[
+          "QQOQCCP / 5W2H.",
+          "Uniquement un brainstorming libre.",
+          "Un vote à main levée.",
+          "Une estimation sans mesure."
+        ],
+        answer:0,
+        explain:"QQOQCCP / 5W2H aide à préciser quoi, où, quand, combien, comment, qui et pourquoi."
+      }
+    ];
+
+    function renderTheoryQuiz(){
+      const container=document.getElementById("theoryQuiz");
+      if(!container)return;
+      container.innerHTML="";
+      theoryQuizQuestions.forEach((item,index)=>{
+        const card=document.createElement("div");
+        card.className="quiz-card";
+        const options=item.choices.map((choice,choiceIndex)=>`
+          <label class="quiz-option" data-question="${index}" data-choice="${choiceIndex}">
+            <input type="radio" name="theoryQuiz${index}" value="${choiceIndex}">
+            <span>${choice}</span>
+          </label>
+        `).join("");
+        card.innerHTML=`
+          <h3>Question ${index+1}</h3>
+          <p><b>${item.question}</b></p>
+          <div class="quiz-options">${options}</div>
+          <div class="quiz-explain" id="theoryExplain${index}"></div>
+        `;
+        container.appendChild(card);
+      });
+      const result=document.getElementById("theoryQuizResult");
+      if(result)result.textContent="Aucun résultat pour le moment.";
+    }
+
+    function checkTheoryQuiz(){
+      let score=0;
+      let answered=0;
+
+      theoryQuizQuestions.forEach((item,index)=>{
+        const selected=document.querySelector(`input[name="theoryQuiz${index}"]:checked`);
+        const labels=document.querySelectorAll(`.quiz-option[data-question="${index}"]`);
+        const explain=document.getElementById(`theoryExplain${index}`);
+
+        labels.forEach(label=>{
+          label.classList.remove("correct","wrong");
+          const choiceIndex=Number(label.dataset.choice);
+          if(choiceIndex===item.answer)label.classList.add("correct");
+        });
+
+        if(selected){
+          answered++;
+          const selectedIndex=Number(selected.value);
+          if(selectedIndex===item.answer){
+            score++;
+          }else{
+            const wrongLabel=document.querySelector(`.quiz-option[data-question="${index}"][data-choice="${selectedIndex}"]`);
+            if(wrongLabel)wrongLabel.classList.add("wrong");
+          }
+        }
+
+        if(explain){
+          explain.classList.add("visible");
+          explain.innerHTML=`<b>Correction :</b> ${item.explain}`;
+        }
+      });
+
+      const result=document.getElementById("theoryQuizResult");
+      const total=theoryQuizQuestions.length;
+
+      if(answered<total){
+        result.innerHTML=`<b>Quiz incomplet :</b> ${answered} / ${total} questions répondues. Les réponses correctes sont affichées pour vous aider à finir.`;
+        activityState.quizDone=false;
+        updateGlobalScore();
+        return;
+      }
+
+      const percent=Math.round(score/total*100);
+      let message=`<span class="quiz-score">Score : ${score} / ${total} (${percent}%)</span><br>`;
+      if(percent>=85){
+        message+="✅ Très bonne maîtrise des notions théoriques du QRQC.";
+      }else if(percent>=65){
+        message+="Bien. Revoir surtout les notions de cause racine, d’action corrective et de 3 réels.";
+      }else{
+        message+="À retravailler. Reprenez la théorie avant de refaire le quiz.";
+      }
+
+      result.innerHTML=message;
+      activityState.quizDone=true;
+      updateGlobalScore();
+    }
+
+    function resetTheoryQuiz(){
+      activityState.quizDone=false;
+      updateGlobalScore();
+      renderTheoryQuiz();
+    }
+
+    document.getElementById("checkTheoryQuiz").addEventListener("click",checkTheoryQuiz);
+    document.getElementById("resetTheoryQuiz").addEventListener("click",resetTheoryQuiz);
+
+    populateScenarioSelect();resetSimulationForScenario(false);currentOrder=shuffle(correctOrder);renderSortList();renderCorrection();renderTheoryQuiz();updateGlobalScore();
+  </script>
+</body>
+</html>

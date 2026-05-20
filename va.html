@@ -83,6 +83,25 @@
         }
         .correct-anim { animation: success-pulse 0.5s ease-out; }
 
+        /* Hint text on cards */
+        .hint-text {
+            display: none;
+            font-size: 7.5px;
+            font-style: italic;
+            opacity: 0.6;
+            margin-top: 5px;
+            line-height: 1.4;
+            font-weight: 400;
+        }
+        body.hints-on .hint-text { display: block; }
+
+        /* Correction button pulse */
+        @keyframes btn-pulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(231,76,60,0.3); }
+            50%      { box-shadow: 0 0 0 6px rgba(231,76,60,0); }
+        }
+        .btn-correction { animation: btn-pulse 2.5s ease infinite; }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-color); }
@@ -115,6 +134,14 @@
                     <button onclick="checkAnswers()" class="flex items-center gap-2 px-6 py-2.5 text-white font-bold rounded-lg shadow-md transition-all active:scale-95" style="background-color: var(--primary);">
                         <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         Valider l'analyse
+                    </button>
+                    <button id="btnHints" onclick="toggleHints()" class="flex items-center gap-2 px-4 py-2.5 bg-white border font-semibold rounded-lg hover:bg-amber-50 transition-all" style="border-color: var(--border-color); color: var(--accent-text);">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.476A1 1 0 0118 17.5V19a1 1 0 01-1 1h-1a1 1 0 01-1-1v-1.5a1 1 0 00-.464-.833l-.548-.476z"></path></svg>
+                        Indices
+                    </button>
+                    <button onclick="confirmShowCorrection()" class="btn-correction flex items-center gap-2 px-4 py-2.5 bg-white border font-bold rounded-lg transition-all active:scale-95" style="border-color: var(--danger); color: var(--danger);">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        Correction
                     </button>
                     <button onclick="resetScenario()" class="flex items-center gap-2 px-4 py-2.5 bg-white border font-semibold rounded-lg hover:bg-slate-50 transition-all" style="border-color: var(--border-color); color: var(--text-color);">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
@@ -162,6 +189,9 @@
                 <span>🍕</span> Services
             </button>
         </div>
+
+        <!-- Description scénario -->
+        <div id="scenario-description" class="hidden mb-6 p-4 rounded-xl border-l-4 text-sm font-medium relative z-20" style="border-left-color: var(--accent); background-color: var(--accent-light); color: var(--accent-text);"></div>
 
         <!-- Dashboard -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 relative z-20">
@@ -229,36 +259,63 @@
     <script>
         const scenarios = {
             bike: {
+                label: '🚲 Industrie — Cadre de vélo',
+                description: '📋 Contexte : Fabrication d\'un cadre de vélo en acier dans un atelier. Analysez chaque étape du point de vue du client final qui attend son vélo livré et en état de rouler.',
                 steps: [
-                    { id: 'b1', text: "Réception commande", time: 10, type: 'nvan' },
-                    { id: 'b2', text: "Attente livraison tubes", time: 120, type: 'nvap' },
-                    { id: 'b3', text: "Découpe des tubes", time: 15, type: 'va' },
-                    { id: 'b4', text: "Soudure du cadre", time: 45, type: 'va' },
-                    { id: 'b5', text: "Contrôle qualité", time: 15, type: 'nvan' },
-                    { id: 'b6', text: "Retouche soudure", time: 30, type: 'nvap' },
-                    { id: 'b7', text: "Peinture", time: 60, type: 'va' },
-                    { id: 'b8', text: "Séchage cabine", time: 90, type: 'nvan' },
-                    { id: 'b9', text: "Stockage expédition", time: 480, type: 'nvap' }
+                    { id: 'b1', text: "Réception commande", time: 10, type: 'nvan',
+                      hint: "Le client exige qu'on traite sa demande, mais cette étape n'apporte pas de transformation physique au produit." },
+                    { id: 'b2', text: "Attente livraison tubes", time: 120, type: 'nvap',
+                      hint: "L'atelier ne fait rien, il attend. Aucune valeur n'est créée pendant ces 2h d'immobilisme." },
+                    { id: 'b3', text: "Découpe des tubes", time: 15, type: 'va',
+                      hint: "La matière brute est transformée : les tubes sont coupés aux bonnes dimensions pour le cadre." },
+                    { id: 'b4', text: "Soudure du cadre", time: 45, type: 'va',
+                      hint: "Assemblage des éléments — transformation directe et visible attendue par le client." },
+                    { id: 'b5', text: "Contrôle qualité", time: 15, type: 'nvan',
+                      hint: "Obligatoire pour la sécurité et la conformité, mais le contrôle seul ne transforme pas le produit." },
+                    { id: 'b6', text: "Retouche soudure", time: 30, type: 'nvap',
+                      hint: "On refait un travail qui aurait dû être juste du premier coup. Pure perte." },
+                    { id: 'b7', text: "Peinture", time: 60, type: 'va',
+                      hint: "Le client attend un vélo peint et fini — transformation finale valorisée et payée." },
+                    { id: 'b8', text: "Séchage cabine", time: 90, type: 'nvan',
+                      hint: "Techniquement nécessaire après la peinture, mais le produit ne se transforme pas activement." },
+                    { id: 'b9', text: "Stockage expédition", time: 480, type: 'nvap',
+                      hint: "Le vélo est prêt mais attend 8h dans l'entrepôt. Le client ne bénéficie pas de ce délai." }
                 ]
             },
             order: {
+                label: '📄 Administratif — Remboursement',
+                description: '📋 Contexte : Traitement d\'une demande de remboursement client dans un service comptabilité. Identifiez ce qui apporte réellement de la valeur pour le client qui attend son remboursement.',
                 steps: [
-                    { id: 'o1', text: "Ouverture mail client", time: 2, type: 'nvan' },
-                    { id: 'o2', text: "Recherche facture", time: 15, type: 'nvap' },
-                    { id: 'o3', text: "Vérification conditions", time: 5, type: 'nvan' },
-                    { id: 'o4', text: "Saisie validation", time: 2, type: 'va' },
-                    { id: 'o5', text: "Panne logiciel", time: 45, type: 'nvap' },
-                    { id: 'o6', text: "Envoi confirmation", time: 3, type: 'va' }
+                    { id: 'o1', text: "Ouverture mail client", time: 2, type: 'nvan',
+                      hint: "Nécessaire pour initier le traitement, mais lire un email ne produit aucune valeur directe pour le client." },
+                    { id: 'o2', text: "Recherche facture", time: 15, type: 'nvap',
+                      hint: "15 min perdues à chercher un document mal archivé — problème d'organisation, pas de valeur." },
+                    { id: 'o3', text: "Vérification conditions", time: 5, type: 'nvan',
+                      hint: "Contrôle contractuel obligatoire, mais le client n'attend pas ce vérification : il attend le virement." },
+                    { id: 'o4', text: "Saisie validation", time: 2, type: 'va',
+                      hint: "L'acte de valider le remboursement est précisément ce que le client attend — valeur directe." },
+                    { id: 'o5', text: "Panne logiciel", time: 45, type: 'nvap',
+                      hint: "Interruption totale due à un bug. Pure perte de temps pour tout le monde, zéro valeur." },
+                    { id: 'o6', text: "Envoi confirmation", time: 3, type: 'va',
+                      hint: "Le client reçoit sa confirmation de remboursement — valeur directement attendue et ressentie." }
                 ]
             },
             pizza: {
+                label: '🍕 Services — Livraison pizza',
+                description: '📋 Contexte : Processus de livraison d\'une pizza artisanale à domicile. Placez-vous du côté du client : qu\'attendez-vous concrètement d\'une pizzeria quand vous passez commande ?',
                 steps: [
-                    { id: 'p1', text: "Prise de commande", time: 3, type: 'nvan' },
-                    { id: 'p2', text: "Préparation pâte", time: 5, type: 'va' },
-                    { id: 'p3', text: "Cuisson four bois", time: 8, type: 'va' },
-                    { id: 'p4', text: "Attente livreur", time: 10, type: 'nvap' },
-                    { id: 'p5', text: "Trajet livraison", time: 15, type: 'nvan' },
-                    { id: 'p6', text: "Erreur adresse GPS", time: 10, type: 'nvap' }
+                    { id: 'p1', text: "Prise de commande", time: 3, type: 'nvan',
+                      hint: "Nécessaire pour démarrer, mais le client attend sa pizza, pas la conversation téléphonique." },
+                    { id: 'p2', text: "Préparation pâte", time: 5, type: 'va',
+                      hint: "La pâte est façonnée et garnie — c'est la transformation centrale qui justifie le prix payé." },
+                    { id: 'p3', text: "Cuisson four bois", time: 8, type: 'va',
+                      hint: "La pizza prend sa forme finale. C'est l'étape clé attendue par le client." },
+                    { id: 'p4', text: "Attente livreur", time: 10, type: 'nvap',
+                      hint: "La pizza est prête mais attend sur le comptoir que le livreur soit disponible. Gaspillage pur." },
+                    { id: 'p5', text: "Trajet livraison", time: 15, type: 'nvan',
+                      hint: "Nécessaire pour acheminer la pizza, mais conduire n'améliore pas le produit en lui-même." },
+                    { id: 'p6', text: "Erreur adresse GPS", time: 10, type: 'nvap',
+                      hint: "Erreur évitable : le livreur tourne en rond. Le client attend, la pizza refroidit." }
                 ]
             }
         };
@@ -269,6 +326,15 @@
             currentSteps = scenarios[key].steps;
             const container = document.getElementById('process-grid');
             container.innerHTML = '';
+
+            // Afficher la description du scénario
+            const descEl = document.getElementById('scenario-description');
+            if (scenarios[key].description) {
+                descEl.textContent = scenarios[key].description;
+                descEl.classList.remove('hidden');
+            } else {
+                descEl.classList.add('hidden');
+            }
 
             currentSteps.forEach((step, index) => {
                 const row = document.createElement('div');
@@ -312,6 +378,7 @@
                     <span class="px-1.5 py-0.5 rounded-md text-[8px] bg-black text-white">${step.time}m</span>
                 </div>
                 <div class="leading-tight">${step.text}</div>
+                ${step.hint ? `<div class="hint-text">${step.hint}</div>` : ''}
             `;
             card.ondragstart = e => { e.dataTransfer.setData("text", card.id); card.style.opacity = "0.4"; };
             card.ondragend = () => { card.style.opacity = "1"; };
@@ -446,6 +513,44 @@
 
         function closeModal() { document.getElementById('feedbackModal').classList.add('hidden'); }
         function resetScenario() { loadScenario(Object.keys(scenarios).find(k => scenarios[k].steps[0].id === currentSteps[0].id)); }
+
+        function toggleHints() {
+            const on = document.body.classList.toggle('hints-on');
+            const btn = document.getElementById('btnHints');
+            btn.style.backgroundColor = on ? 'var(--accent-light)' : '';
+            btn.style.borderColor     = on ? 'var(--accent)' : 'var(--border-color)';
+            btn.innerHTML = on
+                ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg> Masquer indices`
+                : `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.476A1 1 0 0118 17.5V19a1 1 0 01-1 1h-1a1 1 0 01-1-1v-1.5a1 1 0 00-.464-.833l-.548-.476z"/></svg> Indices`;
+            setTimeout(drawLinks, 50);
+        }
+
+        function confirmShowCorrection() {
+            const modal = document.getElementById('feedbackModal');
+            document.getElementById('feedbackIcon').innerText = '👁️';
+            document.getElementById('feedbackTitle').innerText = 'Afficher la correction ?';
+            document.getElementById('feedbackText').innerText = 'Toutes les étapes seront automatiquement classées. Cela remplacera vos réponses actuelles.';
+            document.getElementById('modalBorder').style.borderTopColor = 'var(--danger)';
+            // Remplace le bouton Continuer par Confirmer + Annuler
+            const btn = modal.querySelector('button');
+            btn.outerHTML = `
+                <div class="flex gap-3">
+                    <button onclick="closeModal()" class="flex-1 py-3 border font-bold text-sm rounded-xl" style="border-color:var(--border-color);color:var(--text-color);">Annuler</button>
+                    <button onclick="showCorrection();closeModal();" class="flex-1 py-3 text-white font-black text-xs tracking-widest rounded-xl" style="background-color:var(--danger);">Voir la correction</button>
+                </div>`;
+            modal.classList.remove('hidden');
+        }
+
+        // Restore Continuer button after closeModal
+        const _origClose = closeModal;
+        closeModal = function() {
+            _origClose();
+            const btn = document.querySelector('#feedbackModal button, #feedbackModal .flex.gap-3');
+            if (btn && btn.classList.contains('flex')) {
+                btn.outerHTML = `<button onclick="closeModal()" class="w-full py-4 text-white font-black uppercase text-xs tracking-widest rounded-xl transition active:scale-95 shadow-lg" style="background-color: var(--primary);">Continuer</button>`;
+            }
+            document.getElementById('modalBorder').style.borderTopColor = 'var(--accent)';
+        };
 
         window.addEventListener('keydown', (e) => {
             if (e.shiftKey && e.altKey && e.code === 'KeyL') showCorrection();

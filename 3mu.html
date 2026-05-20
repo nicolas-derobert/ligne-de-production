@@ -7,7 +7,6 @@
   <style>
     :root {
       --bg: #f4f7fb;
-      --card: #ffffff;
       --ink: #0f172a;
       --muted: #64748b;
       --blue: #2563eb;
@@ -15,57 +14,47 @@
       --green: #16a34a;
       --orange: #f97316;
       --red: #dc2626;
-      --purple: #7c3aed;
       --line: #e2e8f0;
       --ok: #dcfce7;
       --bad: #fee2e2;
-      --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.04);
-      --shadow-md: 0 12px 30px rgba(15, 23, 42, 0.08);
+      --shadow-sm: 0 4px 12px rgba(15,23,42,0.05);
+      --shadow-md: 0 12px 30px rgba(15,23,42,0.09);
       --radius: 16px;
     }
-
     * { box-sizing: border-box; }
-
     body {
       margin: 0;
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: radial-gradient(circle at top center, #ffffff 0, var(--bg) 100%);
+      background: radial-gradient(circle at top center, #fff 0, var(--bg) 100%);
       color: var(--ink);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
-
     header {
       text-align: center;
       padding: 32px 22px 16px;
       max-width: 900px;
       margin: 0 auto;
+      position: relative;
     }
-
     h1 {
-      margin: 0 0 12px;
-      font-size: clamp(2.2rem, 4vw, 3.2rem);
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 3rem);
       line-height: 1.1;
       letter-spacing: -0.03em;
       color: #1e293b;
     }
-
     .subtitle {
       margin: 0 auto;
       color: var(--muted);
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       max-width: 600px;
       line-height: 1.5;
     }
 
-    /* --- NOUVEAU DESIGN DES ONGLETS --- */
-    .tabs-wrapper {
-      display: flex;
-      justify-content: center;
-      padding: 0 22px 24px;
-    }
-
+    /* ---- TABS ---- */
+    .tabs-wrapper { display: flex; justify-content: center; padding: 0 22px 24px; }
     .tabs {
       display: inline-flex;
       background: #e2e8f0;
@@ -75,168 +64,484 @@
       flex-wrap: wrap;
       justify-content: center;
     }
-
     .tab-button {
       background: transparent;
       color: var(--muted);
       border: none;
       border-radius: 999px;
-      padding: 10px 20px;
+      padding: 10px 18px;
       font-weight: 700;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       cursor: pointer;
       transition: all 0.25s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
+    .tab-button:hover { color: var(--ink); }
+    .tab-button.active { background: white; color: var(--blue); box-shadow: var(--shadow-sm); }
 
-    .tab-button:hover {
-      color: var(--ink);
-    }
-
-    .tab-button.active {
-      background: white;
-      color: var(--blue);
-      box-shadow: var(--shadow-sm);
-    }
-
-    /* --- ZONES PRINCIPALES --- */
     main {
       max-width: 1280px;
       margin: 0 auto;
-      padding: 0 22px 40px;
+      padding: 0 22px 60px;
       flex-grow: 1;
       width: 100%;
     }
-
-    #game-wrapper {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 20px;
-      align-items: start;
-    }
-
     .panel {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(12px);
       border: 1px solid white;
       border-radius: var(--radius);
       box-shadow: var(--shadow-md);
-      display: flex;
-      flex-direction: column;
       overflow: hidden;
     }
+    .hidden { display: none !important; }
 
-    .panel h2 {
+    /* ==============================
+       ONGLET MÉMO
+    ============================== */
+    #memo-wrapper { max-width: 980px; margin: 0 auto; }
+
+    .memo-section-header {
+      padding: 28px 28px 10px;
+      text-align: center;
+    }
+    .memo-section-header h2 {
+      font-size: 1.45rem;
+      margin: 0 0 6px;
+      color: var(--ink);
+    }
+    .memo-section-header p {
+      color: var(--muted);
+      font-size: 0.9rem;
       margin: 0;
-      padding: 18px 20px;
-      border-bottom: 1px solid var(--line);
-      font-size: 1.15rem;
-      background: white;
     }
 
+    /* -- FLIP CARDS -- */
+    .flip-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      padding: 12px 28px 28px;
+    }
+    .flip-card {
+      height: 270px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+    .flip-card-inner {
+      position: relative;
+      width: 100%; height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.65s cubic-bezier(0.4,0.2,0.2,1);
+    }
+    .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+    .flip-front, .flip-back {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      backface-visibility: hidden;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 16px;
+      text-align: center;
+    }
+    .flip-back { transform: rotateY(180deg); }
+
+    .flip-icon { font-size: 2.8rem; line-height: 1; margin-bottom: 4px; }
+    .flip-jp { font-size: 1.3rem; opacity: 0.4; font-weight: 300; margin-bottom: 2px; }
+    .flip-title { font-size: 2rem; font-weight: 900; letter-spacing: 0.04em; margin: 4px 0; }
+    .flip-fr { font-size: 1rem; font-weight: 600; opacity: 0.75; margin-bottom: 10px; }
+    .flip-cta {
+      font-size: 0.75rem;
+      opacity: 0.55;
+      margin-top: auto;
+      background: rgba(255,255,255,0.35);
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .memo-tag {
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.65;
+      margin-bottom: 10px;
+    }
+    .memo-metaphor {
+      font-size: 0.9rem;
+      line-height: 1.55;
+      margin: 0 0 10px;
+    }
+    .memo-acrostic {
+      font-size: 0.82rem;
+      line-height: 1.8;
+      text-align: left;
+      background: rgba(255,255,255,0.15);
+      padding: 7px 12px;
+      border-radius: 8px;
+      width: 100%;
+    }
+    .memo-acrostic .letter {
+      font-size: 1rem;
+      font-weight: 900;
+      display: inline-block;
+      width: 16px;
+    }
+
+    /* -- TIMWOOD BANNER -- */
+    .timwood-banner {
+      margin: 0 28px 20px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      border-radius: 16px;
+      padding: 22px 24px;
+      color: white;
+      text-align: center;
+    }
+    .timwood-title { font-size: 0.9rem; opacity: 0.65; margin-bottom: 14px; }
+    .timwood-letters {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .timwood-letters span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 50px; height: 50px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 10px;
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #93c5fd;
+      cursor: default;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .timwood-letters span:hover {
+      background: rgba(255,255,255,0.18);
+      transform: translateY(-3px);
+      color: #fff;
+    }
+    .timwood-letters span::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: -26px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #94a3b8;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+    .timwood-letters span:hover::after { opacity: 1; }
+    .timwood-fr-phrase {
+      font-size: 0.88rem;
+      line-height: 1.65;
+      opacity: 0.85;
+      background: rgba(255,255,255,0.07);
+      padding: 12px 16px;
+      border-radius: 10px;
+      text-align: left;
+    }
+
+    /* -- 7 MUDA ACCORDION -- */
+    .accordion-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 0 28px 28px;
+    }
+    .acc-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: white;
+      transition: box-shadow 0.2s;
+    }
+    .acc-item:hover { box-shadow: var(--shadow-sm); }
+    .acc-header {
+      padding: 13px 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      user-select: none;
+    }
+    .acc-header-left { display: flex; align-items: center; gap: 10px; }
+    .acc-emoji { font-size: 1.4rem; }
+    .acc-names { display: flex; flex-direction: column; }
+    .acc-name-en { font-size: 0.67rem; color: var(--blue); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+    .acc-name-fr { font-size: 0.95rem; font-weight: 700; color: var(--ink); }
+    .acc-arrow { font-size: 0.75rem; color: var(--muted); transition: transform 0.3s; flex-shrink: 0; }
+    .acc-item.open .acc-arrow { transform: rotate(180deg); }
+    .acc-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+    .acc-item.open .acc-body { max-height: 500px; }
+    .acc-content { padding: 0 15px 14px; border-top: 1px solid var(--line); }
+    .acc-memo {
+      background: #f0f9ff;
+      border-left: 3px solid var(--blue);
+      padding: 7px 10px;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.82rem;
+      color: var(--ink);
+      margin: 10px 0 8px;
+      line-height: 1.5;
+    }
+    .acc-definition { font-size: 0.84rem; color: var(--muted); line-height: 1.5; margin-bottom: 8px; }
+    .acc-example {
+      font-size: 0.82rem;
+      background: var(--light-blue);
+      border-radius: 8px;
+      padding: 8px 11px;
+      color: #1e40af;
+      line-height: 1.5;
+    }
+    .acc-example strong { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+
+    /* ==============================
+       ONGLET CONCEPTS
+    ============================== */
+    #help-wrapper { max-width: 900px; margin: 0 auto; }
+    .lean-diagram {
+      background: white;
+      border-bottom: 1px solid var(--line);
+      padding: 28px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .lean-diagram h3 { margin-top: 0; color: var(--ink); margin-bottom: 20px; }
+    .help-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      padding: 24px;
+    }
+    .help-section h3 {
+      color: var(--blue);
+      margin-top: 0;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+    }
+
+    /* Clickable concept cards */
+    .concept-card {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.15s;
+    }
+    .concept-card:hover { box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+    .concept-card-header {
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .concept-card-title { font-size: 0.92rem; font-weight: 700; color: var(--ink); margin: 0; }
+    .concept-toggle {
+      font-size: 0.72rem;
+      color: var(--blue);
+      font-weight: 700;
+      white-space: nowrap;
+      padding: 3px 8px;
+      background: var(--light-blue);
+      border-radius: 999px;
+      flex-shrink: 0;
+      transition: opacity 0.2s;
+    }
+    .concept-card-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+    .concept-card.expanded .concept-card-body { max-height: 300px; }
+    .concept-card.expanded .concept-toggle { opacity: 0; }
+    .concept-card-content {
+      padding: 0 14px 12px;
+      border-top: 1px solid var(--line);
+    }
+    .concept-card-content p { margin: 8px 0 6px; font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+    .concept-example {
+      background: var(--light-blue);
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 0.82rem;
+      color: #1e40af;
+      line-height: 1.5;
+    }
+    span.badge {
+      display: inline-block;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--blue);
+      margin-left: 5px;
+    }
+
+    /* ==============================
+       MODAL
+    ============================== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: rgba(15,23,42,0.55);
+      backdrop-filter: blur(5px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-card {
+      background: white;
+      border-radius: 22px;
+      max-width: 500px;
+      width: 100%;
+      padding: 30px;
+      position: relative;
+      box-shadow: 0 28px 70px rgba(15,23,42,0.22);
+      animation: modalIn 0.22s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(14px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-close {
+      position: absolute;
+      top: 14px; right: 14px;
+      background: #f1f5f9;
+      border: none;
+      border-radius: 9px;
+      width: 34px; height: 34px;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--muted);
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .modal-close:hover { background: #e2e8f0; color: var(--ink); }
+    .modal-icon { font-size: 2.4rem; line-height: 1; margin-bottom: 8px; }
+    .modal-title { font-size: 1.7rem; font-weight: 900; margin: 0 0 3px; letter-spacing: -0.02em; }
+    .modal-fr {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    .modal-def {
+      font-size: 0.92rem;
+      color: #334155;
+      line-height: 1.65;
+      margin: 0 0 12px;
+    }
+    .modal-example {
+      background: var(--light-blue);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.86rem;
+      color: #1e40af;
+      line-height: 1.6;
+    }
+    .modal-example strong {
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      opacity: 0.65;
+      margin-bottom: 3px;
+    }
+    /* SVG nodes */
+    .svg-node { cursor: pointer; }
+    .svg-node:hover { filter: drop-shadow(0 0 7px rgba(37,99,235,0.45)); }
+
+    /* ==============================
+       JEU
+    ============================== */
+    #game-wrapper {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    .panel h2 {
+      margin: 0;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      font-size: 1.1rem;
+      background: white;
+    }
     .instructions {
-      padding: 14px 20px;
+      padding: 12px 20px;
       color: var(--muted);
       line-height: 1.45;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       background: #f8fafc;
       border-bottom: 1px solid var(--line);
     }
-
-    /* --- BANQUE DE CARTES --- */
     .bank {
-      padding: 16px;
+      padding: 14px;
       min-height: 400px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       flex-grow: 1;
     }
-
     .card {
       background: #fff;
       border: 1px solid var(--line);
       border-left: 6px solid #cbd5e1;
-      border-radius: 12px;
-      padding: 14px;
+      border-radius: 10px;
+      padding: 12px;
       cursor: grab;
       box-shadow: var(--shadow-sm);
       user-select: none;
       touch-action: none;
-      transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s;
+      transition: transform 0.15s, box-shadow 0.2s;
     }
-
-    .card:hover {
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
-      transform: translateY(-1px);
-    }
-
+    .card:hover { box-shadow: 0 8px 20px rgba(15,23,42,0.08); transform: translateY(-1px); }
     .card:active { cursor: grabbing; }
     .card.dragging { opacity: 0.4; transform: scale(0.95); }
+    .card-text { font-size: 0.9rem; color: var(--ink); font-weight: 500; line-height: 1.4; }
 
-    .card-text {
-      font-size: 0.95rem;
-      color: var(--ink);
-      font-weight: 500;
-      line-height: 1.4;
-    }
-
-    /* --- ZONES DE DEPOT --- */
-    .zones-grid {
-      display: grid;
-      gap: 16px;
-      padding: 16px;
-      background: #f8fafc;
-      flex-grow: 1;
-    }
-
+    .zones-grid { display: grid; gap: 14px; padding: 14px; background: #f8fafc; flex-grow: 1; }
     .zones-3mu { grid-template-columns: repeat(3, 1fr); }
     .zones-muda { grid-template-columns: repeat(3, 1fr); }
 
     .zone {
-      min-height: 180px;
+      min-height: 160px;
       background: white;
       border: 2px dashed #cbd5e1;
-      border-radius: 14px;
-      padding: 14px;
+      border-radius: 12px;
+      padding: 12px;
       transition: all .2s ease;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-    }
-
-    .zone.over {
-      transform: scale(1.02);
-      border-color: var(--blue);
-      background: var(--light-blue);
-    }
-
-    .zone-header {
-      display: flex;
-      align-items: center;
       gap: 8px;
-      margin-bottom: 2px;
-      font-weight: 800;
-      font-size: 1.05rem;
     }
+    .zone.over { transform: scale(1.02); border-color: var(--blue); background: var(--light-blue); }
+    .zone-header { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; font-weight: 800; font-size: 1rem; }
+    .zone small { display: block; color: var(--muted); line-height: 1.3; font-size: 0.82rem; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
 
-    .zone small {
-      display: block;
-      color: var(--muted);
-      line-height: 1.3;
-      font-size: 0.85rem;
-    }
-
-    .dot {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-
-    /* Couleurs des catégories */
     [data-id="mura"] { --accent: var(--orange); }
     [data-id="muri"] { --accent: var(--red); }
     [data-id="muda"] { --accent: var(--blue); }
@@ -250,98 +555,21 @@
 
     .zone .dot { background: var(--accent); }
     .zone { border-color: color-mix(in srgb, var(--accent) 30%, #cbd5e1); }
-
     .zone .card { margin: 0; border-left-color: var(--accent); }
-    .card.correct {
-      background: var(--ok);
-      border-color: #86efac;
-      border-left-color: var(--green) !important;
-      pointer-events: none;
-    }
-    .card.incorrect {
-      background: var(--bad);
-      border-color: #fca5a5;
-      border-left-color: var(--red) !important;
-      animation: shake 0.4s;
-    }
+    .card.correct { background: var(--ok); border-color: #86efac; border-left-color: var(--green) !important; pointer-events: none; }
+    .card.incorrect { background: var(--bad); border-color: #fca5a5; border-left-color: var(--red) !important; animation: shake 0.4s; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
 
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-4px); }
-      75% { transform: translateX(4px); }
-    }
-
-    /* --- ONGLET AIDE & ASTUCES --- */
-    #help-wrapper {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .help-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      padding: 24px;
-    }
-
-    .help-section h3 {
-      color: var(--blue);
-      margin-top: 0;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .concept-card {
-      background: #f8fafc;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 12px;
-    }
-
-    .concept-card h4 { margin: 0 0 6px 0; color: var(--ink); }
-    .concept-card p { margin: 0; font-size: 0.9rem; color: var(--muted); line-height: 1.5; }
-    .concept-card span.badge {
-      display: inline-block;
-      background: white;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 2px 6px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--blue);
-      margin-left: 6px;
-    }
-
-    /* --- SCHÉMA HIÉRARCHIQUE --- */
-    .lean-diagram {
-      background: white;
-      border-bottom: 1px solid var(--line);
-      padding: 30px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .lean-diagram h3 {
-      margin-top: 0;
-      color: var(--ink);
-      margin-bottom: 24px;
-    }
-
-    /* --- INDICATEURS EN BAS (SCORE) --- */
+    /* Score bar */
     .bottom-indicator {
       background: white;
       border-top: 1px solid var(--line);
-      padding: 16px 22px;
+      padding: 14px 22px;
       position: sticky;
       bottom: 0;
       z-index: 10;
       box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
     }
-
     .indicator-content {
       max-width: 1280px;
       margin: 0 auto;
@@ -349,444 +577,1129 @@
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 16px;
+      gap: 14px;
     }
-
-    .score-area {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .score-badge {
-      background: var(--light-blue);
-      color: var(--blue);
-      border-radius: 999px;
-      padding: 8px 16px;
-      font-weight: 800;
-      font-size: 1.1rem;
-      border: 1px solid #bfdbfe;
-    }
-
-    .feedback-msg {
-      color: var(--muted);
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: color 0.3s;
-    }
-
-    .action-btn {
-      border: 0;
-      border-radius: 999px;
-      padding: 10px 20px;
-      font-weight: 700;
-      cursor: pointer;
-      color: white;
-      background: var(--ink);
-      transition: transform 0.1s, opacity 0.2s;
-    }
-    
+    .score-area { display: flex; align-items: center; gap: 14px; }
+    .score-badge { background: var(--light-blue); color: var(--blue); border-radius: 999px; padding: 7px 14px; font-weight: 800; font-size: 1rem; border: 1px solid #bfdbfe; }
+    .feedback-msg { color: var(--muted); font-weight: 600; font-size: 0.9rem; transition: color 0.3s; }
+    .action-btn { border: 0; border-radius: 999px; padding: 9px 18px; font-weight: 700; cursor: pointer; color: white; background: var(--ink); transition: transform 0.1s, opacity 0.2s; }
     .action-btn:hover { opacity: 0.85; }
     .action-btn:active { transform: scale(0.96); }
 
-    .hidden { display: none !important; }
-
-    /* On maintient les 2 colonnes principales sur tablette/écran moyen */
-    @media (max-width: 1050px) {
-      #game-wrapper { grid-template-columns: 280px 1fr; }
-      .zones-muda { grid-template-columns: repeat(2, 1fr); }
-      .help-grid { grid-template-columns: 1fr; }
+    /* ==============================
+       RESPONSIVE
+    ============================== */
+    /* ==============================
+       SCÉNARIOS
+    ============================== */
+    #scenario-wrapper { max-width: 860px; margin: 0 auto; }
+    .scenario-top {
+      padding: 24px 28px 16px;
+      border-bottom: 1px solid var(--line);
+      background: white;
     }
+    .scenario-top h2 { margin: 0 0 6px; font-size: 1.3rem; color: var(--ink); }
+    .scenario-top p { margin: 0 0 14px; color: var(--muted); font-size: 0.9rem; }
+    .scenario-select-wrap { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .scenario-select {
+      flex: 1;
+      min-width: 220px;
+      padding: 10px 14px;
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--ink);
+      background: white;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .scenario-select:focus { border-color: var(--blue); }
+    .scenario-body { padding: 20px 28px 28px; }
+    .scenario-desc {
+      background: #f8fafc;
+      border-left: 4px solid var(--blue);
+      padding: 10px 14px;
+      border-radius: 0 10px 10px 0;
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .scenario-items { display: flex; flex-direction: column; gap: 10px; }
+    .scenario-item {
+      background: white;
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      align-items: center;
+      transition: border-color 0.2s;
+    }
+    .scenario-item.correct { border-color: #86efac; background: var(--ok); }
+    .scenario-item.incorrect { border-color: #fca5a5; background: var(--bad); }
+    .scenario-situation { font-size: 0.88rem; color: var(--ink); line-height: 1.45; }
+    .scenario-answer-sel {
+      padding: 7px 10px;
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-family: inherit;
+      color: var(--ink);
+      background: white;
+      cursor: pointer;
+      min-width: 150px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .scenario-answer-sel:focus { border-color: var(--blue); }
+    .scenario-item.correct .scenario-answer-sel { border-color: var(--green); background: var(--ok); }
+    .scenario-item.incorrect .scenario-answer-sel { border-color: var(--red); background: var(--bad); }
+    .scenario-badge {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .scenario-item.correct .scenario-badge { background: #dcfce7; opacity: 1; }
+    .scenario-item.incorrect .scenario-badge { background: var(--bad); opacity: 1; }
+    .scenario-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .scenario-score {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--muted);
+      transition: color 0.3s;
+    }
+    .scenario-score.done { color: var(--green); font-size: 1rem; }
+    .btn-check {
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 22px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-check:hover { opacity: 0.88; }
+    .btn-check:active { transform: scale(0.96); }
+    .btn-reset-sc {
+      background: transparent;
+      border: 1.5px solid var(--line);
+      border-radius: 999px;
+      padding: 9px 18px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-reset-sc:hover { border-color: var(--ink); color: var(--ink); }
 
-    /* On empile tout uniquement sur les petits écrans (mobiles) */
+    @media (max-width: 960px) {
+      .accordion-grid { grid-template-columns: 1fr; }
+    }
     @media (max-width: 820px) {
+      .flip-grid { grid-template-columns: 1fr; }
+      .flip-card { height: 240px; }
+      .help-grid { grid-template-columns: 1fr; }
       #game-wrapper { grid-template-columns: 1fr; }
       .bank { min-height: auto; flex-direction: row; flex-wrap: wrap; }
-      .card { flex: 1 1 calc(50% - 10px); }
+      .card { flex: 1 1 calc(50% - 8px); }
       .zones-3mu, .zones-muda { grid-template-columns: 1fr; }
       .indicator-content { flex-direction: column; text-align: center; justify-content: center; }
-      .score-area { flex-direction: column; gap: 8px; }
     }
-
-    @media (max-width: 480px) {
+    @media (max-width: 600px) {
+      .flip-grid, .accordion-grid { padding-left: 14px; padding-right: 14px; }
+      .timwood-banner { margin-left: 14px; margin-right: 14px; }
+      .memo-section-header { padding: 18px 14px 8px; }
       .card { flex: 1 1 100%; }
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>Classement Lean</h1>
-    <p class="subtitle">Mettez de l'ordre dans vos processus. Identifiez correctement les sources d'inefficacité (les 3 Mu) et les types de gaspillages (TIMWOOD).</p>
-  </header>
+<header>
+  <a href="index.html" title="Retour à l'accueil" style="position:absolute;top:18px;left:18px;display:flex;align-items:center;justify-content:center;width:42px;height:42px;background:white;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 4px 12px rgba(15,23,42,0.06);color:#475569;text-decoration:none;transition:color 0.2s,box-shadow 0.2s;" onmouseover="this.style.color='#2563eb';this.style.boxShadow='0 6px 16px rgba(37,99,235,0.15)'" onmouseout="this.style.color='#475569';this.style.boxShadow='0 4px 12px rgba(15,23,42,0.06)'">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  </a>
+  <h1>Classement Lean</h1>
+  <p class="subtitle">Aide-mémoire mnémotechniques, fiches concepts cliquables et jeu de classement pour maîtriser les 3&nbsp;Mu et les 7&nbsp;gaspillages.</p>
+</header>
 
-  <!-- Onglets -->
-  <nav class="tabs-wrapper">
-    <div class="tabs">
-      <button class="tab-button active" onclick="switchMode('help', event)">
-        <span>💡</span> Astuces & Aide
-      </button>
-      <button class="tab-button" onclick="switchMode('3mu', event)">
-        <span>1️⃣</span> Les 3 Mu
-      </button>
-      <button class="tab-button" onclick="switchMode('muda', event)">
-        <span>2️⃣</span> Les 7 Mudas
-      </button>
-    </div>
-  </nav>
+<nav class="tabs-wrapper">
+  <div class="tabs">
+    <button class="tab-button active" onclick="switchMode('help', event)">💡 Concepts</button>
+    <button class="tab-button" onclick="switchMode('3mu', event)">1️⃣ Les 3 Mu</button>
+    <button class="tab-button" onclick="switchMode('muda', event)">2️⃣ Les 7 Mudas</button>
+    <button class="tab-button" onclick="switchMode('scenario', event)">🎯 Scénarios</button>
+    <button class="tab-button" onclick="switchMode('memo', event)">🧠 Mémo</button>
+  </div>
+</nav>
 
-  <main>
-    <!-- ZONE DE JEU -->
-    <div id="game-wrapper" class="hidden">
-      <!-- Banque -->
-      <div class="panel">
-        <h2>À classer</h2>
-        <div class="instructions">Glissez les situations ci-dessous dans la bonne catégorie à droite.</div>
-        <div class="bank" id="bank" data-id="bank"></div>
-      </div>
+<main>
 
-      <!-- Catégories de dépôt -->
-      <div class="panel">
-        <h2>Catégories</h2>
-        
-        <!-- Vue 3 MU -->
-        <div id="view-3mu" class="zones-grid zones-3mu">
-          <div class="zone" data-id="mura">
-            <div class="zone-header"><span class="dot"></span> Mura</div>
-            <small>Irrégularité, variabilité, rythme non constant ou flux haché.</small>
-          </div>
-          <div class="zone" data-id="muri">
-            <div class="zone-header"><span class="dot"></span> Muri</div>
-            <small>Surcharge, excès, effort déraisonnable (hommes ou machines).</small>
-          </div>
-          <div class="zone" data-id="muda">
-            <div class="zone-header"><span class="dot"></span> Muda</div>
-            <small>Gaspillage pur, activité qui n'ajoute aucune valeur pour le client.</small>
-          </div>
-        </div>
+  <!-- ================================================
+       ONGLET MÉMO
+  ================================================ -->
+  <div id="memo-wrapper" class="panel hidden" style="max-width:980px;margin:0 auto;">
 
-        <!-- Vue 7 MUDAS -->
-        <div id="view-muda" class="zones-grid zones-muda hidden">
-          <div class="zone" data-id="transport"><div class="zone-header"><span class="dot"></span> Transport</div></div>
-          <div class="zone" data-id="inventory"><div class="zone-header"><span class="dot"></span> Stock</div></div>
-          <div class="zone" data-id="motion"><div class="zone-header"><span class="dot"></span> Mouvements</div></div>
-          <div class="zone" data-id="waiting"><div class="zone-header"><span class="dot"></span> Attente</div></div>
-          <div class="zone" data-id="overprocessing"><div class="zone-header"><span class="dot"></span> Sur-traitement</div></div>
-          <div class="zone" data-id="overproduction"><div class="zone-header"><span class="dot"></span> Surproduction</div></div>
-          <div class="zone" data-id="defects"><div class="zone-header"><span class="dot"></span> Défauts</div></div>
-        </div>
-      </div>
+    <div class="memo-section-header">
+      <h2>🧠 Les 3 Mu — Aide-mémoire</h2>
+      <p>Cliquez sur une carte pour la retourner et découvrir le moyen mnémotechnique.</p>
     </div>
 
-    <!-- ZONE AIDE & ASTUCES -->
-    <div id="help-wrapper" class="panel">
-      <h2>💡 Comprendre les concepts du Lean</h2>
+    <div class="flip-grid">
 
-      <div class="lean-diagram">
-        <h3>Schéma de la hiérarchie</h3>
-        <svg viewBox="0 0 600 380" style="width: 100%; max-width: 650px; height: auto;">
-          <defs>
-            <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb" />
-            </marker>
-          </defs>
+      <!-- MUDA -->
+      <div class="flip-card" onclick="this.classList.toggle('flipped')" title="Retourner la carte">
+        <div class="flip-card-inner">
+          <div class="flip-front" style="background:linear-gradient(145deg,#fff1f2,#ffe4e6);border:2px solid #fda4af;">
+            <div class="flip-icon">🗑️</div>
+            <div class="flip-jp">無駄</div>
+            <h3 class="flip-title" style="color:#be123c;">MUDA</h3>
+            <div class="flip-fr" style="color:#9f1239;">= Gaspillage</div>
+            <div class="flip-cta" style="color:#9f1239;">👆 Voir le mémo</div>
+          </div>
+          <div class="flip-back" style="background:linear-gradient(145deg,#be123c,#9f1239);color:white;">
+            <div class="memo-tag">💡 Moyen mnémotechnique</div>
+            <p class="memo-metaphor">
+              « <strong>MUD</strong> = boue en 🇬🇧<br>
+              La boue ? Inutile → on la <em>jette</em><br>
+              → <strong>GASPILLAGE</strong> »
+            </p>
+            <div class="memo-acrostic">
+              <span class="letter">M</span>ise utile ?<br>
+              <span class="letter">U</span>ne valeur ?<br>
+              <span class="letter">D</span>ire<br>
+              <span class="letter">A</span>dieu !
+            </div>
+          </div>
+        </div>
+      </div>
 
-          <!-- Top Node -->
-          <rect x="225" y="10" width="150" height="40" rx="8" fill="#0f172a" />
+      <!-- MURA -->
+      <div class="flip-card" onclick="this.classList.toggle('flipped')" title="Retourner la carte">
+        <div class="flip-card-inner">
+          <div class="flip-front" style="background:linear-gradient(145deg,#fff7ed,#ffedd5);border:2px solid #fdba74;">
+            <div class="flip-icon">🎢</div>
+            <div class="flip-jp">斑</div>
+            <h3 class="flip-title" style="color:#c2410c;">MURA</h3>
+            <div class="flip-fr" style="color:#9a3412;">= Irrégularité</div>
+            <div class="flip-cta" style="color:#9a3412;">👆 Voir le mémo</div>
+          </div>
+          <div class="flip-back" style="background:linear-gradient(145deg,#c2410c,#9a3412);color:white;">
+            <div class="memo-tag">💡 Moyen mnémotechnique</div>
+            <p class="memo-metaphor">
+              « <strong>MUR</strong>a = <strong>M</strong>ontagne-<strong>R</strong>usse des <strong>A</strong>ctivités<br>
+              Hauts & bas constants<br>
+              → <strong>IRRÉGULARITÉ</strong> »
+            </p>
+            <div class="memo-acrostic">
+              <span class="letter">M</span>ontée<br>
+              <span class="letter">U</span>n creux<br>
+              <span class="letter">R</span>emontée<br>
+              <span class="letter">A</span>lternée
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MURI -->
+      <div class="flip-card" onclick="this.classList.toggle('flipped')" title="Retourner la carte">
+        <div class="flip-card-inner">
+          <div class="flip-front" style="background:linear-gradient(145deg,#fefce8,#fef9c3);border:2px solid #fde047;">
+            <div class="flip-icon">💥</div>
+            <div class="flip-jp">無理</div>
+            <h3 class="flip-title" style="color:#a16207;">MURI</h3>
+            <div class="flip-fr" style="color:#92400e;">= Surcharge</div>
+            <div class="flip-cta" style="color:#92400e;">👆 Voir le mémo</div>
+          </div>
+          <div class="flip-back" style="background:linear-gradient(145deg,#a16207,#92400e);color:white;">
+            <div class="memo-tag">💡 Moyen mnémotechnique</div>
+            <p class="memo-metaphor">
+              « Être <strong>MURé</strong> sous le travail<br>
+              Coincé, sous pression → rupture !<br>
+              → <strong>SURCHARGE</strong> »
+            </p>
+            <div class="memo-acrostic">
+              <span class="letter">M</span>ort de fatigue<br>
+              <span class="letter">U</span>sé jusqu'au bout<br>
+              <span class="letter">R</span>upture<br>
+              <span class="letter">I</span>mpossible !
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /flip-grid -->
+
+    <!-- 7 MUDA HEADER -->
+    <div class="memo-section-header" style="padding-top:6px;border-top:1px solid var(--line);margin-top:4px;">
+      <h2>🧠 Les 7 Muda — Aide-mémoire</h2>
+      <p>Survolez chaque lettre de l'acrostiche pour voir le gaspillage. Cliquez sur chaque carte pour les détails + exemple.</p>
+    </div>
+
+    <!-- Acrostiche français -->
+    <div class="timwood-banner">
+      <div class="timwood-title">🇫🇷 Acrostiche français — survolez chaque lettre !</div>
+      <div class="timwood-letters">
+        <span data-label="Transport">T</span>
+        <span data-label="Inventaire (Stock)">I</span>
+        <span data-label="Mouvements">M</span>
+        <span data-label="Attente">A</span>
+        <span data-label="Sur-traitement">S</span>
+        <span data-label="Surproduction">S</span>
+        <span data-label="Défauts">D</span>
+      </div>
+      <div class="timwood-fr-phrase">
+        <div style="font-size:1.05rem;font-weight:700;letter-spacing:0.04em;margin-bottom:10px;color:#93c5fd;">
+          « <strong>T</strong>out <strong>I</strong>nventaire <strong>M</strong>al <strong>A</strong>géré <strong>S</strong>ème <strong>S</strong>ouvent des <strong>D</strong>éfauts »
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:0.82rem;text-align:left;">
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+            <td style="padding:4px 8px;color:#93c5fd;font-weight:900;font-size:1rem;width:28px;">T</td>
+            <td style="padding:4px 8px;opacity:0.6;font-style:italic;">out</td>
+            <td style="padding:4px 8px;font-weight:600;">→ Transport</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+            <td style="padding:4px 8px;color:#93c5fd;font-weight:900;font-size:1rem;">I</td>
+            <td style="padding:4px 8px;opacity:0.6;font-style:italic;">nventaire</td>
+            <td style="padding:4px 8px;font-weight:600;">→ Inventaire (Stock)</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+            <td style="padding:4px 8px;color:#93c5fd;font-weight:900;font-size:1rem;">M</td>
+            <td style="padding:4px 8px;opacity:0.6;font-style:italic;">al</td>
+            <td style="padding:4px 8px;font-weight:600;">→ Mouvements</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+            <td style="padding:4px 8px;color:#93c5fd;font-weight:900;font-size:1rem;">A</td>
+            <td style="padding:4px 8px;opacity:0.6;font-style:italic;">géré</td>
+            <td style="padding:4px 8px;font-weight:600;">→ Attente</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+            <td style="padding:4px 8px;color:#93c5fd;font-weight:900;font-size:1rem;">S</td>
+            <td style="padding:4px 8px;opacity:0.6;font-style:italic;">ème</td>
+            <td style="padding:4px 8px;font-weight:600;">→ Sur-traitement</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+            <td style="padding:4px 8px;color:#93c5fd;font-weight:900;font-size:1rem;">S</td>
+            <td style="padding:4px 8px;opacity:0.6;font-style:italic;">ouvent</td>
+            <td style="padding:4px 8px;font-weight:600;">→ Surproduction</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 8px;color:#93c5fd;font-weight:900;font-size:1rem;">D</td>
+            <td style="padding:4px 8px;opacity:0.6;font-style:italic;">éfauts</td>
+            <td style="padding:4px 8px;font-weight:600;">→ Défauts</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- 7 Muda accordion -->
+    <div class="accordion-grid">
+
+      <div class="acc-item" onclick="toggleAcc(this)">
+        <div class="acc-header">
+          <div class="acc-header-left">
+            <span class="acc-emoji">🚚</span>
+            <div class="acc-names">
+              <span class="acc-name-en">T · Transport</span>
+              <span class="acc-name-fr">Transport</span>
+            </div>
+          </div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body"><div class="acc-content">
+          <div class="acc-memo">💡 <strong>Mémo :</strong> « Un transport n'<em>ajoute jamais de valeur</em> — il ne fait que déplacer le problème. »</div>
+          <p class="acc-definition">Tout déplacement de matériaux, pièces ou produits sans valeur ajoutée. Chaque transfert est un risque de dommage, un coût, un délai.</p>
+          <div class="acc-example"><strong>📌 Exemple concret</strong>Transporter des composants à l'autre bout de l'atelier parce que les postes sont mal implantés. Déplacer des palettes 3 fois par jour faute de stockage logique.</div>
+        </div></div>
+      </div>
+
+      <div class="acc-item" onclick="toggleAcc(this)">
+        <div class="acc-header">
+          <div class="acc-header-left">
+            <span class="acc-emoji">📦</span>
+            <div class="acc-names">
+              <span class="acc-name-en">I · Inventaire</span>
+              <span class="acc-name-fr">Stock (Inventaire)</span>
+            </div>
+          </div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body"><div class="acc-content">
+          <div class="acc-memo">💡 <strong>Mémo :</strong> « Le stock = <em>argent qui dort</em>. Et pendant qu'il dort, il <em>cache les problèmes</em>. »</div>
+          <p class="acc-definition">Accumulation excessive de matières premières, d'en-cours ou de produits finis au-delà du besoin immédiat. Masque pannes, retards et défauts.</p>
+          <div class="acc-example"><strong>📌 Exemple concret</strong>Garder 6 mois de matières "au cas où". Avoir 500 pièces en attente entre deux postes. Les problèmes se cachent derrière le stock.</div>
+        </div></div>
+      </div>
+
+      <div class="acc-item" onclick="toggleAcc(this)">
+        <div class="acc-header">
+          <div class="acc-header-left">
+            <span class="acc-emoji">🚶</span>
+            <div class="acc-names">
+              <span class="acc-name-en">M · Mouvements</span>
+              <span class="acc-name-fr">Mouvements</span>
+            </div>
+          </div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body"><div class="acc-content">
+          <div class="acc-memo">💡 <strong>Mémo :</strong> « ≠ Transport ! Le <em>Mouvement</em> c'est le corps de <em>l'opérateur</em> qui bouge, pas la pièce. »</div>
+          <p class="acc-definition">Déplacements inutiles des opérateurs dans leur zone de travail : se baisser, s'étirer, marcher, chercher un outil, tourner sur soi-même.</p>
+          <div class="acc-example"><strong>📌 Exemple concret</strong>Marcher 10 m pour chercher un outil. Se baisser sous l'établi toutes les 5 min. Chercher une fiche dans plusieurs tiroirs.</div>
+        </div></div>
+      </div>
+
+      <div class="acc-item" onclick="toggleAcc(this)">
+        <div class="acc-header">
+          <div class="acc-header-left">
+            <span class="acc-emoji">⏳</span>
+            <div class="acc-names">
+              <span class="acc-name-en">A · Attente</span>
+              <span class="acc-name-fr">Attente</span>
+            </div>
+          </div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body"><div class="acc-content">
+          <div class="acc-memo">💡 <strong>Mémo :</strong> « Un opérateur qui <em>attend</em> ne produit pas. Ce temps est perdu <em>pour toujours</em>. »</div>
+          <p class="acc-definition">Période pendant laquelle un opérateur est inactif faute de pièce, d'information, de machine disponible ou de décision.</p>
+          <div class="acc-example"><strong>📌 Exemple concret</strong>Attendre la fin d'un cycle machine de 3 min. Attendre la signature du responsable. Attendre l'arrivée d'un composant manquant.</div>
+        </div></div>
+      </div>
+
+      <div class="acc-item" onclick="toggleAcc(this)">
+        <div class="acc-header">
+          <div class="acc-header-left">
+            <span class="acc-emoji">⚙️</span>
+            <div class="acc-names">
+              <span class="acc-name-en">S · Sur-traitement</span>
+              <span class="acc-name-fr">Sur-traitement</span>
+            </div>
+          </div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body"><div class="acc-content">
+          <div class="acc-memo">💡 <strong>Mémo :</strong> « Si le client ne <em>paie pas</em> pour cette étape, c'est du sur-traitement. La qualité excessive est du gaspillage. »</div>
+          <p class="acc-definition">Réaliser des opérations ou utiliser des équipements plus sophistiqués que nécessaire. Faire plus que ce que le client demande ou paie.</p>
+          <div class="acc-example"><strong>📌 Exemple concret</strong>Polir l'intérieur d'une pièce jamais visible. Remplir 3 formulaires pour une opération simple. Utiliser une CNC 5 axes pour une coupe droite.</div>
+        </div></div>
+      </div>
+
+      <div class="acc-item" onclick="toggleAcc(this)">
+        <div class="acc-header">
+          <div class="acc-header-left">
+            <span class="acc-emoji">🏭</span>
+            <div class="acc-names">
+              <span class="acc-name-en">S · Surproduction</span>
+              <span class="acc-name-fr">Surproduction</span>
+            </div>
+          </div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body"><div class="acc-content">
+          <div class="acc-memo">💡 <strong>Mémo :</strong> « C'est le <em>pire</em> des 7 Mudas ! Elle en génère tous les autres : stock, transport, défauts non détectés… »</div>
+          <p class="acc-definition">Produire plus que ce qui est commandé, ou plus tôt que nécessaire. Le Muda "roi" car il déclenche une cascade d'autres gaspillages.</p>
+          <div class="acc-example"><strong>📌 Exemple concret</strong>Fabriquer 1 000 pièces "pour amortir le setup" alors que la commande est de 200. Produire en avance pour avoir du stock de sécurité.</div>
+        </div></div>
+      </div>
+
+      <div class="acc-item" onclick="toggleAcc(this)" style="grid-column:1/-1;">
+        <div class="acc-header">
+          <div class="acc-header-left">
+            <span class="acc-emoji">❌</span>
+            <div class="acc-names">
+              <span class="acc-name-en">D · Défauts</span>
+              <span class="acc-name-fr">Défauts</span>
+            </div>
+          </div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body"><div class="acc-content">
+          <div class="acc-memo">💡 <strong>Mémo :</strong> « Chaque défaut est <em>payé deux fois</em> : une fois pour le produire, une fois pour le corriger. »</div>
+          <p class="acc-definition">Pièces non conformes, erreurs, retouches, rebuts. Tout travail qui n'est pas fait "bon du premier coup" et qui nécessite correction ou mise au rebut.</p>
+          <div class="acc-example"><strong>📌 Exemple concret</strong>Pièces rayées lors de l'assemblage nécessitant retouche. Erreurs de saisie dans les fiches de fabrication. Retours clients pour non-conformité.</div>
+        </div></div>
+      </div>
+
+    </div><!-- /accordion-grid -->
+
+  </div><!-- /memo-wrapper -->
+
+
+  <!-- ================================================
+       ONGLET CONCEPTS
+  ================================================ -->
+  <div id="help-wrapper" class="panel" style="max-width:900px;margin:0 auto;">
+
+    <div class="lean-diagram">
+      <h3>Hiérarchie des concepts Lean</h3>
+      <svg viewBox="0 0 600 398" style="width:100%;max-width:650px;height:auto;">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
+          </marker>
+        </defs>
+        <!-- Lignes passives -->
+        <path d="M 300 50 L 300 75 M 120 75 L 480 75 M 120 75 L 120 100 M 300 75 L 300 100 M 480 75 L 480 100" stroke="#cbd5e1" stroke-width="2" fill="none"/>
+        <path d="M 300 140 L 300 165" stroke="#2563eb" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+        <path d="M 300 215 L 300 320 M 120 235 L 480 235 M 120 235 L 120 250 M 240 235 L 240 250 M 360 235 L 360 250 M 480 235 L 480 250 M 160 305 L 440 305 M 160 305 L 160 320 M 440 305 L 440 320" stroke="#94a3b8" stroke-width="1.5" fill="none"/>
+        <!-- Nœuds cliquables -->
+        <g class="svg-node" onclick="openModal('3mu')">
+          <rect x="225" y="10" width="150" height="40" rx="8" fill="#0f172a"/>
           <text x="300" y="35" fill="white" font-family="sans-serif" font-weight="bold" font-size="16" text-anchor="middle">Les 3 Mu</text>
-
-          <!-- Lines from Top to 3 Mu -->
-          <path d="M 300 50 L 300 75 M 120 75 L 480 75 M 120 75 L 120 100 M 300 75 L 300 100 M 480 75 L 480 100" stroke="#cbd5e1" stroke-width="2" fill="none" />
-
-          <!-- Mura (Left) -->
-          <rect x="60" y="100" width="120" height="40" rx="8" fill="white" stroke="#f97316" stroke-width="2" />
+        </g>
+        <g class="svg-node" onclick="openModal('mura')">
+          <rect x="60" y="100" width="120" height="40" rx="8" fill="white" stroke="#f97316" stroke-width="2"/>
           <text x="120" y="125" fill="#f97316" font-family="sans-serif" font-weight="bold" font-size="16" text-anchor="middle">Mura</text>
-
-          <!-- Muda (Center to allow branches below) -->
-          <rect x="240" y="100" width="120" height="40" rx="8" fill="white" stroke="#2563eb" stroke-width="2" />
+        </g>
+        <g class="svg-node" onclick="openModal('muda')">
+          <rect x="240" y="100" width="120" height="40" rx="8" fill="white" stroke="#2563eb" stroke-width="2"/>
           <text x="300" y="125" fill="#2563eb" font-family="sans-serif" font-weight="bold" font-size="16" text-anchor="middle">Muda</text>
-
-          <!-- Muri (Right) -->
-          <rect x="420" y="100" width="120" height="40" rx="8" fill="white" stroke="#dc2626" stroke-width="2" />
+        </g>
+        <g class="svg-node" onclick="openModal('muri')">
+          <rect x="420" y="100" width="120" height="40" rx="8" fill="white" stroke="#dc2626" stroke-width="2"/>
           <text x="480" y="125" fill="#dc2626" font-family="sans-serif" font-weight="bold" font-size="16" text-anchor="middle">Muri</text>
-
-          <!-- Arrow from Muda to 7 Mudas -->
-          <path d="M 300 140 L 300 165" stroke="#2563eb" stroke-width="2" fill="none" marker-end="url(#arrow)" />
-          
-          <!-- 7 Mudas Category Header -->
-          <rect x="220" y="170" width="160" height="45" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2" />
+        </g>
+        <g class="svg-node" onclick="openModal('7mudas')">
+          <rect x="220" y="170" width="160" height="45" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
           <text x="300" y="190" fill="#2563eb" font-family="sans-serif" font-weight="bold" font-size="15" text-anchor="middle">Les 7 Mudas</text>
-          <text x="300" y="206" fill="#64748b" font-family="sans-serif" font-size="11" text-anchor="middle">(TIMWOOD)</text>
-
-          <!-- Lines from 7 Mudas to individual items -->
-          <path d="M 300 215 L 300 320 M 120 235 L 480 235 M 120 235 L 120 250 M 240 235 L 240 250 M 360 235 L 360 250 M 480 235 L 480 250 M 160 305 L 440 305 M 160 305 L 160 320 M 440 305 L 440 320" stroke="#94a3b8" stroke-width="1.5" fill="none" />
-
-          <!-- Row 1: Transport, Stock, Mouvements, Attente -->
-          <rect x="70" y="250" width="100" height="30" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.5" />
+          <text x="300" y="206" fill="#64748b" font-family="sans-serif" font-size="11" text-anchor="middle">(T·I·M·A·S·S·D)</text>
+        </g>
+        <g class="svg-node" onclick="openModal('transport')">
+          <rect x="70" y="250" width="100" height="30" rx="6" fill="#fff" stroke="#2563eb" stroke-width="1.5"/>
           <text x="120" y="270" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="12" text-anchor="middle">Transport</text>
-
-          <rect x="190" y="250" width="100" height="30" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.5" />
+        </g>
+        <g class="svg-node" onclick="openModal('stock')">
+          <rect x="190" y="250" width="100" height="30" rx="6" fill="#fff" stroke="#2563eb" stroke-width="1.5"/>
           <text x="240" y="270" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="12" text-anchor="middle">Stock</text>
-
-          <rect x="310" y="250" width="100" height="30" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.5" />
+        </g>
+        <g class="svg-node" onclick="openModal('mouvements')">
+          <rect x="310" y="250" width="100" height="30" rx="6" fill="#fff" stroke="#2563eb" stroke-width="1.5"/>
           <text x="360" y="270" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="12" text-anchor="middle">Mouvements</text>
-
-          <rect x="430" y="250" width="100" height="30" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.5" />
+        </g>
+        <g class="svg-node" onclick="openModal('attente')">
+          <rect x="430" y="250" width="100" height="30" rx="6" fill="#fff" stroke="#2563eb" stroke-width="1.5"/>
           <text x="480" y="270" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="12" text-anchor="middle">Attente</text>
-
-          <!-- Row 2: Sur-traitement, Surproduction, Défauts -->
-          <rect x="100" y="320" width="120" height="30" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.5" />
+        </g>
+        <g class="svg-node" onclick="openModal('surtraitement')">
+          <rect x="100" y="320" width="120" height="30" rx="6" fill="#fff" stroke="#2563eb" stroke-width="1.5"/>
           <text x="160" y="340" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="12" text-anchor="middle">Sur-traitement</text>
-
-          <rect x="240" y="320" width="120" height="30" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.5" />
+        </g>
+        <g class="svg-node" onclick="openModal('surproduction')">
+          <rect x="240" y="320" width="120" height="30" rx="6" fill="#fff" stroke="#2563eb" stroke-width="1.5"/>
           <text x="300" y="340" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="12" text-anchor="middle">Surproduction</text>
-
-          <rect x="380" y="320" width="120" height="30" rx="6" fill="#ffffff" stroke="#2563eb" stroke-width="1.5" />
+        </g>
+        <g class="svg-node" onclick="openModal('defauts')">
+          <rect x="380" y="320" width="120" height="30" rx="6" fill="#fff" stroke="#2563eb" stroke-width="1.5"/>
           <text x="440" y="340" fill="#0f172a" font-family="sans-serif" font-weight="bold" font-size="12" text-anchor="middle">Défauts</text>
-        </svg>
+        </g>
+        <text x="300" y="390" fill="#94a3b8" font-family="sans-serif" font-size="10" text-anchor="middle" font-style="italic">👆 Cliquez sur un nœud pour voir la définition</text>
+      </svg>
+    </div>
+
+    <div class="help-grid">
+
+      <div class="help-section">
+        <h3>Les 3 Mu — cliquer pour les détails</h3>
+
+        <div class="concept-card" style="border-left:4px solid #be123c;" onclick="toggleConceptCard(this)">
+          <div class="concept-card-header">
+            <h4 class="concept-card-title">🗑️ Muda — <em style="font-weight:400;">Gaspillage</em></h4>
+            <span class="concept-toggle">+ détails</span>
+          </div>
+          <div class="concept-card-body"><div class="concept-card-content">
+            <p>Toute activité qui consomme des ressources sans créer de valeur pour le client. <strong>Type 1</strong> : inévitable à court terme. <strong>Type 2</strong> : à éliminer immédiatement.</p>
+            <div class="concept-example">📌 Corriger des pièces défectueuses, attendre une approbation, effectuer des déplacements inutiles.</div>
+          </div></div>
+        </div>
+
+        <div class="concept-card" style="border-left:4px solid #c2410c;" onclick="toggleConceptCard(this)">
+          <div class="concept-card-header">
+            <h4 class="concept-card-title">🎢 Mura — <em style="font-weight:400;">Irrégularité</em></h4>
+            <span class="concept-toggle">+ détails</span>
+          </div>
+          <div class="concept-card-body"><div class="concept-card-content">
+            <p>Variation ou irrégularité dans les flux de travail. C'est souvent la <strong>cause racine</strong> des Muri et Muda. Agir sur le Mura est la clé pour éliminer les deux autres.</p>
+            <div class="concept-example">📌 Commandes fluctuant de 20 à 200 unités sans prévision. Cadence hachée entre deux postes de travail.</div>
+          </div></div>
+        </div>
+
+        <div class="concept-card" style="border-left:4px solid #a16207;" onclick="toggleConceptCard(this)">
+          <div class="concept-card-header">
+            <h4 class="concept-card-title">💥 Muri — <em style="font-weight:400;">Surcharge</em></h4>
+            <span class="concept-toggle">+ détails</span>
+          </div>
+          <div class="concept-card-body"><div class="concept-card-content">
+            <p>Exiger plus qu'une personne ou une machine ne peut fournir raisonnablement. Entraîne stress, pannes, burn-out, erreurs et accidents.</p>
+            <div class="concept-example">📌 Machine à 150% de sa capacité nominale pour rattraper un retard. Opérateur portant 30 kg toute la journée.</div>
+          </div></div>
+        </div>
       </div>
 
-      <div class="help-grid">
-        
-        <div class="help-section">
-          <h3>Les 3 Mu (Démons du Lean)</h3>
-          
-          <div class="concept-card" style="border-left: 4px solid var(--blue)">
-            <h4>Muda (Gaspillage)</h4>
-            <p>Toute activité qui consomme des ressources sans créer de valeur aux yeux du client final.</p>
+      <div class="help-section">
+        <h3>Les 7 Mudas <span style="font-size:0.85rem;color:var(--muted);font-weight:normal;">(T·I·M·A·S·S·D)</span></h3>
+
+        <div class="concept-card" style="border-left:4px solid #3b82f6;" onclick="toggleConceptCard(this)">
+          <div class="concept-card-header">
+            <h4 class="concept-card-title">🚚 Transport</h4>
+            <span class="concept-toggle">+ détails</span>
           </div>
-          <div class="concept-card" style="border-left: 4px solid var(--orange)">
-            <h4>Mura (Irrégularité)</h4>
-            <p>Variation dans le fonctionnement (ex: pics d'activité, planning instable). C'est souvent la cause racine des deux autres Mu.</p>
-          </div>
-          <div class="concept-card" style="border-left: 4px solid var(--red)">
-            <h4>Muri (Surcharge)</h4>
-            <p>Exiger l'impossible d'un équipement ou d'un humain. Entraîne stress, pannes, burn-out et défauts.</p>
-          </div>
+          <div class="concept-card-body"><div class="concept-card-content">
+            <p>Déplacement inutile de matériaux ou produits sans valeur ajoutée.</p>
+            <div class="concept-example">📌 Déplacer des composants à l'autre bout de l'atelier car les postes sont mal implantés.</div>
+          </div></div>
         </div>
 
-        <div class="help-section">
-          <h3>Les 7 Mudas <span style="font-size: 0.9rem; color:var(--muted); font-weight:normal;">(L'acronyme TIMWOOD)</span></h3>
-          
-          <div class="concept-card">
-            <h4>🚚 <span style="color:var(--blue)">T</span>ransport</h4>
-            <p>Déplacement inutile de matériels ou de produits d'un point A à un point B.</p>
+        <div class="concept-card" style="border-left:4px solid #8b5cf6;" onclick="toggleConceptCard(this)">
+          <div class="concept-card-header">
+            <h4 class="concept-card-title">📦 Stock <span class="badge">Inventory</span></h4>
+            <span class="concept-toggle">+ détails</span>
           </div>
-          <div class="concept-card">
-            <h4>📦 <span style="color:var(--blue)">I</span>nventory <span class="badge">Stock</span></h4>
-            <p>Accumulation de matières premières, d'en-cours ou de produits finis (cache les problèmes).</p>
-          </div>
-          <div class="concept-card">
-            <h4>🚶‍♂️ <span style="color:var(--blue)">M</span>otion <span class="badge">Mouvements</span></h4>
-            <p>Déplacements inutiles des opérateurs (chercher un outil, se baisser, marcher).</p>
-          </div>
-          <div class="concept-card">
-            <h4>⏳ <span style="color:var(--blue)">W</span>aiting <span class="badge">Attente</span></h4>
-            <p>Opérateur inactif (attend une pièce, une signature, une fin de cycle machine).</p>
-          </div>
-          <div class="concept-card">
-            <h4>⚙️ <span style="color:var(--blue)">O</span>verprocessing <span class="badge">Sur-traitement</span></h4>
-            <p>Faire de la qualité excessive ou des étapes non demandées/payées par le client.</p>
-          </div>
-          <div class="concept-card">
-            <h4>🏭 <span style="color:var(--blue)">O</span>verproduction <span class="badge">Surproduction</span></h4>
-            <p>Produire trop ou trop tôt. C'est le pire Muda car il génère tous les autres !</p>
-          </div>
-          <div class="concept-card">
-            <h4>❌ <span style="color:var(--blue)">D</span>efects <span class="badge">Défauts</span></h4>
-            <p>Pièces non conformes, erreurs, nécessité de retoucher le travail.</p>
-          </div>
+          <div class="concept-card-body"><div class="concept-card-content">
+            <p>Accumulation de matières premières, d'en-cours ou de produits finis au-delà du besoin immédiat.</p>
+            <div class="concept-example">📌 6 mois de matières "au cas où". 500 pièces en attente entre deux postes.</div>
+          </div></div>
         </div>
 
+        <div class="concept-card" style="border-left:4px solid #ec4899;" onclick="toggleConceptCard(this)">
+          <div class="concept-card-header">
+            <h4 class="concept-card-title">🚶 Mouvements <span class="badge">Motion</span></h4>
+            <span class="concept-toggle">+ détails</span>
+          </div>
+          <div class="concept-card-body"><div class="concept-card-content">
+            <p>Déplacements inutiles du corps des opérateurs (≠ transport de pièces).</p>
+            <div class="concept-example">📌 Marcher 10 m pour un outil. Se baisser sous l'établi toutes les 5 min.</div>
+          </div></div>
+        </div>
+
+        <div class="concept-card" style="border-left:4px solid #eab308;" onclick="toggleConceptCard(this)">
+          <div class="concept-card-header">
+            <h4 class="concept-card-title">⏳ Attente <span class="badge">Waiting</span></h4>
+            <span class="concept-toggle">+ détails</span>
+          </div>
+          <div class="concept-card-body"><div class="concept-card-content">
+            <p>Opérateur inactif en attente d'une pièce, d'une décision ou d'une fin de cycle machine.</p>
+            <div class="concept-example">📌 Regarder la machine tourner pendant 3 min. Attendre la signature du responsable.</div>
+          </div></div>
+        </div>
+
+        <div class="concept-card" style="border-left:4px solid #14b8a6;" onclick="toggleConceptCard(this)">
+          <div class="concept-card-header">
+            <h4 class="concept-card-title">⚙️ Sur-traitement <span class="badge">Overprocessing</span></h4>
+            <span class="concept-toggle">+ détails</span>
+          </div>
+          <div class="concept-card-body"><div class="concept-card-content">
+            <p>Faire plus que ce que le client demande ou paie. Qualité excessive non requise.</p>
+            <div class="concept-example">📌 Peindre l'intérieur d'une pièce jamais visible. 3 formulaires pour une opération simple.</div>
+          </div></div>
+        </div>
+
+        <div class="concept-card" style="border-left:4px solid #f97316;" onclick="toggleConceptCard(this)">
+          <div class="concept-card-header">
+            <h4 class="concept-card-title">🏭 Surproduction <span class="badge">Overproduction</span></h4>
+            <span class="concept-toggle">+ détails</span>
+          </div>
+          <div class="concept-card-body"><div class="concept-card-content">
+            <p>Produire plus ou plus tôt que nécessaire. Le pire Muda — il génère tous les autres.</p>
+            <div class="concept-example">📌 1 000 pièces "pour amortir le setup" alors que la commande est de 200.</div>
+          </div></div>
+        </div>
+
+        <div class="concept-card" style="border-left:4px solid #ef4444;" onclick="toggleConceptCard(this)">
+          <div class="concept-card-header">
+            <h4 class="concept-card-title">❌ Défauts <span class="badge">Defects</span></h4>
+            <span class="concept-toggle">+ détails</span>
+          </div>
+          <div class="concept-card-body"><div class="concept-card-content">
+            <p>Pièces non conformes, retouches, rebuts. Tout travail non "bon du premier coup".</p>
+            <div class="concept-example">📌 Pièces rayées à retoucher. Erreurs de saisie dans les fiches de fabrication.</div>
+          </div></div>
+        </div>
+
+      </div>
+    </div><!-- /help-grid -->
+  </div><!-- /help-wrapper -->
+
+
+  <!-- ================================================
+       SCÉNARIOS
+  ================================================ -->
+  <div id="scenario-wrapper" class="panel hidden">
+    <div class="scenario-top">
+      <h2>🎯 Classez les situations par type de Muda</h2>
+      <p>Choisissez un scénario, identifiez le gaspillage dans chaque situation, puis vérifiez vos réponses.</p>
+      <div class="scenario-select-wrap">
+        <select class="scenario-select" id="scenario-sel" onchange="loadScenario(this.value)">
+          <option value="">— Choisir un scénario —</option>
+          <option value="atelier">🔧 Atelier mécanique</option>
+          <option value="entrepot">📦 Entrepôt logistique</option>
+          <option value="bureau">💼 Bureau administratif</option>
+        </select>
       </div>
     </div>
-  </main>
-
-  <!-- Indicateurs en bas (Masqué sur l'onglet d'aide) -->
-  <footer class="bottom-indicator" style="display: none;">
-    <div class="indicator-content" id="indicator-content">
-      <div class="score-area">
-        <div class="score-badge">
-          Score : <span id="score-display">0</span> / <span id="total-display">0</span>
-        </div>
-        <div class="feedback-msg" id="feedback-msg">À vous de jouer ! Glissez les cartes.</div>
+    <div class="scenario-body">
+      <div class="scenario-desc" id="scenario-desc" style="display:none;"></div>
+      <div class="scenario-items" id="scenario-items"></div>
+      <div class="scenario-actions" id="scenario-actions" style="display:none;">
+        <button class="btn-reset-sc" onclick="resetScenario()">🔄 Réessayer</button>
+        <span class="scenario-score" id="scenario-score"></span>
+        <button class="btn-check" onclick="checkScenario()">Vérifier mes réponses ✓</button>
       </div>
-      <button class="action-btn" onclick="resetCurrentGame()">🔄 Recommencer l'étape</button>
     </div>
-  </footer>
+  </div>
 
-  <script>
-    // --- Données du jeu ---
-    const data3Mu = [
-      { id: 'q1', text: "L'équipe subit des pics d'activité le matin et n'a rien à faire l'après-midi.", answer: 'mura' },
-      { id: 'q2', text: "Un opérateur porte des caisses de 40 kg à la main toute la journée.", answer: 'muri' },
-      { id: 'q3', text: "On jette 10% de la production à cause de défauts de fabrication.", answer: 'muda' },
-      { id: 'q4', text: "La machine tourne à 150% de sa capacité nominale pour rattraper le retard.", answer: 'muri' },
-      { id: 'q5', text: "Les commandes clients fluctuent de 20 à 200 unités sans aucune prévision.", answer: 'mura' }
-    ];
+  <!-- ================================================
+       JEU
+  ================================================ -->
+  <div id="game-wrapper" class="hidden">
+    <div class="panel">
+      <h2>À classer</h2>
+      <div class="instructions">Glissez les situations ci-dessous dans la bonne catégorie à droite.</div>
+      <div class="bank" id="bank" data-id="bank"></div>
+    </div>
+    <div class="panel">
+      <h2>Catégories</h2>
+      <div id="view-3mu" class="zones-grid zones-3mu">
+        <div class="zone" data-id="mura">
+          <div class="zone-header"><span class="dot"></span> Mura</div>
+          <small>Irrégularité, variabilité, rythme non constant ou flux haché.</small>
+        </div>
+        <div class="zone" data-id="muri">
+          <div class="zone-header"><span class="dot"></span> Muri</div>
+          <small>Surcharge, excès, effort déraisonnable (hommes ou machines).</small>
+        </div>
+        <div class="zone" data-id="muda">
+          <div class="zone-header"><span class="dot"></span> Muda</div>
+          <small>Gaspillage pur, activité qui n'ajoute aucune valeur pour le client.</small>
+        </div>
+      </div>
+      <div id="view-muda" class="zones-grid zones-muda hidden">
+        <div class="zone" data-id="transport"><div class="zone-header"><span class="dot"></span> Transport</div></div>
+        <div class="zone" data-id="inventory"><div class="zone-header"><span class="dot"></span> Stock</div></div>
+        <div class="zone" data-id="motion"><div class="zone-header"><span class="dot"></span> Mouvements</div></div>
+        <div class="zone" data-id="waiting"><div class="zone-header"><span class="dot"></span> Attente</div></div>
+        <div class="zone" data-id="overprocessing"><div class="zone-header"><span class="dot"></span> Sur-traitement</div></div>
+        <div class="zone" data-id="overproduction"><div class="zone-header"><span class="dot"></span> Surproduction</div></div>
+        <div class="zone" data-id="defects"><div class="zone-header"><span class="dot"></span> Défauts</div></div>
+      </div>
+    </div>
+  </div>
 
-    const dataMuda = [
-      { id: 'q6', text: "Déplacer des palettes d'un bout à l'autre de l'usine pour faire de la place.", answer: 'transport' },
-      { id: 'q7', text: "Garder 6 mois de matières premières dans l'entrepôt « au cas où ».", answer: 'inventory' },
-      { id: 'q8', text: "L'ouvrier doit se baisser constamment pour ramasser ses outils sous l'établi.", answer: 'motion' },
-      { id: 'q9', text: "L'opérateur regarde la machine de découpe tourner pendant 5 minutes.", answer: 'waiting' },
-      { id: 'q10', text: "Peindre l'intérieur d'une pièce mécanique qui ne se verra jamais.", answer: 'overprocessing' },
-      { id: 'q11', text: "Fabriquer 500 pièces pour amortir la machine alors que la commande est de 100.", answer: 'overproduction' },
-      { id: 'q12', text: "Devoir retoucher des pièces rayées lors de l'étape d'assemblage.", answer: 'defects' }
-    ];
+</main>
 
-    let currentMode = '3mu'; // Note: ce mode sera activé au premier clic, par défaut on affiche l'aide.
-    let currentData = data3Mu;
+<!-- ================================================
+     MODALE HIÉRARCHIE
+================================================ -->
+<div id="modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-icon" id="modal-icon"></div>
+    <h2 class="modal-title" id="modal-title"></h2>
+    <div class="modal-fr" id="modal-fr"></div>
+    <p class="modal-def" id="modal-def"></p>
+    <div class="modal-example" id="modal-example"></div>
+  </div>
+</div>
 
-    // --- Initialisation ---
-    function initGame() {
-      const bank = document.getElementById('bank');
-      bank.innerHTML = '';
-      
-      // Vider les zones de dépôt
-      document.querySelectorAll('.zone:not(#bank)').forEach(zone => {
-        const cards = zone.querySelectorAll('.card');
-        cards.forEach(card => card.remove());
-      });
+<footer class="bottom-indicator" style="display:none;">
+  <div class="indicator-content" id="indicator-content">
+    <div class="score-area">
+      <div class="score-badge">Score : <span id="score-display">0</span> / <span id="total-display">0</span></div>
+      <div class="feedback-msg" id="feedback-msg">À vous de jouer ! Glissez les cartes.</div>
+    </div>
+    <button class="action-btn" onclick="resetCurrentGame()">🔄 Recommencer</button>
+  </div>
+</footer>
 
-      // Créer les cartes
-      currentData.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.draggable = true;
-        card.dataset.id = item.id;
-        card.dataset.answer = item.answer;
-        card.innerHTML = `<div class="card-text">${item.text}</div>`;
-        
-        card.addEventListener('dragstart', dragStart);
-        card.addEventListener('dragend', dragEnd);
-        bank.appendChild(card);
-      });
-
-      updateScore();
+<script>
+  // ---- Modal ----
+  const modalData = {
+    '3mu': {
+      emoji: '⚡', color: '#0f172a',
+      title: 'Les 3 Mu',
+      fr: 'Les trois démons du Lean',
+      def: 'Les 3 Mu sont les trois grandes sources d\'inefficacité du Toyota Production System. Ils se nourrissent mutuellement : le Mura (irrégularité) génère le Muri (surcharge) qui génère le Muda (gaspillage). Agir sur le Mura est le levier le plus puissant.',
+      example: 'Une demande irrégulière (Mura) force l\'usine à produire en urgence, surchargeant les opérateurs (Muri), qui font des erreurs et génèrent des défauts (Muda).'
+    },
+    'mura': {
+      emoji: '🎢', color: '#c2410c',
+      title: 'Mura',
+      fr: 'Irrégularité — Variabilité',
+      def: 'Variation ou irrégularité dans les flux de travail ou de production. Le Mura est souvent la cause racine des Muri et Muda. Éliminer le Mura permet de réduire les deux autres simultanément.',
+      example: 'Commandes clients fluctuant de 20 à 200 unités sans prévision. Cadence hachée entre deux postes avec des pics et des creux non maîtrisés.'
+    },
+    'muda': {
+      emoji: '🗑️', color: '#2563eb',
+      title: 'Muda',
+      fr: 'Gaspillage — Activité sans valeur',
+      def: 'Toute activité qui consomme des ressources (temps, matériaux, énergie) sans créer de valeur pour le client. Type 1 : inévitable à court terme (à réduire). Type 2 : à éliminer immédiatement.',
+      example: 'Corriger des pièces défectueuses, attendre l\'approbation d\'un responsable, effectuer des déplacements inutiles d\'un bout à l\'autre de l\'atelier.'
+    },
+    'muri': {
+      emoji: '💥', color: '#dc2626',
+      title: 'Muri',
+      fr: 'Surcharge — Effort déraisonnable',
+      def: 'Exiger plus qu\'une personne ou une machine ne peut raisonnablement fournir. Entraîne stress, pannes, burn-out, accidents et multiplication des défauts de production.',
+      example: 'Machine tournant à 150 % de sa capacité nominale pour rattraper un retard. Opérateur portant des charges de 30 kg toute la journée sans aide mécanique.'
+    },
+    '7mudas': {
+      emoji: '📋', color: '#2563eb',
+      title: 'Les 7 Mudas',
+      fr: 'T·I·M·A·S·S·D',
+      def: 'Les 7 types de gaspillages identifiés par Taiichi Ohno dans le TPS. Ils représentent toutes les formes d\'activités sans valeur. La surproduction est le pire : elle génère les 6 autres.',
+      example: '« Tout Inventaire Mal Agéré Sème Souvent des Défauts » → Transport · Inventaire · Mouvements · Attente · Sur-traitement · Surproduction · Défauts.'
+    },
+    'transport': {
+      emoji: '🚚', color: '#3b82f6',
+      title: 'Transport',
+      fr: 'Déplacements inutiles de matières',
+      def: 'Tout mouvement de matériaux, pièces ou produits sans valeur ajoutée. Chaque transfert représente un risque de dommage, un coût supplémentaire et un délai évitable.',
+      example: 'Transporter des composants à l\'autre bout de l\'atelier car les postes sont mal implantés. Déplacer des palettes 3 fois par jour faute de stockage logique.'
+    },
+    'stock': {
+      emoji: '📦', color: '#8b5cf6',
+      title: 'Stock',
+      fr: 'Inventaire excessif — Argent qui dort',
+      def: 'Accumulation excessive de matières premières, d\'en-cours ou de produits finis au-delà du besoin immédiat. Les stocks immobilisent du capital et masquent les problèmes de flux.',
+      example: 'Garder 6 mois de matières "au cas où". 500 pièces en attente entre deux postes. Les pannes et retards se cachent derrière le stock tampon.'
+    },
+    'mouvements': {
+      emoji: '🚶', color: '#ec4899',
+      title: 'Mouvements',
+      fr: 'Déplacements inutiles des opérateurs',
+      def: 'Déplacements inutiles du corps des opérateurs : se baisser, s\'étirer, marcher, chercher. À ne pas confondre avec le Transport (qui concerne les pièces, pas les personnes).',
+      example: 'Marcher 10 m pour aller chercher un outil. Se baisser sous l\'établi toutes les 5 minutes. Chercher une fiche technique dans plusieurs tiroirs.'
+    },
+    'attente': {
+      emoji: '⏳', color: '#d97706',
+      title: 'Attente',
+      fr: 'Temps d\'inactivité subi',
+      def: 'Période pendant laquelle un opérateur est inactif faute de pièce, d\'information, de machine disponible ou de décision. Ce temps est définitivement perdu et ne peut être récupéré.',
+      example: 'Attendre la fin d\'un cycle machine de 3 min. Attendre la signature du responsable avant de continuer. Attendre l\'arrivée d\'un composant manquant.'
+    },
+    'surtraitement': {
+      emoji: '⚙️', color: '#0d9488',
+      title: 'Sur-traitement',
+      fr: 'Opérations non demandées par le client',
+      def: 'Réaliser des opérations ou utiliser des équipements plus sophistiqués que nécessaire. Faire plus que ce que le client demande ou est prêt à payer. La qualité excessive est un gaspillage.',
+      example: 'Polir l\'intérieur d\'une pièce jamais visible. Remplir 3 formulaires pour une opération simple. Utiliser une CNC 5 axes pour une simple coupe droite.'
+    },
+    'surproduction': {
+      emoji: '🏭', color: '#ea580c',
+      title: 'Surproduction',
+      fr: 'Produire plus ou trop tôt — Le pire Muda',
+      def: 'Produire plus que ce qui est commandé, ou plus tôt que nécessaire. C\'est le plus grave des 7 Mudas car il génère tous les autres : stock, transport, défauts non détectés, mouvements.',
+      example: 'Fabriquer 1 000 pièces "pour amortir le setup" alors que la commande est de 200. Produire en avance pour remplir les entrepôts avant que la demande n\'arrive.'
+    },
+    'defauts': {
+      emoji: '❌', color: '#dc2626',
+      title: 'Défauts',
+      fr: 'Non-conformités — Retouches — Rebuts',
+      def: 'Pièces non conformes, erreurs, retouches nécessaires, rebuts. Tout travail non fait "bon du premier coup". Chaque défaut est payé deux fois : une fois pour le produire, une fois pour le corriger.',
+      example: 'Pièces rayées lors de l\'assemblage à retoucher. Erreurs de saisie dans les fiches de fabrication. Retours clients pour non-conformité produit.'
     }
+  };
 
-    // --- Logique Drag & Drop ---
-    let draggedCard = null;
+  function openModal(key) {
+    const d = modalData[key];
+    if (!d) return;
+    document.getElementById('modal-icon').textContent = d.emoji;
+    const t = document.getElementById('modal-title');
+    t.textContent = d.title;
+    t.style.color = d.color;
+    document.getElementById('modal-fr').textContent = d.fr;
+    document.getElementById('modal-def').textContent = d.def;
+    document.getElementById('modal-example').innerHTML = '<strong>📌 Exemple concret</strong>' + d.example;
+    document.getElementById('modal-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
 
-    function dragStart(e) {
-      draggedCard = this;
-      setTimeout(() => this.classList.add('dragging'), 0);
-    }
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
 
-    function dragEnd(e) {
-      this.classList.remove('dragging');
-      draggedCard = null;
-    }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-    document.querySelectorAll('.zone, .bank').forEach(zone => {
-      zone.addEventListener('dragover', e => {
-        e.preventDefault();
-        if(zone.id !== 'bank') zone.classList.add('over');
-      });
+  // ---- Accordion ----
+  function toggleAcc(item) {
+    item.classList.toggle('open');
+  }
 
-      zone.addEventListener('dragleave', () => {
-        zone.classList.remove('over');
-      });
+  // ---- Concept cards ----
+  function toggleConceptCard(card) {
+    card.classList.toggle('expanded');
+  }
 
-      zone.addEventListener('drop', e => {
-        e.preventDefault();
-        zone.classList.remove('over');
-        
-        if (!draggedCard) return;
+  // ---- Navigation ----
+  function switchMode(mode, event) {
+    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+    if (event) event.currentTarget.classList.add('active');
 
-        // Retour à la banque
-        if (zone.id === 'bank' || zone.dataset.id === 'bank') {
-          draggedCard.classList.remove('correct', 'incorrect');
-          document.getElementById('bank').appendChild(draggedCard);
-          updateScore();
-          return;
-        }
+    const memo     = document.getElementById('memo-wrapper');
+    const help     = document.getElementById('help-wrapper');
+    const game     = document.getElementById('game-wrapper');
+    const scenario = document.getElementById('scenario-wrapper');
+    const footer   = document.querySelector('.bottom-indicator');
 
-        // Dépôt dans une zone
-        zone.appendChild(draggedCard);
-        checkAnswer(draggedCard, zone.dataset.id);
-      });
-    });
+    [memo, help, game, scenario].forEach(el => el.classList.add('hidden'));
+    footer.style.display = 'none';
 
-    // --- Validation et Score ---
-    function checkAnswer(card, zoneId) {
-      card.classList.remove('correct', 'incorrect');
-      
-      if (card.dataset.answer === zoneId) {
-        card.classList.add('correct');
-        showFeedback("Bonne réponse ! ✅", "var(--green)");
-      } else {
-        card.classList.add('incorrect');
-        showFeedback("Oups, mauvaise catégorie... ❌", "var(--red)");
-      }
-      updateScore();
-    }
-
-    function updateScore() {
-      const correctCards = document.querySelectorAll('#view-' + currentMode + ' .card.correct').length;
-      document.getElementById('score-display').textContent = correctCards;
-      document.getElementById('total-display').textContent = currentData.length;
-
-      if (correctCards === currentData.length) {
-        showFeedback("🎉 Bravo ! Étape complétée avec succès !", "var(--blue)");
-      }
-    }
-
-    function showFeedback(msg, color) {
-      const feedback = document.getElementById('feedback-msg');
-      feedback.textContent = msg;
-      feedback.style.color = color;
-      
-      clearTimeout(window.feedbackTimer);
-      window.feedbackTimer = setTimeout(() => {
-        const correctCards = document.querySelectorAll('#view-' + currentMode + ' .card.correct').length;
-        if (correctCards !== currentData.length) {
-          feedback.textContent = "À vous de jouer ! Glissez les cartes.";
-          feedback.style.color = "var(--muted)";
-        }
-      }, 2500);
-    }
-
-    // --- Navigation (Onglets) ---
-    function switchMode(mode, event) {
-      // Gérer l'UI des onglets
-      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-      if(event) {
-        event.currentTarget.classList.add('active');
-      }
-
-      // Si clic sur Aide
-      if (mode === 'help') {
-        document.getElementById('game-wrapper').classList.add('hidden');
-        document.getElementById('help-wrapper').classList.remove('hidden');
-        // Cacher la barre d'indicateurs de jeu en mode aide
-        document.querySelector('.bottom-indicator').style.display = 'none';
-        return;
-      }
- 
-      
-      // Si passage au jeu
-      document.getElementById('game-wrapper').classList.remove('hidden');
-      document.getElementById('help-wrapper').classList.add('hidden');
-      document.querySelector('.bottom-indicator').style.display = 'block';
-
+    if (mode === 'memo') {
+      memo.classList.remove('hidden');
+    } else if (mode === 'help') {
+      help.classList.remove('hidden');
+    } else if (mode === 'scenario') {
+      scenario.classList.remove('hidden');
+    } else {
+      game.classList.remove('hidden');
+      footer.style.display = 'block';
       currentMode = mode;
       currentData = mode === '3mu' ? data3Mu : dataMuda;
-
       document.getElementById('view-3mu').classList.add('hidden');
       document.getElementById('view-muda').classList.add('hidden');
-      document.getElementById(`view-${mode}`).classList.remove('hidden');
-
+      document.getElementById('view-' + mode).classList.remove('hidden');
       initGame();
-      showFeedback("À vous de jouer ! Glissez les cartes.", "var(--muted)");
+      showFeedback('À vous de jouer ! Glissez les cartes.', 'var(--muted)');
     }
+  }
 
-    function resetCurrentGame() {
-      initGame();
-      showFeedback("Jeu réinitialisé.", "var(--muted)");
+  // ---- Scénarios ----
+  const MUDA_OPTIONS = [
+    { value: '', label: '— Choisir —' },
+    { value: 'transport',      label: '🚚 Transport' },
+    { value: 'stock',          label: '📦 Stock (Inventaire)' },
+    { value: 'mouvements',     label: '🚶 Mouvements' },
+    { value: 'attente',        label: '⏳ Attente' },
+    { value: 'surtraitement',  label: '⚙️ Sur-traitement' },
+    { value: 'surproduction',  label: '🏭 Surproduction' },
+    { value: 'defauts',        label: '❌ Défauts' }
+  ];
+
+  const scenarios = {
+    atelier: {
+      title: '🔧 Atelier mécanique',
+      desc: 'Vous observez le fonctionnement d\'un atelier de production mécanique. Identifiez le type de gaspillage (Muda) dans chaque situation.',
+      items: [
+        { text: "L'opérateur attend 4 minutes sans rien faire pendant que la fraiseuse termine son cycle automatique.", answer: 'attente' },
+        { text: "3 mois de stock de barres d'acier s'accumulent dans l'entrepôt sans commande en cours.", answer: 'stock' },
+        { text: "Le cariste fait un détour de 200 m pour livrer les pièces car la zone de passage directe est encombrée.", answer: 'transport' },
+        { text: "L'opérateur doit se baisser sous son poste toutes les 5 minutes pour ramasser ses clés tombées.", answer: 'mouvements' },
+        { text: "On fabrique 800 boulons pour amortir le changement d'outil alors que la commande est de 100.", answer: 'surproduction' },
+        { text: "Chaque pièce est ébavurée deux fois en deux passes distinctes alors qu'une seule passe suffirait.", answer: 'surtraitement' },
+        { text: "5 % des pièces usinées sont mises au rebut pour des rayures causées par un mauvais serrage.", answer: 'defauts' }
+      ]
+    },
+    entrepot: {
+      title: '📦 Entrepôt logistique',
+      desc: 'Vous analysez les opérations d\'un entrepôt de distribution. Identifiez le type de gaspillage pour chaque observation.',
+      items: [
+        { text: "Le préparateur de commandes parcourt 300 m par colis car les références sont réparties sans logique.", answer: 'mouvements' },
+        { text: "Des colis expédiés reviennent des clients car l'adresse était mal saisie lors de l'étiquetage.", answer: 'defauts' },
+        { text: "On stocke 6 mois de consommables d'emballage car le fournisseur est étranger et les délais sont longs.", answer: 'stock' },
+        { text: "Le camion de livraison patiente 2h au quai car le bon de livraison n'a pas encore été signé.", answer: 'attente' },
+        { text: "Les colis font systématiquement un aller-retour au bureau de contrôle avant d'aller en expédition.", answer: 'transport' },
+        { text: "On imprime et colle 3 étiquettes par colis par précaution, alors qu'une seule est réglementairement requise.", answer: 'surtraitement' },
+        { text: "On prépare des commandes à l'avance avant même réception des bons de commande confirmés.", answer: 'surproduction' }
+      ]
+    },
+    bureau: {
+      title: '💼 Bureau administratif',
+      desc: 'Vous observez les activités d\'un service administratif. Identifiez le type de gaspillage dans chaque pratique.',
+      items: [
+        { text: "La comptable attend 45 minutes la validation de son responsable pour envoyer une facture urgente.", answer: 'attente' },
+        { text: "Les dossiers papier sont scannés deux fois car la première numérisation était illisible.", answer: 'defauts' },
+        { text: "On imprime systématiquement tous les emails reçus pour les archiver dans des classeurs.", answer: 'surtraitement' },
+        { text: "Des rapports hebdomadaires détaillés sont préparés et envoyés à des destinataires qui ne les lisent pas.", answer: 'surproduction' },
+        { text: "Les fichiers clients actifs sont dupliqués et stockés sur 3 serveurs différents sans règle de gestion.", answer: 'stock' },
+        { text: "L'assistante monte au 3ème étage pour soumettre une signature alors qu'un outil numérique est disponible.", answer: 'mouvements' },
+        { text: "Les contrats papier signés sont envoyés physiquement par courrier interne d'un bureau à l'autre du même immeuble.", answer: 'transport' }
+      ]
     }
+  };
 
-  </script>
+  function buildMudaSelect(itemId) {
+    return MUDA_OPTIONS.map(o =>
+      `<option value="${o.value}">${o.label}</option>`
+    ).join('');
+  }
+
+  function loadScenario(key) {
+    const sc = scenarios[key];
+    const desc = document.getElementById('scenario-desc');
+    const items = document.getElementById('scenario-items');
+    const actions = document.getElementById('scenario-actions');
+    const score = document.getElementById('scenario-score');
+
+    if (!sc) { desc.style.display = 'none'; items.innerHTML = ''; actions.style.display = 'none'; return; }
+
+    desc.style.display = 'block';
+    desc.textContent = sc.desc;
+    score.textContent = '';
+    score.className = 'scenario-score';
+
+    items.innerHTML = sc.items.map((item, i) => `
+      <div class="scenario-item" id="sc-item-${i}">
+        <div class="scenario-situation">${item.text}</div>
+        <select class="scenario-answer-sel" id="sc-ans-${i}">
+          ${buildMudaSelect(i)}
+        </select>
+        <div class="scenario-badge" id="sc-badge-${i}"></div>
+      </div>
+    `).join('');
+
+    actions.style.display = 'flex';
+    // reset state
+    items.querySelectorAll('.scenario-item').forEach(el => el.classList.remove('correct','incorrect'));
+  }
+
+  function checkScenario() {
+    const key = document.getElementById('scenario-sel').value;
+    const sc = scenarios[key];
+    if (!sc) return;
+
+    let correct = 0;
+    sc.items.forEach((item, i) => {
+      const sel = document.getElementById('sc-ans-' + i);
+      const row = document.getElementById('sc-item-' + i);
+      const badge = document.getElementById('sc-badge-' + i);
+      row.classList.remove('correct', 'incorrect');
+      if (sel.value === item.answer) {
+        row.classList.add('correct');
+        badge.textContent = '✅';
+        correct++;
+      } else {
+        row.classList.add('incorrect');
+        badge.textContent = '❌';
+        // Show correct answer hint
+        const correctLabel = MUDA_OPTIONS.find(o => o.value === item.answer)?.label || item.answer;
+        sel.title = 'Bonne réponse : ' + correctLabel;
+      }
+    });
+
+    const total = sc.items.length;
+    const scoreEl = document.getElementById('scenario-score');
+    scoreEl.textContent = correct === total
+      ? `🎉 Parfait ! ${correct}/${total}`
+      : `${correct} / ${total} correctes`;
+    scoreEl.className = 'scenario-score' + (correct === total ? ' done' : '');
+  }
+
+  function resetScenario() {
+    const key = document.getElementById('scenario-sel').value;
+    if (key) loadScenario(key);
+  }
+
+  // ---- Game data ----
+  const data3Mu = [
+    { id: 'q1', text: "L'équipe subit des pics d'activité le matin et n'a rien à faire l'après-midi.", answer: 'mura' },
+    { id: 'q2', text: "Un opérateur porte des caisses de 40 kg à la main toute la journée.", answer: 'muri' },
+    { id: 'q3', text: "On jette 10% de la production à cause de défauts de fabrication.", answer: 'muda' },
+    { id: 'q4', text: "La machine tourne à 150% de sa capacité nominale pour rattraper le retard.", answer: 'muri' },
+    { id: 'q5', text: "Les commandes clients fluctuent de 20 à 200 unités sans aucune prévision.", answer: 'mura' }
+  ];
+  const dataMuda = [
+    { id: 'q6', text: "Déplacer des palettes d'un bout à l'autre de l'usine pour faire de la place.", answer: 'transport' },
+    { id: 'q7', text: "Garder 6 mois de matières premières dans l'entrepôt « au cas où ».", answer: 'inventory' },
+    { id: 'q8', text: "L'ouvrier doit se baisser constamment pour ramasser ses outils sous l'établi.", answer: 'motion' },
+    { id: 'q9', text: "L'opérateur regarde la machine de découpe tourner pendant 5 minutes.", answer: 'waiting' },
+    { id: 'q10', text: "Peindre l'intérieur d'une pièce mécanique qui ne se verra jamais.", answer: 'overprocessing' },
+    { id: 'q11', text: "Fabriquer 500 pièces pour amortir la machine alors que la commande est de 100.", answer: 'overproduction' },
+    { id: 'q12', text: "Devoir retoucher des pièces rayées lors de l'étape d'assemblage.", answer: 'defects' }
+  ];
+
+  let currentMode = '3mu';
+  let currentData = data3Mu;
+
+  function initGame() {
+    const bank = document.getElementById('bank');
+    bank.innerHTML = '';
+    document.querySelectorAll('.zone:not(#bank)').forEach(zone => zone.querySelectorAll('.card').forEach(c => c.remove()));
+    currentData.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.draggable = true;
+      card.dataset.id = item.id;
+      card.dataset.answer = item.answer;
+      card.innerHTML = '<div class="card-text">' + item.text + '</div>';
+      card.addEventListener('dragstart', dragStart);
+      card.addEventListener('dragend', dragEnd);
+      bank.appendChild(card);
+    });
+    updateScore();
+  }
+
+  let draggedCard = null;
+  function dragStart() { draggedCard = this; setTimeout(() => this.classList.add('dragging'), 0); }
+  function dragEnd() { this.classList.remove('dragging'); draggedCard = null; }
+
+  document.querySelectorAll('.zone, .bank').forEach(zone => {
+    zone.addEventListener('dragover', e => { e.preventDefault(); if (zone.id !== 'bank') zone.classList.add('over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('over');
+      if (!draggedCard) return;
+      if (zone.id === 'bank' || zone.dataset.id === 'bank') {
+        draggedCard.classList.remove('correct', 'incorrect');
+        document.getElementById('bank').appendChild(draggedCard);
+        updateScore();
+        return;
+      }
+      zone.appendChild(draggedCard);
+      checkAnswer(draggedCard, zone.dataset.id);
+    });
+  });
+
+  function checkAnswer(card, zoneId) {
+    card.classList.remove('correct', 'incorrect');
+    if (card.dataset.answer === zoneId) {
+      card.classList.add('correct');
+      showFeedback('Bonne réponse ! ✅', 'var(--green)');
+    } else {
+      card.classList.add('incorrect');
+      showFeedback('Oups, mauvaise catégorie... ❌', 'var(--red)');
+    }
+    updateScore();
+  }
+
+  function updateScore() {
+    const correct = document.querySelectorAll('#view-' + currentMode + ' .card.correct').length;
+    document.getElementById('score-display').textContent = correct;
+    document.getElementById('total-display').textContent = currentData.length;
+    if (correct === currentData.length) showFeedback('🎉 Bravo ! Étape complétée !', 'var(--blue)');
+  }
+
+  function showFeedback(msg, color) {
+    const el = document.getElementById('feedback-msg');
+    el.textContent = msg;
+    el.style.color = color;
+    clearTimeout(window._fbTimer);
+    window._fbTimer = setTimeout(() => {
+      const c = document.querySelectorAll('#view-' + currentMode + ' .card.correct').length;
+      if (c !== currentData.length) { el.textContent = 'À vous de jouer ! Glissez les cartes.'; el.style.color = 'var(--muted)'; }
+    }, 2500);
+  }
+
+  function resetCurrentGame() { initGame(); showFeedback('Jeu réinitialisé.', 'var(--muted)'); }
+</script>
 </body>
 </html>
