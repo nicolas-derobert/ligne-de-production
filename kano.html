@@ -2,7 +2,9 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#141414">
+<meta name="apple-mobile-web-app-title" content="Kano · EHG">
 <title>Le diagramme de Kano — Voix du client · EHG</title>
 <meta name="description" content="Application pédagogique autonome : théorie, simulation et exercices sur la voix du client et le diagramme de Kano. École d'Horlogerie de Genève, module CPH_HOP_01.">
 <!--
@@ -164,7 +166,7 @@ ul.liste { padding-left: 1.2rem; } ul.liste li { margin-bottom: .35rem; } ul.lis
 .diagramme .drag:active { cursor: grabbing; }
 
 /* pas à pas (théorie) */
-.pas { display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); gap: 1.5rem; align-items: start; }
+.pas { display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); gap: 1.5rem; align-items: start; touch-action: pan-y; }
 @media (max-width: 56rem) { .pas { grid-template-columns: 1fr; } }
 .pas__nav { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; margin-bottom: 1rem; }
 .pas__points { display: flex; gap: .4rem; }
@@ -217,9 +219,6 @@ ul.liste { padding-left: 1.2rem; } ul.liste li { margin-bottom: .35rem; } ul.lis
 /* point que l'on positionne : couleur vive, réservée à cet usage */
 .diagramme .point-libre .point, .diagramme .drag .point { fill: #F26B1D; stroke: #F26B1D; }
 .diagramme .point-libre .halo, .diagramme .drag .halo { fill: #fff; }
-.reglage { display: flex; gap: 1rem; align-items: center; margin: .5rem 0 1rem; }
-.reglage__icone { flex: 0 0 64px; }
-.reglage__corps { flex: 1; min-width: 0; }
 .choix.toggles button[aria-pressed="false"] { opacity: .45; }
 .exemple--sim { display: grid; grid-template-columns: 7rem 1fr; gap: 1rem; align-items: start; margin-top: .5rem; }
 .exemple--sim .exemple__picto { width: 7rem; }
@@ -229,11 +228,7 @@ ul.liste { padding-left: 1.2rem; } ul.liste li { margin-bottom: .35rem; } ul.lis
 .situation { font-size: 1.08em; line-height: 1.55; padding: 1rem 1.25rem; border-left: 3px solid var(--ehg-or); background: var(--ehg-brume); border-radius: 0 var(--ehg-radius-lg) var(--ehg-radius-lg) 0; margin: 0 0 1rem; }
 .situation__carac { display: block; font-family: var(--ehg-font-titre); font-size: 1rem; color: var(--ehg-noir); margin-bottom: .35rem; }
 .situation .src { display: block; font-family: var(--ehg-font-titre); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-acier); margin-top: .5rem; }
-.niveau { font-family: var(--ehg-font-titre); font-weight: 500; }
 .faces { display: grid; gap: .5rem; margin: .6rem 0 .25rem; }
-.faces--texte { margin: .25rem 0 0; }
-.face-ligne { display: grid; gap: .15rem; padding: .5rem .75rem; background: var(--ehg-blanc); border-radius: var(--ehg-radius); border: var(--ehg-filet); }
-.face-ligne__titre { font-family: var(--ehg-font-titre); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ehg-acier); }
 .face-btn { display: grid; gap: .15rem; text-align: left; font: inherit; letter-spacing: inherit; color: var(--ehg-noir); padding: .6rem .8rem; border-radius: var(--ehg-radius); border: 1px solid var(--ehg-perle); background: var(--ehg-blanc); cursor: pointer; transition: border-color .12s, background .12s; }
 .face-btn:hover { border-color: var(--ehg-noir); background: var(--ehg-brume); }
 .face-btn.actif { border-color: var(--ehg-or); background: var(--ehg-or-pale); }
@@ -242,15 +237,28 @@ ul.liste { padding-left: 1.2rem; } ul.liste li { margin-bottom: .35rem; } ul.lis
 .btn--large { padding: .8rem 1.4rem; font-size: .85rem; }
 .sim-modes .n { font-family: var(--ehg-font-serif); color: var(--ehg-or); margin-right: .15em; }
 .sim-modes button[aria-pressed="true"] .n { color: var(--ehg-or-clair); }
-details.aide { margin-bottom: 1.5rem; }
-details.aide summary { cursor: pointer; font-family: var(--ehg-font-titre); list-style: none; display: flex; align-items: center; gap: .6rem; }
-details.aide summary::before { content: '+'; font-family: var(--ehg-font-serif); color: var(--ehg-or); font-size: 1.3rem; line-height: 1; width: 1rem; }
-details.aide[open] summary::before { content: '−'; }
-details.aide summary::-webkit-details-marker { display: none; }
 .avant-apres { margin-top: 1.5rem; }
 .carte--or-bord { border-color: var(--ehg-or); }
 .avant-apres .tuile { margin-top: .5rem; }
 .tableau tr.modif td { background: var(--ehg-or-pale); }
+
+/* simulation : exemples à gauche, diagramme (avec bascules et lecture) à droite */
+.grille--sim { grid-template-columns: minmax(0, 7fr) minmax(0, 13fr); align-items: start; }
+@media (max-width: 56rem) { .grille--sim { grid-template-columns: 1fr; } .grille--sim .diag-colle { order: -1; } }
+.carte-sim__entete { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; margin-bottom: .5rem; }
+.toggles--carte { margin: 0; gap: .35rem; }
+.toggles--carte button { font-size: .74rem; padding: .3rem .6rem; letter-spacing: .03em; }
+.toggles--carte button .lettre { width: 1.35em; height: 1.35em; line-height: 1.35em; margin-right: .3em; }
+.lecture-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.5rem; margin-top: .35rem; padding-top: .5rem; border-top: var(--ehg-filet); }
+.lecture-ligne__item { display: inline-flex; align-items: center; gap: .5rem; }
+.lecture-ligne__ico svg { display: block; width: 40px; height: 40px; }
+.lecture-ligne .lab { display: block; font-family: var(--ehg-font-titre); font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-acier); line-height: 1.2; }
+.lecture-ligne strong { font-family: var(--ehg-font-titre); font-weight: 500; font-size: .98rem; }
+.lecture-ligne__aide { margin-left: auto; font-size: .78em; }
+.diagramme .trace .halo { fill: none; }
+.diagramme .trace .point { stroke: none; }
+.sim-gauche .exemple--sim { grid-template-columns: 5.5rem 1fr; }
+.sim-gauche .exemple--sim .exemple__picto { width: 5.5rem; }
 
 /* simulation : poignées (curseurs) sur les axes du diagramme */
 .curseurs .bande { fill: transparent; pointer-events: all; cursor: pointer; }
@@ -261,7 +269,6 @@ details.aide summary::-webkit-details-marker { display: none; }
 .poignee__grip { stroke: #fff; stroke-width: 2; stroke-linecap: round; fill: none; }
 .poignee:hover .poignee__disque { fill: var(--ehg-or-fonce); }
 .poignee:focus-visible .poignee__disque { stroke: var(--ehg-noir); stroke-width: 4; }
-.lecture-val { display: block; font-family: var(--ehg-font-titre); font-size: 1.15rem; }
 
 /* simulation : modèle A → modèle B (révélation, animation, info-bulles) */
 .m-actions { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin: 0 0 1rem; }
@@ -279,7 +286,7 @@ details.aide summary::-webkit-details-marker { display: none; }
 .pt-version { cursor: pointer; outline: none; }
 .pt-version:focus-visible circle:nth-child(3) { stroke: var(--ehg-noir); stroke-width: 4; }
 .pt-version__anneau { transition: opacity .3s; }
-.pt-version__pulse.pulse-on { animation: pulse .9s ease-out forwards; transform-box: fill-box; transform-origin: center; }
+.pt-version__pulse.pulse-on { animation: pulse 1.4s ease-out forwards; transform-box: fill-box; transform-origin: center; }
 @keyframes pulse { from { transform: scale(1); opacity: 1; } to { transform: scale(2.4); opacity: 0; } }
 .info { display: inline-flex; align-items: center; justify-content: center; width: 1.35rem; height: 1.35rem; border-radius: 50%; border: 1px solid var(--ehg-or); background: var(--ehg-blanc); color: var(--ehg-or); font-family: var(--ehg-font-serif); font-size: .8rem; line-height: 1; cursor: pointer; vertical-align: middle; padding: 0; }
 .info:hover, .info:focus-visible { background: var(--ehg-or); color: #fff; }
@@ -292,12 +299,50 @@ details.aide summary::-webkit-details-marker { display: none; }
 .bulle__chg { color: var(--ehg-or-clair); }
 .bulle .cat-B { color: #E8A6A6; } .bulle .cat-P { color: #A6D3BA; } .bulle .cat-A { color: #E6C766; } .bulle .cat-I { color: #D5D5D5; } .bulle .cat-R { color: #FFFFFF; }
 
+.situation--parole .citation { margin: 0; font-size: 1.05em; line-height: 1.6; }
+.exo-entete__droite { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+/* modale (QR code) */
+.modale { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.modale__fond { position: absolute; inset: 0; background: rgba(20,20,20,.55); }
+.modale__boite { position: relative; background: var(--ehg-blanc); border-radius: var(--ehg-radius-lg); box-shadow: 0 12px 40px rgba(20,20,20,.35); width: min(34rem, 100%); max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem); overflow: auto; display: flex; flex-direction: column; }
+.modale__boite--large { width: min(46rem, 100%); }
+.modale__entete { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; padding: 1.25rem 1.5rem 1rem; border-bottom: var(--ehg-filet); }
+.modale__fermer { flex: 0 0 auto; min-width: 2.4rem; justify-content: center; }
+.modale__corps { padding: 1.25rem 1.5rem 1.5rem; }
+.modale__actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.25rem; }
+.qr-zone { width: min(20rem, 100%); margin: 0 auto; }
+.qr-zone svg { display: block; width: 100%; height: auto; }
+.qr-url { font-family: var(--ehg-font-titre); font-size: .9rem; text-align: center; word-break: break-all; margin: .75rem 0 .5rem; color: var(--ehg-graphite); }
+.qr-options { margin-top: .75rem; }
+.qr-options summary { cursor: pointer; font-family: var(--ehg-font-titre); font-size: .85rem; color: var(--ehg-graphite); }
+.qr-options .champ__label { margin-top: .75rem; }
+.input { width: 100%; font: inherit; font-size: 16px; color: var(--ehg-noir); background: var(--ehg-blanc); border: 1px solid var(--ehg-acier); border-radius: var(--ehg-radius); padding: .6rem .75rem; letter-spacing: inherit; }
+.input:focus { border-color: var(--ehg-noir); outline: 2px solid var(--ehg-or); outline-offset: 1px; }
+body.modale-ouverte { overflow: hidden; }
+/* mode projection : le QR code occupe l'écran */
+.modale--plein .modale__boite { width: 100%; height: 100%; max-height: none; border-radius: 0; }
+.modale--plein .modale__corps { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.modale--plein .qr-zone { width: min(80vh, 80vw, 90%); }
+.modale--plein .qr-url { font-size: 1.25rem; }
+.modale--plein .qr-options { display: none; }
+.btn__ico { display: inline-flex; align-items: center; font-weight: 500; text-transform: none; }
+button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
 /* Responsive : petits écrans (smartphone) */
 @media (max-width: 48rem) {
   .page { padding: 0 1rem; }
-  /* onglets collants : toujours accessibles en faisant défiler */
-  .onglets { position: sticky; top: 0; z-index: 20; background: var(--ehg-blanc); margin: 0 -1rem 1.5rem; padding: 0 1rem; box-shadow: 0 1px 0 var(--ehg-perle); }
-  .onglets button { padding: .9rem 0; }
+  /* barre d'onglets fixée en bas de l'écran, à portée du pouce */
+  .onglets { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 20; background: var(--ehg-blanc); margin: 0; padding: 0 .5rem env(safe-area-inset-bottom, 0); border-top: var(--ehg-filet); border-bottom: 0; box-shadow: 0 -2px 10px rgba(20,20,20,.08); gap: 0; justify-content: space-around; overflow: visible; }
+  .onglets button { flex: 1 1 0; text-align: center; padding: .85rem 0; margin: 0; border-bottom: 0; border-top: 3px solid transparent; font-size: .78rem; letter-spacing: .06em; min-height: 56px; }
+  .onglets button[aria-selected="true"] { border-top-color: var(--ehg-or); border-bottom: 0; }
+  body.onglets-bas { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0)); }
+  body.onglets-bas .pied { margin-bottom: .5rem; }
+  .entete__droite { gap: .4rem; }
+  .entete__droite .btn { font-size: .68rem; padding: .5rem .6rem; min-height: 40px; }
+  .modale { padding: 0; align-items: stretch; }
+  .modale__boite { width: 100%; max-height: none; border-radius: 0; }
+  .modale__corps { padding: 1rem; } .modale__entete { padding: 1rem; }
+  .modale__actions .btn { flex: 1 1 auto; justify-content: center; }
   .defile { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -1rem; padding: 0 1rem; }
   .defile .tableau { margin-bottom: .5rem; }
   .defile .tableau--large { min-width: 40rem; }
@@ -311,7 +356,6 @@ details.aide summary::-webkit-details-marker { display: none; }
   .carte { padding: 1rem; }
   .exemple--sim { grid-template-columns: 1fr; }
   .exemple--sim .exemple__picto { width: 6rem; }
-  .reglage { gap: .6rem; } .reglage__icone { flex-basis: 52px; } .reglage__icone svg { width: 52px; height: 52px; }
   /* cibles tactiles : au moins 44 px de haut, boutons de mode et de validation pleine largeur */
   .sim-modes { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
   .sim-modes button { font-size: .8rem; padding: .7rem .6rem; min-height: 44px; }
@@ -319,23 +363,33 @@ details.aide summary::-webkit-details-marker { display: none; }
   .choix.cats { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
   .choix.cats button { text-align: left; }
   .choix.cats button:last-child { grid-column: 1 / -1; }
+  .carte--sim .choix.cats { display: flex; flex-wrap: wrap; gap: .3rem; }
+  .carte--sim .choix.cats button { min-height: 32px; font-size: .7rem; padding: .3rem .5rem; flex: 0 1 auto; }
+  .carte--sim .choix.cats button:last-child { grid-column: auto; }
+  .carte-sim__entete .surtitre { display: none; }
+  .lecture-ligne { gap: .35rem .9rem; margin-top: .25rem; padding-top: .35rem; }
+  .lecture-ligne__ico svg { width: 30px; height: 30px; }
+  .lecture-ligne strong { font-size: .85rem; }
+  .lecture-ligne__aide { display: none; }
   .btn { padding: .6rem .9rem; min-height: 40px; }
   .btn--large { width: 100%; justify-content: center; min-height: 48px; }
   .btn--petit { min-height: 40px; flex: 1 1 auto; justify-content: center; }
+  .modale__fermer { flex: 0 0 auto; width: 2.6rem; }
   .pas__nav { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
   .pas__points { grid-column: 1 / -1; justify-content: center; flex-wrap: wrap; order: -1; }
   .pas__points button { width: 2.2rem; height: 2.2rem; }
   .pas__nav .btn { justify-content: center; min-height: 44px; }
   .situation { font-size: 1.02em; padding: .8rem 1rem; }
-  .face-ligne, .face-btn { padding: .55rem .65rem; }
+  .face-btn { padding: .55rem .65rem; }
   .encadre { padding: .8rem 1rem; gap: .75rem; }
   .exo-entete { align-items: center; }
   .diagramme .lib { font-size: 27px; } .diagramme .lib-petit { font-size: 25px; } .diagramme .etiquette { font-size: 28px; } .diagramme .zone-lib { font-size: 25px; }
   .pied { flex-direction: column; gap: .35rem; }
 }
 @media (max-width: 30rem) {
-  .onglets { gap: 1rem; } .onglets button { font-size: .8rem; letter-spacing: .05em; }
-  .entete__droite .btn { font-size: .62rem; padding: .4rem .5rem; }
+  .onglets button { font-size: .72rem; letter-spacing: .04em; }
+  .entete__droite .btn .btn__txt { display: none; }
+  .entete__droite .btn { padding: .5rem .65rem; }
   .diagramme .titre-axe { display: none; }
 }
 /* smartphone en portrait : le diagramme reste visible pendant qu'on manipule les commandes situées dessous */
@@ -360,7 +414,8 @@ details.aide summary::-webkit-details-marker { display: none; }
   <a class="logotype" href="#theorie">École d'Horlo<span class="g">g</span>erie Genève</a>
   <div class="entete__droite">
     <span>CPH_HOP_01 · Voix du client</span>
-    <button class="btn btn--secondaire btn--petit" id="btn-confort" type="button" aria-pressed="false" title="Texte plus grand et plus aéré (dyslexie, dysorthographie)">Aa · Confort de lecture</button>
+    <button class="btn btn--secondaire btn--petit" id="btn-confort" type="button" aria-pressed="false" title="Texte plus grand et plus aéré (dyslexie, dysorthographie)"><span class="btn__ico" aria-hidden="true">Aa</span><span class="btn__txt">Confort de lecture</span></button>
+    <button class="btn btn--petit" id="btn-qr" type="button" aria-haspopup="dialog" aria-controls="modale-qr" title="Afficher un QR code pour ouvrir l'application sur un téléphone"><svg class="btn__ico" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M1 1h6v6H1zM2.5 2.5v3h3v-3zM9 1h6v6H9zm1.5 1.5v3h3v-3zM1 9h6v6H1zm1.5 1.5v3h3v-3zM9 9h2v2H9zm2 2h2v2h-2zm2-2h2v2h-2zm-4 4h2v2H9zm4 0h2v2h-2z"/></svg><span class="btn__txt">QR code</span></button>
   </div>
 </header>
 
@@ -368,7 +423,6 @@ details.aide summary::-webkit-details-marker { display: none; }
   <div class="titre">
     <span class="surtitre">Module CPH_HOP_01 · Voix du client · Application pédagogique</span>
     <h1>Le diagramme de Kano</h1>
-    <p class="lead texte">Comprendre comment une caractéristique d'un produit ou d'un service agit sur la satisfaction du client, puis s'entraîner à placer des situations sur le diagramme et à reconnaître la catégorie d'une caractéristique.</p>
   </div>
 
   <nav class="onglets" role="tablist" aria-label="Sections de l'application">
@@ -492,41 +546,30 @@ details.aide summary::-webkit-details-marker { display: none; }
   <!-- ================================================================ -->
   <section id="panel-simulation" role="tabpanel" aria-labelledby="tab-simulation" hidden>
     <h2 style="margin-top:0">Simulation</h2>
-    <p class="texte">Deux manières de manipuler le diagramme : placer un point — à partir d'un exemple horloger ou librement — et observer sa position par rapport aux courbes affichées ; puis comparer deux versions d'un même modèle de montre.</p>
+    <p class="texte">Deux manières de manipuler le diagramme : placer un point — à partir d'un exemple horloger ou librement — et observer sa position par rapport aux courbes affichées ; puis comparer deux versions d'un même modèle de montre. Survolez ou touchez une face d'un exemple pour voir le point se déplacer le long de sa courbe.</p>
     <div class="sim-modes" role="group" aria-label="Mode de simulation">
       <button type="button" data-mode="courbes" aria-pressed="true">Explorer le diagramme</button>
       <button type="button" data-mode="modele" aria-pressed="false">Nouvelle version d'un modèle de montre</button>
     </div>
 
     <!-- Mode A : explorer le diagramme -->
-    <div id="sim-courbes" class="grille grille--diag">
-      <div class="diag-colle">
-        <div class="carte carte--sim">
-          <div id="sim-svg" class="zone-drag" aria-label="Diagramme de Kano avec deux poignées : degré de réalisation sur l'axe horizontal, satisfaction sur l'axe vertical"></div>
-        </div>
-      </div>
-      <div>
-        <h4 style="margin-top:0">1 · Courbes affichées</h4>
-        <div class="choix cats toggles" id="sim-toggles" role="group" aria-label="Courbes affichées"></div>
-
-        <h4>2 · Un exemple horloger, ou un point libre</h4>
+    <div id="sim-courbes" class="grille grille--sim">
+      <div class="sim-gauche">
+        <h4 style="margin-top:0">Un exemple horloger, ou un point libre</h4>
         <div class="choix" id="sim-exemples" role="group" aria-label="Exemple"></div>
         <div id="sim-exemple-detail"></div>
-
-        <h4>3 · Lecture du point</h4>
-        <p class="note" style="margin:0 0 .5rem">Faites glisser les <strong>poignées dorées</strong> sur les deux axes du diagramme (ou touchez un axe). Au clavier : flèches, Maj + flèches pour aller plus vite.</p>
-        <div class="reglage">
-          <div class="reglage__icone" id="ico-deg"></div>
-          <div class="reglage__corps">
-            <span class="champ__label">Degré de réalisation de la fonction</span>
-            <span class="lecture-val" id="sim-degre">—</span>
+      </div>
+      <div class="diag-colle">
+        <div class="carte carte--sim">
+          <div class="carte-sim__entete">
+            <span class="surtitre" style="margin:0">Courbes affichées</span>
+            <div class="choix cats toggles toggles--carte" id="sim-toggles" role="group" aria-label="Courbes affichées"></div>
           </div>
-        </div>
-        <div class="reglage">
-          <div class="reglage__icone" id="ico-sat"></div>
-          <div class="reglage__corps">
-            <span class="champ__label">Satisfaction du client</span>
-            <span class="lecture-val" id="sim-sat">—</span>
+          <div id="sim-svg" class="zone-drag" aria-label="Diagramme de Kano avec deux poignées : degré de réalisation sur l'axe horizontal, satisfaction sur l'axe vertical"></div>
+          <div class="lecture-ligne">
+            <span class="lecture-ligne__item"><span class="lecture-ligne__ico" id="ico-deg"></span><span><span class="lab">Degré de réalisation</span><strong id="sim-degre">—</strong></span></span>
+            <span class="lecture-ligne__item"><span class="lecture-ligne__ico" id="ico-sat"></span><span><span class="lab">Satisfaction</span><strong id="sim-sat">—</strong></span></span>
+            <span class="note lecture-ligne__aide">Poignées dorées : glisser ou toucher un axe · clavier : flèches</span>
           </div>
         </div>
       </div>
@@ -582,22 +625,9 @@ details.aide summary::-webkit-details-marker { display: none; }
     <div id="exo-placer">
       <div class="exo-entete">
         <h3 style="margin-top:0">Placer le point</h3>
-        <div class="score" id="e1-score"></div>
+        <div class="exo-entete__droite"><div class="score" id="e1-score"></div><button type="button" class="btn btn--secondaire btn--petit btn-aide" data-aide="placer" data-titre="Les niveaux de chaque axe" aria-haspopup="dialog" aria-controls="modale-aide">? Aide</button></div>
       </div>
       <p class="texte">Chaque situation donne deux informations : le <strong>degré de réalisation</strong> de la fonction et le <strong>niveau de satisfaction</strong> du client. Glissez le point à l'endroit correspondant. Deux points par question : un pour l'abscisse, un pour l'ordonnée. L'indice est gratuit ; si vous affichez la solution, la question n'est pas comptée.</p>
-      <details class="carte carte--brume aide">
-        <summary>Aide : les niveaux de chaque axe</summary>
-        <div class="grille grille--2" style="margin-top:1rem">
-          <div>
-            <h4 style="margin-top:0">Axe horizontal · degré de réalisation</h4>
-            <table class="tableau" style="font-size:.9em"><tbody id="table-deg"></tbody></table>
-          </div>
-          <div>
-            <h4 style="margin-top:0">Axe vertical · satisfaction du client</h4>
-            <table class="tableau" style="font-size:.9em"><tbody id="table-sat"></tbody></table>
-          </div>
-        </div>
-      </details>
       <div class="progress"><span id="e1-progress" style="width:0"></span></div>
       <div id="e1-corps"></div>
     </div>
@@ -606,16 +636,9 @@ details.aide summary::-webkit-details-marker { display: none; }
     <div id="exo-categorie" hidden>
       <div class="exo-entete">
         <h3 style="margin-top:0">Identifier la catégorie</h3>
-        <div class="score" id="e2-score"></div>
+        <div class="exo-entete__droite"><div class="score" id="e2-score"></div><button type="button" class="btn btn--secondaire btn--petit btn-aide" data-aide="categorie" data-titre="Lire une parole de client, puis croiser les deux faces" aria-haspopup="dialog" aria-controls="modale-aide">? Aide</button></div>
       </div>
-      <p class="texte">Chaque situation décrit les <strong>deux faces</strong> d'une caractéristique : ce que ressent le client quand elle est réalisée, et ce qu'il ressent quand elle est absente ou peu réalisée. Les deux points sont placés sur le diagramme ; à vous de reconnaître la courbe qui passe par les deux, donc la catégorie. Un point par question.</p>
-      <details class="carte carte--brume aide">
-        <summary>Aide : le croisement des deux faces</summary>
-        <table class="tableau tableau--zebre" style="margin-top:1rem;font-size:.9em">
-          <thead><tr><th>Fonction réalisée : le client est…</th><th>Fonction absente : le client est…</th><th>Catégorie</th></tr></thead>
-          <tbody id="table-croisement"></tbody>
-        </table>
-      </details>
+      <p class="texte">Chaque parole de client (fictive) contient les <strong>deux faces</strong> d'une caractéristique : ce que le client ressent quand elle est réalisée, et ce qu'il ressentirait si elle était absente ou peu réalisée. Les deux points sont placés sur le diagramme ; à vous de reconnaître la courbe qui passe par les deux, donc la catégorie. Un point par question.</p>
       <div class="progress"><span id="e2-progress" style="width:0"></span></div>
       <div id="e2-corps"></div>
     </div>
@@ -626,6 +649,76 @@ details.aide summary::-webkit-details-marker { display: none; }
   <span>École d'Horlogerie de Genève · CPH_HOP_01 · Voix du client · N. Derobert</span>
   <span>Document élaboré avec l'assistance d'outils d'intelligence artificielle.</span>
 </footer>
+
+<!-- Modale : QR code vers cette page -->
+<div class="modale" id="modale-qr" role="dialog" aria-modal="true" aria-labelledby="modale-qr-titre" hidden>
+  <div class="modale__fond" data-fermer></div>
+  <div class="modale__boite">
+    <div class="modale__entete">
+      <div>
+        <span class="surtitre">Ouvrir sur un téléphone</span>
+        <h3 id="modale-qr-titre" style="margin:0">Le diagramme de Kano · EHG</h3>
+      </div>
+      <button type="button" class="btn btn--secondaire btn--petit modale__fermer" data-fermer aria-label="Fermer">✕</button>
+    </div>
+    <div class="modale__corps">
+      <div class="qr-zone" id="qr-zone" aria-live="polite"></div>
+      <p class="qr-url" id="qr-url"></p>
+      <p class="note" id="qr-note" hidden></p>
+      <details class="qr-options">
+        <summary>Modifier l'adresse encodée</summary>
+        <label class="champ__label" for="qr-input">Adresse (URL) à encoder</label>
+        <input class="input" type="url" id="qr-input" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://…">
+        <p class="note" style="margin:.5rem 0 0">Le QR code se met à jour pendant la saisie. Utile si l'application est hébergée à une autre adresse que celle affichée.</p>
+      </details>
+      <div class="modale__actions">
+        <button type="button" class="btn btn--secondaire" id="qr-agrandir" aria-pressed="false">Agrandir pour projeter</button>
+        <button type="button" class="btn btn--secondaire" id="qr-copier">Copier l'adresse</button>
+        <button type="button" class="btn" data-fermer>Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modale : aide des exercices -->
+<div class="modale" id="modale-aide" role="dialog" aria-modal="true" aria-labelledby="modale-aide-titre" hidden>
+  <div class="modale__fond" data-fermer></div>
+  <div class="modale__boite modale__boite--large">
+    <div class="modale__entete">
+      <div>
+        <span class="surtitre">Aide</span>
+        <h3 id="modale-aide-titre" style="margin:0">Aide</h3>
+      </div>
+      <button type="button" class="btn btn--secondaire btn--petit modale__fermer" data-fermer aria-label="Fermer">✕</button>
+    </div>
+    <div class="modale__corps">
+      <div id="aide-placer" hidden>
+        <p class="texte">Lisez la situation deux fois : une première fois pour trouver ce que fait — ou ne fait pas — la montre ou le service (l'abscisse), une seconde pour trouver ce que ressent le client (l'ordonnée). Les mots employés correspondent aux niveaux ci-dessous.</p>
+        <div class="grille grille--2">
+          <div>
+            <h4 style="margin-top:0">Axe horizontal · degré de réalisation</h4>
+            <table class="tableau" style="font-size:.9em"><tbody id="table-deg"></tbody></table>
+          </div>
+          <div>
+            <h4 style="margin-top:0">Axe vertical · satisfaction du client</h4>
+            <table class="tableau" style="font-size:.9em"><tbody id="table-sat"></tbody></table>
+          </div>
+        </div>
+      </div>
+      <div id="aide-categorie" hidden>
+        <p class="texte">Une parole de client donne les deux faces : ce qu'il vit avec la caractéristique <strong>réalisée</strong>, et ce qu'il vivrait si elle était <strong>absente ou peu réalisée</strong>. Repérez le niveau de satisfaction de chaque face avec le vocabulaire ci-dessous, puis lisez la catégorie au croisement des deux.</p>
+        <h4 style="margin-top:0">Vocabulaire des niveaux de satisfaction</h4>
+        <table class="tableau" style="font-size:.9em"><tbody id="table-sat-2"></tbody></table>
+        <h4>Le croisement des deux faces</h4>
+        <table class="tableau tableau--zebre" style="font-size:.9em">
+          <thead><tr><th>Fonction réalisée : le client est…</th><th>Fonction absente : le client est…</th><th>Catégorie</th></tr></thead>
+          <tbody id="table-croisement"></tbody>
+        </table>
+      </div>
+      <div class="modale__actions"><button type="button" class="btn" data-fermer>Fermer</button></div>
+    </div>
+  </div>
+</div>
 
 <script>
 (function () {
@@ -910,8 +1003,36 @@ $$('table.tableau').forEach(t => {
 });
 
 // hauteur de la barre d'onglets (collante sur petit écran) : sert de décalage aux diagrammes collants
-const majOngletsH = () => { try { document.documentElement.style.setProperty('--onglets-h', $('.onglets').offsetHeight + 'px'); } catch (e) {} };
+const majOngletsH = () => { try { const n = $('.onglets'); const bas = getComputedStyle(n).position === 'fixed'; document.body.classList.toggle('onglets-bas', bas); document.documentElement.style.setProperty('--onglets-h', (bas ? 0 : n.offsetHeight) + 'px'); } catch (e) {} };
 majOngletsH(); window.addEventListener('resize', majOngletsH);
+
+/* ======================================================================
+   3 bis. Modales génériques (fenêtres pop-up) : ouverture, fermeture, focus, Échap, clic sur le fond
+   ====================================================================== */
+function ouvrirModale(m) {
+  m._retourFocus = document.activeElement;
+  m.hidden = false; document.body.classList.add('modale-ouverte');
+  const f = m.querySelector('[data-focus-initial]') || m.querySelector('.modale__fermer'); if (f) f.focus();
+}
+function fermerModale(m) {
+  m.hidden = true;
+  if (!document.querySelector('.modale:not([hidden])')) document.body.classList.remove('modale-ouverte');
+  if (typeof m._onClose === 'function') m._onClose();
+  if (m._retourFocus && m._retourFocus.focus) m._retourFocus.focus();
+}
+$$('.modale').forEach(m => {
+  m.querySelectorAll('[data-fermer]').forEach(b => b.addEventListener('click', () => fermerModale(m)));
+  // piège de focus minimal : Tab reste dans la boîte
+  m.addEventListener('keydown', ev => {
+    if (ev.key !== 'Tab') return;
+    const f = Array.from(m.querySelectorAll('button, input, summary, [tabindex="0"]')).filter(e => !e.disabled && e.offsetParent !== null);
+    if (!f.length) return;
+    const i = f.indexOf(document.activeElement);
+    if (ev.shiftKey && i <= 0) { ev.preventDefault(); f[f.length - 1].focus(); }
+    else if (!ev.shiftKey && i === f.length - 1) { ev.preventDefault(); f[0].focus(); }
+  });
+});
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { const m = document.querySelector('.modale:not([hidden])'); if (m) fermerModale(m); } });
 
 /* ======================================================================
    4. Théorie — le diagramme pas à pas
@@ -999,6 +1120,13 @@ function afficherPas(i) {
 PAS.forEach((p, k) => $('#pas-points').appendChild(h('button', { type: 'button', text: String(k + 1), title: p.titre, 'aria-label': 'Élément ' + (k + 1) + ' : ' + p.titre, onclick: () => afficherPas(k) })));
 $('#pas-prec').addEventListener('click', () => afficherPas(pasCourant - 1));
 $('#pas-suiv').addEventListener('click', () => afficherPas(pasCourant + 1));
+// balayage horizontal (téléphone) sur le pas-à-pas : gauche = suivant, droite = précédent
+{
+  const z = $('.pas'); let x0 = null, y0 = null;
+  z.addEventListener('pointerdown', ev => { if (ev.pointerType === 'mouse') return; x0 = ev.clientX; y0 = ev.clientY; });
+  z.addEventListener('pointerup', ev => { if (x0 === null) return; const dx = ev.clientX - x0, dy = ev.clientY - y0; x0 = null; if (Math.abs(dx) > 60 && Math.abs(dx) > 2 * Math.abs(dy)) afficherPas(pasCourant + (dx < 0 ? 1 : -1)); });
+  z.addEventListener('pointercancel', () => { x0 = null; });
+}
 afficherPas(0);
 
 // tableau des cinq catégories
@@ -1097,12 +1225,12 @@ $$('.sim-modes button[data-mode]').forEach(b => b.addEventListener('click', () =
 
 // --- Mode A : explorer le diagramme --------------------------------------
 const FLASH = '#F26B1D'; // couleur vive, réservée au point que l'on positionne
-const S = { visibles: new Set(ORDRE), exemple: null, x: 0.8, y: 0, face: null };
+const S = { visibles: new Set(ORDRE), exemple: null, x: 0.8, y: 0, face: null, trace: [], retour: null };
 
 // icônes dynamiques (hors graphique)
 function iconeDegre(container, x) {
   container.innerHTML = '';
-  const svg = el('svg', { viewBox: '0 0 80 80', width: 64, height: 64, role: 'img', 'aria-label': 'Degré de réalisation' }, container);
+  const svg = el('svg', { viewBox: '0 0 80 80', width: 44, height: 44, role: 'img', 'aria-label': 'Degré de réalisation' }, container);
   const id = 'clip' + (++idSeq);
   const defs = el('defs', {}, svg);
   const clip = el('clipPath', { id }, defs);
@@ -1116,7 +1244,7 @@ function iconeDegre(container, x) {
 }
 function iconeSatisfaction(container, y) {
   container.innerHTML = '';
-  const svg = el('svg', { viewBox: '0 0 80 80', width: 64, height: 64, role: 'img', 'aria-label': 'Satisfaction du client' }, container);
+  const svg = el('svg', { viewBox: '0 0 80 80', width: 44, height: 44, role: 'img', 'aria-label': 'Satisfaction du client' }, container);
   const fill = y > 0.2 ? '#F4EDD6' : y < -0.2 ? '#F5E4E4' : '#F6F6F6';
   el('circle', { cx: 40, cy: 40, r: 30, fill, stroke: '#3A3A3A', 'stroke-width': 2.4 }, svg);
   const ey = 32 - Math.max(0, y) * 2;
@@ -1137,7 +1265,7 @@ ORDRE.forEach(k => {
 // exemples horlogers (déplacés depuis la théorie)
 const exBtns = [];
 const btnLibre = h('button', { type: 'button', text: 'Point libre', class: 'actif' });
-btnLibre.addEventListener('click', () => { S.exemple = null; majExemple(); majSim(); });
+btnLibre.addEventListener('click', () => { animPt++; S.trace = []; S.retour = null; S.exemple = null; S.face = null; majExemple(); majSim(); });
 $('#sim-exemples').appendChild(btnLibre); exBtns.push(btnLibre);
 EXEMPLES.forEach((e, i) => {
   const b = h('button', { type: 'button' }, [h('span', { class: 'lettre lettre-' + e.cat, text: e.cat }), e.carac.split(',')[0]]);
@@ -1149,10 +1277,18 @@ function majExemple() {
   const d = $('#sim-exemple-detail'); d.innerHTML = '';
   if (S.exemple === null) { d.appendChild(h('p', { class: 'note', text: 'Point libre : réglez les deux curseurs et observez où le point se place par rapport aux courbes affichées.' })); return; }
   const e = EXEMPLES[S.exemple];
-  const face = (plein, cle, texte) => h('button', { type: 'button', class: 'face-btn', 'data-face': plein ? 'R' : 'A', onclick: () => { S.face = plein ? 'R' : 'A'; placerSur(e.cat, plein ? e.xR : e.xA); } }, [
-    h('span', { class: 'face-btn__titre' }, [marqueur(plein), plein ? 'Fonction réalisée' : 'Fonction absente ou peu réalisée']),
-    h('span', { class: 'face-btn__niveau' }, [h('strong', { text: 'Client ' + satParCle(cle).nom.toLowerCase() }), ' — ' + texte]),
-  ]);
+  const face = (plein, cle, texte) => {
+    const cible = plein ? e.xR : e.xA, nom = plein ? 'R' : 'A';
+    const b = h('button', { type: 'button', class: 'face-btn', 'data-face': nom }, [
+      h('span', { class: 'face-btn__titre' }, [marqueur(plein), plein ? 'Fonction réalisée' : 'Fonction absente ou peu réalisée']),
+      h('span', { class: 'face-btn__niveau' }, [h('strong', { text: 'Client ' + satParCle(cle).nom.toLowerCase() }), ' — ' + texte]),
+    ]);
+    // survol (souris) : aperçu du déplacement le long de la courbe ; on revient en arrière si l'on ressort sans cliquer
+    b.addEventListener('pointerenter', ev => { if (ev.pointerType === 'touch' || S.face === nom) return; if (!S.retour) S.retour = { x: S.x, y: S.y, face: S.face }; animerVers(e.cat, cible, 1400); });
+    b.addEventListener('pointerleave', ev => { if (ev.pointerType === 'touch' || !S.retour) return; const r = S.retour; S.retour = null; animerVers(null, r.x, 700, r.y, () => { S.face = r.face; majSim(); }); });
+    b.addEventListener('click', () => { S.retour = null; S.face = nom; animerVers(e.cat, cible, 1400); });
+    return b;
+  };
   d.appendChild(h('div', { class: 'exemple exemple--sim' }, [
     h('div', { class: 'exemple__picto' }, picto(e.picto)),
     h('div', {}, [
@@ -1163,11 +1299,34 @@ function majExemple() {
     ]),
   ]));
 }
-function placerSur(cat, x) { S.x = x; S.y = yOn(cat, x); majSim(); }
+function placerSur(cat, x) { animerVers(cat, x, 1400); }
+// déplacement animé du point : le long de la courbe `cat` (ou en ligne droite si cat est null), avec une trace des positions parcourues
+let animPt = 0;
+function animerVers(cat, xCible, dur, yCible, apres) {
+  const seq = ++animPt, x0 = S.x, y0 = S.y, t0 = performance.now();
+  const ecart0 = cat ? y0 - yOn(cat, x0) : 0; // écart initial à la courbe, résorbé pendant le trajet
+  const lent = dur, court = reduitMouvement();
+  S.trace = [];
+  const step = now => {
+    if (seq !== animPt) return;
+    const k = court ? 1 : easeDoux(Math.min(1, (now - t0) / lent));
+    const x = x0 + (xCible - x0) * k;
+    const y = cat ? yOn(cat, x) + ecart0 * (1 - k) : y0 + ((yCible === undefined ? y0 : yCible) - y0) * k;
+    S.x = x; S.y = y;
+    const d = S.trace.length ? S.trace[S.trace.length - 1] : null;
+    if (!d || Math.hypot(x - d.x, (y - d.y) * 0.65) > 0.06) S.trace.push({ x, y });
+    majSim();
+    if (k < 1) requestAnimationFrame(step); else if (apres) apres();
+  };
+  requestAnimationFrame(step);
+}
+const easeDoux = t => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+const reduitMouvement = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
 // poignées (curseurs) dessinées sur les axes du diagramme
 const clampSim = v => Math.max(-0.95, Math.min(0.95, v));
 function poignees(svg) {
   const g = el('g', { class: 'curseurs' }, svg);
+  const pl = svg.querySelector('.point-libre'); if (pl) svg.insertBefore(g, pl.parentNode); // poignées sous le point orange
   // bandes tactiles le long des axes (invisibles)
   el('rect', { x: px(-0.95) - 24, y: CY - 40, width: px(0.95) - px(-0.95) + 48, height: 80, class: 'bande', 'data-curseur': 'x' }, g);
   el('rect', { x: CX - 40, y: py(0.95) - 24, width: 80, height: py(-0.95) - py(0.95) + 48, class: 'bande', 'data-curseur': 'y' }, g);
@@ -1186,7 +1345,9 @@ function poignees(svg) {
 }
 function majSim() {
   const curves = ORDRE.filter(k => S.visibles.has(k)).map(k => ({ cat: k, faded: S.exemple !== null && EXEMPLES[S.exemple].cat !== k }));
-  const svg = renderScene($('#sim-svg'), { axes: { ticksX: true, ticksXText: false, ticksY: true }, curves, points: [{ x: S.x, y: S.y, guides: true, r: 13, col: FLASH, cls: 'point-libre' }] });
+  const trace = S.trace.slice(0, -1).map((t, i, a) => ({ x: t.x, y: t.y, r: 4 + 3 * i / Math.max(1, a.length), col: FLASH, cls: 'trace' }));
+  const svg = renderScene($('#sim-svg'), { axes: { ticksX: true, ticksXText: false, ticksY: true }, curves, points: [...trace, { x: S.x, y: S.y, guides: true, r: 13, col: FLASH, cls: 'point-libre' }] });
+  svg.querySelectorAll('.trace').forEach((g, i, a) => g.setAttribute('opacity', (0.25 + 0.55 * i / Math.max(1, a.length)).toFixed(2)));
   poignees(svg);
   $('#sim-degre').textContent = degParCle(degDepuisX(S.x)).nom;
   $('#sim-sat').textContent = satParCle(satDepuisY(S.y)).nom;
@@ -1197,7 +1358,7 @@ function majSim() {
 {
   const zone = $('#sim-svg'); let axe = null;
   const coord = ev => { const r = zone.querySelector('svg').getBoundingClientRect(); return { x: ((ev.clientX - r.left) / r.width * W - CX) / RX, y: (CY - (ev.clientY - r.top) / r.height * H) / RY }; };
-  const appliquer = c => { if (axe === 'x') S.x = clampSim(c.x); else S.y = clampSim(c.y); S.face = null; majSim(); };
+  const appliquer = c => { animPt++; S.trace = []; S.retour = null; if (axe === 'x') S.x = clampSim(c.x); else S.y = clampSim(c.y); S.face = null; majSim(); };
   zone.addEventListener('pointerdown', ev => { const t = ev.target.closest('[data-curseur]'); if (!t) return; axe = t.dataset.curseur; try { zone.setPointerCapture(ev.pointerId); } catch (e) {} ev.preventDefault(); appliquer(coord(ev)); });
   zone.addEventListener('pointermove', ev => { if (axe) appliquer(coord(ev)); });
   zone.addEventListener('pointerup', () => { axe = null; });
@@ -1208,6 +1369,7 @@ function majSim() {
     if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') d = pas; else if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') d = -pas;
     else if (ev.key === 'Home') d = -2; else if (ev.key === 'End') d = 2; else return;
     ev.preventDefault();
+    animPt++; S.trace = []; S.retour = null;
     if (a === 'x') S.x = clampSim(S.x + d); else S.y = clampSim(S.y + d);
     S.face = null; majSim();
     const np = zone.querySelector('.poignee[data-curseur="' + a + '"]'); if (np) np.focus();
@@ -1316,16 +1478,16 @@ function revelerB(anime) {
   // les points modifiés se déplacent l'un après l'autre, dans l'ordre du tableau
   const mods = D.items.filter(it => it.modif);
   mods.forEach((it, i) => {
-    const delay = 400 + i * 900;
-    tween(800, delay, k => { if (seq === animB) placerItem(it, k); }, () => {
+    const delay = 500 + i * 1700;
+    tween(1500, delay, k => { if (seq === animB) placerItem(it, k); }, () => {
       if (seq !== animB) return;
       it.ring.setAttribute('opacity', 1);
       it.pulse.setAttribute('opacity', 1); it.pulse.classList.add('pulse-on');
-      setTimeout(() => { if (seq === animB) it.pulse.setAttribute('opacity', 0); }, 900);
+      setTimeout(() => { if (seq === animB) it.pulse.setAttribute('opacity', 0); }, 1400);
     });
   });
-  const total = 400 + mods.length * 900 + 200;
-  tween(900, Math.max(600, total - 900), k => { if (seq === animB) $('#m-idx-b').textContent = Math.round(ia + (ib - ia) * k); }, () => {
+  const total = 500 + mods.length * 1700 + 300;
+  tween(1500, Math.max(800, total - 1500), k => { if (seq === animB) $('#m-idx-b').textContent = Math.round(ia + (ib - ia) * k); }, () => {
     if (seq !== animB) return;
     $('#m-idx-delta').textContent = (ib >= ia ? '+' : '') + (ib - ia);
     D.labels.forEach(l => l.setAttribute('opacity', 1));
@@ -1391,45 +1553,35 @@ const SITUATIONS = [
 
 // Exercice 2 : identifier la catégorie. Les deux faces sont données, avec le niveau de satisfaction de chacune.
 const DEUX_FACES = [
-  { n: 1, cat: 'B', catAlt: [], carac: 'Tenue de la teinture du bracelet cuir', xR: 0.8, xA: -0.8,
-    satR: 'N', txtR: 'le bracelet garde sa couleur ; le client n’y pense même pas.',
-    satA: 'T', txtA: 'le bracelet déteint sur le poignet dès la première semaine ; le client réclame.',
+  { n: 1, cat: 'B', catAlt: [], carac: 'Tenue de la teinture du bracelet cuir', src: 'entendu en boutique', xR: 0.8, xA: -0.8, satR: 'N', satA: 'T',
+    verbatim: 'Un bracelet cuir qui garde sa couleur ? Je n’y pense même pas, c’est normal. Par contre, s’il déteignait sur mon poignet dès la première semaine, à ce prix, je réclamerais un échange.',
     just: 'Rien de particulier quand c’est là, réclamation quand ça manque : la caractéristique est tenue pour acquise.' },
-  { n: 2, cat: 'P', catAlt: [], carac: 'Réserve de marche', xR: 0.5, xA: -0.5,
-    satR: 'S', txtR: '70 heures : posée le vendredi soir, la montre tourne encore le lundi.',
-    satA: 'D', txtA: '30 heures : elle s’arrête chaque lundi matin.',
+  { n: 2, cat: 'P', catAlt: [], carac: 'Réserve de marche', src: 'avis en ligne', xR: 0.5, xA: -0.5, satR: 'S', satA: 'D',
+    verbatim: 'Avec 70 heures de réserve, je pose la montre le vendredi soir et elle tourne encore le lundi : je suis content. Avec 30 heures, elle s’arrêterait chaque lundi matin et je serais déçu.',
     just: 'La satisfaction suit le niveau, dans les deux sens : plus la réserve est longue, plus le client est content.' },
-  { n: 3, cat: 'A', catAlt: [], carac: 'Réglage du bracelet offert pendant l’attente', xR: 0.85, xA: -0.8,
-    satR: 'E', txtR: 'le vendeur règle le bracelet pendant que le client prend un café ; surpris, il en parle autour de lui.',
-    satA: 'N', txtA: 'aucun réglage proposé ; le client n’y pensait pas.',
+  { n: 3, cat: 'A', catAlt: [], carac: 'Réglage du bracelet offert pendant l’attente', src: 'entendu en boutique', xR: 0.85, xA: -0.8, satR: 'E', satA: 'N',
+    verbatim: 'Le vendeur a réglé mon bracelet pendant que je prenais un café. Je ne m’y attendais pas du tout, j’en ai parlé à tout le monde. S’il ne l’avait pas proposé, je n’y aurais même pas pensé.',
     just: 'Rien n’était attendu : l’absence ne coûte rien, la présence surprend et enchante.' },
-  { n: 4, cat: 'I', catAlt: [], carac: 'Certificat d’origine, pour ce client', xR: 0.8, xA: -0.8,
-    satR: 'N', txtR: 'le certificat est dans la boîte ; le client ne l’a même pas sorti.',
-    satA: 'N', txtA: 'pas de certificat ; il ne s’en apercevrait pas.',
+  { n: 4, cat: 'I', catAlt: [], carac: 'Certificat d’origine, pour ce client', src: 'entendu en boutique', xR: 0.8, xA: -0.8, satR: 'N', satA: 'N',
+    verbatim: 'Le certificat d’origine ? Il est dans la boîte, je ne l’ai même pas sorti, ça ne me fait ni chaud ni froid. S’il n’y était pas, je ne m’en apercevrais pas.',
     just: 'Ni la présence ni l’absence ne changent quelque chose pour ce client. Pour un collectionneur, ce serait une basique.' },
-  { n: 5, cat: 'R', catAlt: [], carac: 'Fermoir déployant, pour un client attaché à la boucle ardillon', xR: 0.8, xA: -0.8,
-    satR: 'D', txtR: 'le fermoir déployant est là ; le client le trouve compliqué et regrette son ardillon.',
-    satA: 'S', txtA: 'une simple boucle ardillon ; c’est ce qu’il voulait.',
+  { n: 5, cat: 'R', catAlt: [], carac: 'Fermoir déployant, pour un client attaché à la boucle ardillon', src: 'entendu en boutique', xR: 0.8, xA: -0.8, satR: 'D', satA: 'S',
+    verbatim: 'Ce fermoir déployant, je le trouve compliqué et je regrette mon ardillon : ça me déplaît. Une simple boucle ardillon, c’est ce que je voulais, j’en serais content.',
     just: 'Le client préfère l’absence à la présence : la courbe descend quand la fonction est réalisée.' },
-  { n: 6, cat: 'B', catAlt: [], carac: 'Garantie internationale', xR: 0.8, xA: -0.8,
-    satR: 'N', txtR: 'la garantie est fournie, comme sur toutes les montres de la gamme ; le client trouve cela normal.',
-    satA: 'T', txtA: 'pas de garantie ; le client proteste et renonce à l’achat.',
+  { n: 6, cat: 'B', catAlt: [], carac: 'Garantie internationale', src: 'entendu en boutique', xR: 0.8, xA: -0.8, satR: 'N', satA: 'T',
+    verbatim: 'La garantie internationale est fournie, comme sur toutes les montres de cette gamme : c’est normal, je n’y pense pas. Sans garantie, je protesterais et je renoncerais à l’achat.',
     just: 'La garantie est supposée acquise : elle ne réjouit pas, mais son absence fait réclamer.' },
-  { n: 7, cat: 'P', catAlt: [], carac: 'Précision de marche', xR: 0.8, xA: -0.8,
-    satR: 'E', txtR: '+2 secondes par jour ; le client est bluffé.',
-    satA: 'T', txtA: '+25 secondes par jour ; le client proteste.',
+  { n: 7, cat: 'P', catAlt: [], carac: 'Précision de marche', src: 'avis en ligne', xR: 0.8, xA: -0.8, satR: 'E', satA: 'T',
+    verbatim: 'Deux secondes par jour : je suis bluffé, je ne pensais pas que c’était possible. À vingt-cinq secondes par jour, je serais furieux et je la ramènerais en boutique.',
     just: 'Chaque seconde compte : la satisfaction est graduée avec la performance, vers le haut comme vers le bas.' },
-  { n: 8, cat: 'A', catAlt: [], carac: 'Suivi photo pendant la révision', xR: 0.85, xA: -0.8,
-    satR: 'E', txtR: 'le SAV envoie une photo du mouvement avec un mot de l’horloger ; le client ne savait pas que cela se faisait.',
-    satA: 'N', txtA: 'pas de suivi ; le client n’attendait rien de tel.',
+  { n: 8, cat: 'A', catAlt: [], carac: 'Suivi photo pendant la révision', src: 'avis en ligne', xR: 0.85, xA: -0.8, satR: 'E', satA: 'N',
+    verbatim: 'Le SAV m’a envoyé une photo du mouvement avec un mot de l’horloger. Je ne savais pas que ça se faisait, j’ai adoré. Sans ce suivi, je n’aurais rien attendu de particulier.',
     just: 'Découverte totale : rien n’aurait manqué sans ce suivi, sa présence enchante.' },
-  { n: 9, cat: 'R', catAlt: [], carac: 'Grande fenêtre de date, pour un amateur de cadrans épurés', xR: 0.8, xA: -0.8,
-    satR: 'D', txtR: 'la fenêtre est là ; elle gâche le cadran à ses yeux, il est agacé.',
-    satA: 'S', txtA: 'pas de fenêtre ; un cadran épuré, exactement ce qu’il cherchait.',
+  { n: 9, cat: 'R', catAlt: [], carac: 'Grande fenêtre de date, pour un amateur de cadrans épurés', src: 'entendu en boutique', xR: 0.8, xA: -0.8, satR: 'D', satA: 'S',
+    verbatim: 'Cette grande fenêtre de date gâche le cadran, ça m’agace. Sans fenêtre, un cadran épuré, exactement ce que je cherche : j’en serais content.',
     just: 'Présence qui déplaît, absence qui plaît : inverse pour ce client — attractive ou proportionnelle pour un autre.' },
-  { n: 10, cat: 'I', catAlt: [], carac: 'Fond transparent, pour un client qui ne retourne jamais sa montre', xR: 0.8, xA: -0.8,
-    satR: 'N', txtR: 'le fond est transparent ; le client ne le regarde jamais.',
-    satA: 'N', txtA: 'fond plein ; il ne voit pas la différence.',
+  { n: 10, cat: 'I', catAlt: [], carac: 'Fond transparent, pour un client qui ne retourne jamais sa montre', src: 'entendu en boutique', xR: 0.8, xA: -0.8, satR: 'N', satA: 'N',
+    verbatim: 'Un fond transparent ? Je ne retourne jamais ma montre, je ne le regarde pas, ça m’est égal. Avec un fond plein, je ne verrais pas la différence.',
     just: 'Présent ou absent, le fond transparent ne change rien pour ce client : la courbe est confondue avec l’axe.' },
 ];
 const CROISEMENT = [
@@ -1445,9 +1597,16 @@ const CROISEMENT = [
    ====================================================================== */
 // tables d'aide
 DEG.filter(d => d.k !== 'dir').forEach(d => $('#table-deg').appendChild(h('tr', {}, [h('td', { class: 'cat', text: d.nom }), h('td', { class: 'note', text: d.desc })])));
-SAT.forEach(s => $('#table-sat').appendChild(h('tr', {}, [h('td', { class: 'cat', text: s.nom }), h('td', { class: 'note', text: s.desc })])));
+SAT.forEach(s => ['#table-sat', '#table-sat-2'].forEach(id => $(id).appendChild(h('tr', {}, [h('td', { class: 'cat', text: s.nom }), h('td', { class: 'note', text: s.desc })]))));
 CROISEMENT.forEach(([r, a, k]) => $('#table-croisement').appendChild(h('tr', {}, [h('td', { text: r }), h('td', { text: a }), h('td', { class: 'cat', style: 'background:' + CAT[k].pale }, h('span', { class: 'cat-' + k, text: nomCat(k) }))])));
 
+// aide en fenêtre pop-up
+$$('.btn-aide').forEach(b => b.addEventListener('click', () => {
+  const m = $('#modale-aide');
+  ['placer', 'categorie'].forEach(k => { $('#aide-' + k).hidden = k !== b.dataset.aide; });
+  $('#modale-aide-titre').textContent = b.dataset.titre;
+  ouvrirModale(m);
+}));
 // choix de l'exercice
 $$('.sim-modes button[data-exo]').forEach(b => b.addEventListener('click', () => {
   $$('.sim-modes button[data-exo]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
@@ -1467,7 +1626,6 @@ function ecranFin(corps, titre, pts, max, onRestart) {
   ]));
 }
 const scrollVers = id => { try { const y = $('#' + id).getBoundingClientRect().top + window.pageYOffset - 70; window.scrollTo({ top: y }); } catch (e) {} };
-const niveau = cle => h('strong', { class: 'niveau', text: 'Client ' + satParCle(cle).nom.toLowerCase() });
 
 // diagramme avec point à glisser ; renvoie { svg, position(), verrouiller(), montrerSolution(item), reveler(item) }
 function diagrammeDrag(container, onMove) {
@@ -1570,13 +1728,10 @@ function e2Afficher() {
   const f = E2.liste[E2.i];
   progression('e2', E2.i, n); scoreHtml('e2', E2.pts, n);
   corps.appendChild(h('p', { class: 'note', text: `Question ${E2.i + 1} sur ${n}` }));
-  corps.appendChild(h('div', { class: 'situation' }, [
+  corps.appendChild(h('div', { class: 'situation situation--parole' }, [
     h('span', { class: 'situation__carac', text: f.carac }),
-    h('div', { class: 'faces faces--texte' }, [
-      h('div', { class: 'face-ligne' }, [h('span', { class: 'face-ligne__titre' }, [marqueur(true), 'Fonction réalisée']), h('span', {}, [niveau(f.satR), ' — ' + f.txtR])]),
-      h('div', { class: 'face-ligne' }, [h('span', { class: 'face-ligne__titre' }, [marqueur(false), 'Fonction absente ou peu réalisée']), h('span', {}, [niveau(f.satA), ' — ' + f.txtA])]),
-    ]),
-    h('span', { class: 'src', text: 'Situation fictive' }),
+    h('p', { class: 'citation', text: '« ' + f.verbatim + ' »' }),
+    h('span', { class: 'src', text: 'Client fictif · ' + f.src }),
   ]));
   const grille = h('div', { class: 'grille grille--diag' }); const zoneSvg = h('div', { class: 'carte diag-colle' }); const droite = h('div');
   grille.append(zoneSvg, droite); corps.appendChild(grille);
@@ -1595,7 +1750,7 @@ function e2Afficher() {
     E2.pts += ok ? 1 : 0; scoreHtml('e2', E2.pts, n);
     renderScene(zoneSvg, { axes: { ticksX: true, ticksY: true }, curves: [{ cat: f.cat }], points: pointsFaces(f) });
     fb.innerHTML = '';
-    fb.appendChild(encadre(ok ? 'ok' : 'erreur', `<strong>Catégorie</strong> : ${ok ? 'juste' : 'à revoir'} — <strong class="cat-${f.cat}">${nomCat(f.cat)}</strong>${f.catAlt.length ? ' (accepté aussi : ' + f.catAlt.map(nomCat).join(', ') + ')' : ''}. ${f.just}`));
+    fb.appendChild(encadre(ok ? 'ok' : 'erreur', `<strong>Catégorie</strong> : ${ok ? 'juste' : 'à revoir'} — <strong class="cat-${f.cat}">${nomCat(f.cat)}</strong>${f.catAlt.length ? ' (accepté aussi : ' + f.catAlt.map(nomCat).join(', ') + ')' : ''}. ${f.just}<br><span class="note">Lecture des deux faces — réalisée : client ${satParCle(f.satR).nom.toLowerCase()} · absente ou peu réalisée : client ${satParCle(f.satA).nom.toLowerCase()}.</span>`));
     fb.appendChild(boutonSuivant(E2.i, n, () => { E2.i++; e2Afficher(); scrollVers('exo-categorie'); }));
   });
 }
@@ -1608,6 +1763,152 @@ try {
   const hash = location.hash.replace('#', '');
   if (['theorie', 'simulation', 'exercices'].includes(hash)) activerOnglet(hash);
 } catch (e) { /* adresse inaccessible dans un aperçu isolé : on reste sur la théorie */ }
+
+/* ======================================================================
+   9. QR code vers cette page (modale)
+   ====================================================================== */
+/* ======================================================================
+   QR code — encodeur autonome (mode octet, versions 1 à 40, niveau de
+   correction M), conforme à ISO/IEC 18004. Aucune dépendance.
+   Renvoie une matrice de modules (tableau de lignes de 0/1).
+   ====================================================================== */
+const QR = (() => {
+  // nombre de mots de code de correction par bloc et structure des blocs, niveau M, versions 1..40
+  // [ecPerBlock, nbBlocksG1, dataPerBlockG1, nbBlocksG2, dataPerBlockG2]
+  const EC_M = [
+    [10, 1, 16, 0, 0], [16, 1, 28, 0, 0], [26, 1, 44, 0, 0], [18, 2, 32, 0, 0], [24, 2, 43, 0, 0],
+    [16, 4, 27, 0, 0], [18, 4, 31, 0, 0], [22, 2, 38, 2, 39], [22, 3, 36, 2, 37], [26, 4, 43, 1, 44],
+    [30, 1, 50, 4, 51], [22, 6, 36, 2, 37], [22, 8, 37, 1, 38], [24, 4, 40, 5, 41], [24, 5, 41, 5, 42],
+    [28, 7, 45, 3, 46], [28, 10, 46, 1, 47], [26, 9, 43, 4, 44], [26, 3, 44, 11, 45], [26, 3, 41, 13, 42],
+    [26, 17, 42, 0, 0], [28, 17, 46, 0, 0], [28, 4, 47, 14, 48], [28, 6, 45, 14, 46], [28, 8, 47, 13, 48],
+    [28, 19, 46, 4, 47], [28, 22, 45, 3, 46], [28, 3, 45, 23, 46], [28, 21, 45, 7, 46], [28, 19, 47, 10, 48],
+    [28, 2, 46, 29, 47], [28, 10, 46, 23, 47], [28, 14, 46, 21, 47], [28, 14, 46, 23, 47], [28, 12, 47, 26, 48],
+    [28, 6, 47, 34, 48], [28, 29, 46, 14, 47], [28, 13, 46, 32, 47], [28, 40, 47, 7, 48], [28, 18, 47, 31, 48],
+  ];
+  const ALIGN = [[], [], [6, 18], [6, 22], [6, 26], [6, 30], [6, 34], [6, 22, 38], [6, 24, 42], [6, 26, 46], [6, 28, 50],
+    [6, 30, 54], [6, 32, 58], [6, 34, 62], [6, 26, 46, 66], [6, 26, 48, 70], [6, 26, 50, 74], [6, 30, 54, 78], [6, 30, 56, 82], [6, 30, 58, 86], [6, 34, 62, 90],
+    [6, 28, 50, 72, 94], [6, 26, 50, 74, 98], [6, 30, 54, 78, 102], [6, 28, 54, 80, 106], [6, 32, 58, 84, 110], [6, 30, 58, 86, 114], [6, 34, 62, 90, 118], [6, 26, 50, 74, 98, 122], [6, 30, 54, 78, 102, 126], [6, 26, 52, 78, 104, 130],
+    [6, 30, 56, 82, 108, 134], [6, 34, 60, 86, 112, 138], [6, 30, 58, 86, 114, 142], [6, 34, 62, 90, 118, 146], [6, 30, 54, 78, 102, 126, 150], [6, 24, 50, 76, 102, 128, 154], [6, 28, 54, 80, 106, 132, 158], [6, 32, 58, 84, 110, 136, 162], [6, 26, 54, 82, 110, 138, 166], [6, 30, 58, 86, 114, 142, 170]];
+  // arithmétique GF(256)
+  const EXP = new Array(512), LOG = new Array(256);
+  { let x = 1; for (let i = 0; i < 255; i++) { EXP[i] = x; LOG[x] = i; x <<= 1; if (x & 0x100) x ^= 0x11d; } for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255]; }
+  const mul = (a, b) => (a && b) ? EXP[LOG[a] + LOG[b]] : 0;
+  function genPoly(n) { let g = [1]; for (let i = 0; i < n; i++) { const ng = new Array(g.length + 1).fill(0); for (let j = 0; j < g.length; j++) { ng[j] ^= g[j]; ng[j + 1] ^= mul(g[j], EXP[i]); } g = ng; } return g; }
+  function rs(data, n) { const g = genPoly(n); const r = new Array(n).fill(0); for (const d of data) { const f = d ^ r[0]; r.shift(); r.push(0); if (f) for (let j = 0; j < n; j++) r[j] ^= mul(g[j + 1], f); } return r; }
+  const utf8 = s => { const out = []; for (const ch of unescape(encodeURIComponent(s))) out.push(ch.charCodeAt(0)); return out; };
+  function encode(text) {
+    const bytes = utf8(text);
+    let v = 1;
+    for (; v <= 40; v++) { const e = EC_M[v - 1]; const cap = e[1] * e[2] + e[3] * e[4]; const lenBits = v < 10 ? 8 : 16; if (4 + lenBits + 8 * bytes.length <= 8 * cap) break; }
+    if (v > 40) throw new Error('Texte trop long pour un QR code');
+    const e = EC_M[v - 1], totalData = e[1] * e[2] + e[3] * e[4];
+    // flux de bits
+    const bits = []; const put = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >> i) & 1); };
+    put(4, 4); put(bytes.length, v < 10 ? 8 : 16); bytes.forEach(b => put(b, 8));
+    for (let i = 0; i < 4 && bits.length < totalData * 8; i++) bits.push(0);
+    while (bits.length % 8) bits.push(0);
+    const data = []; for (let i = 0; i < bits.length; i += 8) { let b = 0; for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j]; data.push(b); }
+    for (let p = 0; data.length < totalData; p++) data.push(p % 2 ? 0x11 : 0xec);
+    // blocs + correction
+    const blocks = [], ecs = []; let pos = 0;
+    for (let g = 0; g < 2; g++) { const nb = g ? e[3] : e[1], sz = g ? e[4] : e[2]; for (let b = 0; b < nb; b++) { const d = data.slice(pos, pos + sz); pos += sz; blocks.push(d); ecs.push(rs(d, e[0])); } }
+    const out = []; const maxD = Math.max(...blocks.map(b => b.length));
+    for (let i = 0; i < maxD; i++) blocks.forEach(b => { if (i < b.length) out.push(b[i]); });
+    for (let i = 0; i < e[0]; i++) ecs.forEach(b => out.push(b[i]));
+    // matrice
+    const N = 17 + 4 * v; const M = Array.from({ length: N }, () => new Array(N).fill(null)); // null = libre
+    const set = (r, c, val) => { M[r][c] = val ? 1 : 0; };
+    const finder = (r, c) => { for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) { const rr = r + i, cc = c + j; if (rr < 0 || cc < 0 || rr >= N || cc >= N) continue; const on = (i >= 0 && i <= 6 && (j === 0 || j === 6)) || (j >= 0 && j <= 6 && (i === 0 || i === 6)) || (i >= 2 && i <= 4 && j >= 2 && j <= 4); set(rr, cc, on); } };
+    finder(0, 0); finder(0, N - 7); finder(N - 7, 0);
+    const al = ALIGN[v]; al.forEach(r => al.forEach(c => { if (M[r][c] !== null) return; for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) set(r + i, c + j, Math.max(Math.abs(i), Math.abs(j)) !== 1); }));
+    for (let i = 8; i < N - 8; i++) { if (M[6][i] === null) set(6, i, i % 2 === 0); if (M[i][6] === null) set(i, 6, i % 2 === 0); }
+    set(N - 8, 8, 1);
+    // réserve format / version
+    const fmtPos = []; for (let i = 0; i < 8; i++) { fmtPos.push([8, i < 6 ? i : i + 1]); fmtPos.push([i < 6 ? i : i + 1, 8]); } fmtPos.push([8, 8]);
+    for (let i = 0; i < 8; i++) { fmtPos.push([N - 1 - i, 8]); fmtPos.push([8, N - 8 + i]); }
+    fmtPos.forEach(([r, c]) => { if (M[r][c] === null) M[r][c] = 0; });
+    if (v >= 7) for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) { M[i][N - 11 + j] = 0; M[N - 11 + j][i] = 0; }
+    const reserved = M.map(row => row.map(x => x !== null));
+    // placement des données
+    let bi = 0; const allBits = []; out.forEach(b => { for (let i = 7; i >= 0; i--) allBits.push((b >> i) & 1); });
+    for (let c = N - 1; c > 0; c -= 2) { if (c === 6) c--; for (let k = 0; k < N; k++) { const r = ((c + 1) & 2) ? k : N - 1 - k; for (let d = 0; d < 2; d++) { const cc = c - d; if (M[r][cc] === null) { M[r][cc] = bi < allBits.length ? allBits[bi] : 0; bi++; } } } }
+    // masques
+    const MASKS = [(r, c) => (r + c) % 2 === 0, (r, c) => r % 2 === 0, (r, c) => c % 3 === 0, (r, c) => (r + c) % 3 === 0, (r, c) => (Math.floor(r / 2) + Math.floor(c / 3)) % 2 === 0, (r, c) => (r * c) % 2 + (r * c) % 3 === 0, (r, c) => ((r * c) % 2 + (r * c) % 3) % 2 === 0, (r, c) => ((r + c) % 2 + (r * c) % 3) % 2 === 0];
+    const formatBits = mask => { const v5 = (0 << 3) | mask; let d = v5 << 10; const g = 0x537; for (let i = 14; i >= 10; i--) if (d & (1 << i)) d ^= g << (i - 10); return ((v5 << 10) | d) ^ 0x5412; };
+    const versionBits = () => { let d = v << 12; const g = 0x1f25; for (let i = 17; i >= 12; i--) if (d & (1 << i)) d ^= g << (i - 12); return (v << 12) | d; };
+    const applyFormat = (G, mask) => {
+      const f = formatBits(mask); const bit = i => (f >> (14 - i)) & 1; // bit 14 (poids fort) en (8,0)
+      for (let i = 0; i < 6; i++) G[8][i] = bit(i); G[8][7] = bit(6); G[8][8] = bit(7); G[7][8] = bit(8); for (let i = 9; i < 15; i++) G[14 - i][8] = bit(i);
+      for (let i = 0; i < 7; i++) G[N - 1 - i][8] = bit(i); for (let i = 7; i < 15; i++) G[8][N - 15 + i] = bit(i); G[N - 8][8] = 1;
+      if (v >= 7) { const vb = versionBits(); for (let i = 0; i < 18; i++) { const b = (vb >> i) & 1; G[Math.floor(i / 3)][N - 11 + (i % 3)] = b; G[N - 11 + (i % 3)][Math.floor(i / 3)] = b; } }
+    };
+    const penalty = G => {
+      let p = 0;
+      for (let pass = 0; pass < 2; pass++) for (let i = 0; i < N; i++) { let run = 1; for (let j = 1; j < N; j++) { const a = pass ? G[j][i] : G[i][j], b = pass ? G[j - 1][i] : G[i][j - 1]; if (a === b) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+      for (let i = 0; i < N - 1; i++) for (let j = 0; j < N - 1; j++) { const s = G[i][j] + G[i][j + 1] + G[i + 1][j] + G[i + 1][j + 1]; if (s === 0 || s === 4) p += 3; }
+      const pat1 = [1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0], pat2 = [0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1];
+      for (let pass = 0; pass < 2; pass++) for (let i = 0; i < N; i++) for (let j = 0; j <= N - 11; j++) { let m1 = true, m2 = true; for (let k = 0; k < 11; k++) { const val = pass ? G[j + k][i] : G[i][j + k]; if (val !== pat1[k]) m1 = false; if (val !== pat2[k]) m2 = false; } if (m1) p += 40; if (m2) p += 40; }
+      let dark = 0; G.forEach(row => row.forEach(x => { dark += x; })); const ratio = Math.abs(dark * 100 / (N * N) - 50); p += Math.floor(ratio / 5) * 10;
+      return p;
+    };
+    let best = null, bestP = Infinity;
+    for (let m = 0; m < 8; m++) {
+      const G = M.map((row, r) => row.map((x, c) => reserved[r][c] ? x : (MASKS[m](r, c) ? x ^ 1 : x)));
+      applyFormat(G, m);
+      const p = penalty(G); if (p < bestP) { bestP = p; best = G; }
+    }
+    return best;
+  }
+  // rendu SVG (chemin unique, modules carrés)
+  function svg(text, opts = {}) {
+    const G = encode(text), N = G.length, q = opts.quiet === undefined ? 4 : opts.quiet, S = N + 2 * q;
+    let d = '';
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (G[r][c]) d += `M${c + q},${r + q}h1v1h-1z`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S} ${S}" shape-rendering="crispEdges" role="img" aria-label="${opts.label || 'QR code'}"><rect width="${S}" height="${S}" fill="#fff"/><path d="${d}" fill="${opts.color || '#141414'}"/></svg>`;
+  }
+  return { encode, svg };
+})();
+{
+  const modale = $('#modale-qr'), zone = $('#qr-zone'), urlEl = $('#qr-url'), note = $('#qr-note'), input = $('#qr-input'), btnQr = $('#btn-qr');
+  let dernierFocus = null;
+  const adresseCourante = () => { try { return location.href.replace(/#.*$/, ''); } catch (e) { return ''; } };
+  function dessiner(texte) {
+    const t = (texte || '').trim();
+    zone.innerHTML = '';
+    if (!t) { zone.appendChild(h('p', { class: 'note', text: 'Saisissez une adresse à encoder.' })); urlEl.textContent = ''; return; }
+    try { zone.innerHTML = QR.svg(t, { label: 'QR code : ' + t }); }
+    catch (e) { zone.appendChild(h('p', { class: 'note', text: 'Adresse trop longue pour un QR code.' })); }
+    urlEl.textContent = t;
+    const local = /^file:/i.test(t) || /^about:|^blob:|^data:/i.test(t);
+    note.hidden = !local;
+    if (local) note.textContent = 'Cette page est ouverte depuis un fichier local : ce QR code n’est pas utilisable par un téléphone. Hébergez le fichier en ligne (site de l’école, plateforme de cours…), puis saisissez son adresse ci-dessous.';
+    if (local) $('.qr-options').open = true;
+  }
+  function ouvrir() {
+    if (!input.value) input.value = adresseCourante();
+    dessiner(input.value);
+    btnQr.setAttribute('aria-expanded', 'true');
+    ouvrirModale(modale);
+  }
+  modale._onClose = () => {
+    modale.classList.remove('modale--plein');
+    $('#qr-agrandir').setAttribute('aria-pressed', 'false'); $('#qr-agrandir').textContent = 'Agrandir pour projeter';
+    btnQr.setAttribute('aria-expanded', 'false');
+  };
+  btnQr.addEventListener('click', ouvrir);
+  input.addEventListener('input', () => dessiner(input.value));
+  $('#qr-agrandir').addEventListener('click', e => {
+    const on = !modale.classList.contains('modale--plein');
+    modale.classList.toggle('modale--plein', on);
+    e.currentTarget.setAttribute('aria-pressed', on ? 'true' : 'false'); e.currentTarget.textContent = on ? 'Taille normale' : 'Agrandir pour projeter';
+  });
+  $('#qr-copier').addEventListener('click', async e => {
+    const b = e.currentTarget, t = (input.value || adresseCourante()).trim();
+    try { await navigator.clipboard.writeText(t); b.textContent = 'Adresse copiée ✓'; }
+    catch (err) { try { input.select(); document.execCommand('copy'); b.textContent = 'Adresse copiée ✓'; } catch (e2) { b.textContent = 'Copie impossible'; } }
+    setTimeout(() => { b.textContent = 'Copier l’adresse'; }, 1800);
+  });
+}
 
 })();
 </script>
