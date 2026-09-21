@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le diagramme de Kano — Voix du client · EHG</title>
+<meta name="description" content="Application pédagogique autonome : théorie, simulation et exercices sur la voix du client et le diagramme de Kano. École d'Horlogerie de Genève, module CPH_HOP_01.">
+<!--
+  ============================================================================
+  Le diagramme de Kano — Voix du client · École d'Horlogerie de Genève
+  Module CPH_HOP_01 · Application pédagogique autonome (un seul fichier)
+  Trois onglets : Théorie · Simulation · Exercices
+  Charte graphique EHG : Century Gothic (titres, graisse régulière), Calibri
+  (texte), Cambria (chiffres, or #AA8802), or unique, gris neutres, filets fins.
+  Aucune dépendance externe obligatoire : le fichier fonctionne hors ligne
+  (les polices web ne sont chargées que si une connexion existe).
+  Document élaboré avec l'assistance d'outils d'intelligence artificielle.
+  ============================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500&family=Source+Sans+3:wght@400;600&family=Playfair+Display:wght@400;600&display=swap">
+<style>
+/* ---------- 1. Tokens (charte EHG, source : ehg.css v1.0) ---------- */
+:root {
+  --ehg-noir: #141414; --ehg-or: #AA8802; --ehg-blanc: #FFFFFF;
+  --ehg-or-clair: #D4B24C; --ehg-or-pale: #F4EDD6; --ehg-or-fonce: #7D6400;
+  --ehg-graphite: #3A3A3A; --ehg-acier: #898989; --ehg-perle: #EAEAEA; --ehg-brume: #F6F6F6;
+  --ehg-ok: #2E6B4B; --ehg-ok-pale: #E4EFE8; --ehg-erreur: #9B2C2C; --ehg-erreur-pale: #F5E4E4;
+  /* Code couleur des catégories de Kano (identique aux fiches et à l'exercice papier) */
+  --kano-B: #9B2C2C; --kano-B-pale: #F5E4E4;
+  --kano-P: #2E6B4B; --kano-P-pale: #E4EFE8;
+  --kano-A: #AA8802; --kano-A-pale: #F4EDD6;
+  --kano-I: #3A3A3A; --kano-I-pale: #F6F6F6;
+  --kano-R: #141414; --kano-R-pale: #EAEAEA;
+  --ehg-font-titre: "Century Gothic", "Jost", "Futura", "Avenir Next", "Calibri Light", sans-serif;
+  --ehg-font-texte: "Calibri", "Source Sans 3", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --ehg-font-serif: "Cambria", "Playfair Display", "Georgia", "Times New Roman", serif;
+  --ehg-radius: 4px; --ehg-radius-lg: 8px; --ehg-filet: 1px solid var(--ehg-perle);
+  --ehg-ombre: 0 1px 2px rgba(20,20,20,.06), 0 4px 12px rgba(20,20,20,.06);
+  --ehg-largeur: 72rem;
+  --fs: 1.0625rem; --lh: 1.6; --ls: 0.01em;
+}
+/* Confort de lecture (dyslexie, dysorthographie) : plus grand, plus aéré */
+body.confort { --fs: 1.1875rem; --lh: 1.8; --ls: 0.03em; word-spacing: .1em; }
+
+/* ---------- 2. Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body { margin: 0; font-family: var(--ehg-font-texte); font-size: var(--fs); line-height: var(--lh); letter-spacing: var(--ls);
+  color: var(--ehg-noir); background: var(--ehg-blanc); -webkit-font-smoothing: antialiased; text-align: left; }
+h1, h2, h3, h4 { font-family: var(--ehg-font-titre); font-weight: 400; line-height: 1.2; color: var(--ehg-noir); margin: 0 0 .75rem; letter-spacing: 0; }
+h1 { font-size: 2.2rem; } h2 { font-size: 1.6rem; margin-top: 2.5rem; } h3 { font-size: 1.25rem; margin-top: 1.75rem; } h4 { font-size: 1.05rem; font-weight: 500; margin-top: 1.25rem; }
+p, ul, ol, table, figure { margin: 0 0 1rem; }
+p.lead { font-size: 1.15em; color: var(--ehg-graphite); }
+small, .note { font-size: .875em; color: var(--ehg-acier); }
+strong, b { font-weight: 600; }
+a { color: var(--ehg-noir); text-decoration: underline; text-decoration-color: var(--ehg-or); text-underline-offset: 3px; }
+a:hover { color: var(--ehg-or-fonce); }
+:focus-visible { outline: 2px solid var(--ehg-or); outline-offset: 2px; }
+::selection { background: var(--ehg-or-pale); }
+ul.liste { padding-left: 1.2rem; } ul.liste li { margin-bottom: .35rem; } ul.liste li::marker { color: var(--ehg-or); }
+.chiffre { font-family: var(--ehg-font-serif); color: var(--ehg-or); font-variant-numeric: lining-nums; }
+.surtitre { display: block; font-family: var(--ehg-font-titre); font-size: .75rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--ehg-acier); margin-bottom: .5rem; }
+.page { max-width: var(--ehg-largeur); margin: 0 auto; padding: 0 1.5rem; }
+.texte { max-width: 46rem; }
+[hidden] { display: none !important; }
+
+/* ---------- 3. En-tête, onglets, pied ---------- */
+.entete { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; padding: 1rem 0; border-bottom: var(--ehg-filet); }
+.logotype { font-family: var(--ehg-font-titre); font-size: 1.25rem; letter-spacing: .01em; color: var(--ehg-noir); text-decoration: none; }
+.logotype .g { color: var(--ehg-or); }
+.entete__droite { display: flex; align-items: center; gap: 1rem; font-family: var(--ehg-font-titre); font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ehg-acier); }
+.titre { padding: 2.25rem 0 1rem; }
+.onglets { display: flex; gap: 2rem; border-bottom: var(--ehg-filet); margin-bottom: 2rem; overflow-x: auto; }
+.onglets button { font-family: var(--ehg-font-titre); font-size: .9rem; letter-spacing: .08em; text-transform: uppercase; background: none; border: 0;
+  border-bottom: 2px solid transparent; padding: .8rem 0; margin-bottom: -1px; color: var(--ehg-acier); cursor: pointer; white-space: nowrap; }
+.onglets button:hover { color: var(--ehg-noir); }
+.onglets button[aria-selected="true"] { color: var(--ehg-noir); border-bottom-color: var(--ehg-or); }
+.onglets button .n { font-family: var(--ehg-font-serif); color: var(--ehg-or); margin-right: .4em; letter-spacing: 0; text-transform: none; }
+.pied { border-top: var(--ehg-filet); padding: 1.5rem 0; margin-top: 4rem; display: flex; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; font-size: .85rem; color: var(--ehg-acier); }
+
+/* ---------- 4. Composants ---------- */
+.btn { display: inline-flex; align-items: center; gap: .5rem; font-family: var(--ehg-font-titre); font-size: .8rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase;
+  padding: .65rem 1.2rem; border-radius: var(--ehg-radius); border: 1px solid var(--ehg-noir); background: var(--ehg-noir); color: var(--ehg-blanc); cursor: pointer; line-height: 1; transition: background .15s, color .15s; }
+.btn:hover { background: var(--ehg-graphite); border-color: var(--ehg-graphite); }
+.btn--secondaire { background: transparent; color: var(--ehg-noir); }
+.btn--secondaire:hover { background: var(--ehg-brume); color: var(--ehg-noir); border-color: var(--ehg-noir); }
+.btn--or { background: var(--ehg-or); border-color: var(--ehg-or); }
+.btn--or:hover { background: var(--ehg-or-fonce); border-color: var(--ehg-or-fonce); }
+.btn--discret { background: none; border-color: transparent; color: var(--ehg-graphite); padding-left: .2rem; padding-right: .2rem; }
+.btn--discret:hover { background: none; border-color: transparent; color: var(--ehg-or-fonce); }
+.btn[disabled] { opacity: .4; cursor: not-allowed; }
+.btn--petit { padding: .45rem .8rem; font-size: .72rem; }
+.carte { background: var(--ehg-blanc); border: var(--ehg-filet); border-radius: var(--ehg-radius-lg); padding: 1.5rem; box-shadow: var(--ehg-ombre); }
+.carte h3, .carte h4 { margin-top: 0; }
+.carte--brume { background: var(--ehg-brume); border-color: transparent; box-shadow: none; }
+.carte--or { background: var(--ehg-or-pale); border-color: transparent; box-shadow: none; }
+.encadre { display: flex; gap: 1rem; align-items: flex-start; padding: 1rem 1.5rem; border-radius: var(--ehg-radius-lg); background: var(--ehg-perle); margin-bottom: 1.5rem; }
+.encadre > :last-child { margin-bottom: 0; }
+.encadre__icone { flex: 0 0 1.5rem; font-family: var(--ehg-font-serif); font-size: 1.4rem; line-height: 1.2; color: var(--ehg-graphite); }
+.encadre--or { background: var(--ehg-or-pale); } .encadre--or .encadre__icone { color: var(--ehg-or); }
+.encadre--ok { background: var(--ehg-ok-pale); } .encadre--ok .encadre__icone { color: var(--ehg-ok); }
+.encadre--erreur { background: var(--ehg-erreur-pale); } .encadre--erreur .encadre__icone { color: var(--ehg-erreur); }
+.encadre--brume { background: var(--ehg-brume); }
+.badge { display: inline-block; font-family: var(--ehg-font-titre); font-size: .7rem; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; padding: .25em .7em; border-radius: 999px; background: var(--ehg-perle); color: var(--ehg-graphite); line-height: 1.4; vertical-align: middle; }
+.badge--or { background: var(--ehg-or); color: var(--ehg-blanc); } .badge--noir { background: var(--ehg-noir); color: var(--ehg-blanc); }
+.tableau { width: 100%; border-collapse: collapse; font-size: .95em; }
+.tableau th, .tableau td { padding: .6rem .8rem; text-align: left; vertical-align: top; border-bottom: var(--ehg-filet); }
+.tableau thead th { font-family: var(--ehg-font-titre); font-weight: 500; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-graphite); border-bottom: 2px solid var(--ehg-noir); }
+.tableau--zebre tbody tr:nth-child(even) { background: var(--ehg-brume); }
+.tableau .cat { font-family: var(--ehg-font-titre); white-space: nowrap; }
+.grille { display: grid; gap: 1.5rem; }
+.grille--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grille--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grille--5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.grille--diag { grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); align-items: start; }
+@media (max-width: 56rem) { .grille--2, .grille--3, .grille--5, .grille--diag { grid-template-columns: 1fr; } h1 { font-size: 1.7rem; } }
+@media (max-width: 40rem) { .entete__droite > span { display: none; } .logotype { white-space: nowrap; font-size: 1.05rem; } .entete { gap: .75rem; } .onglets { gap: 1.25rem; } }
+.etapes { list-style: none; padding: 0; margin: 0; counter-reset: etape; }
+.etapes > li { position: relative; padding-left: 3.4rem; margin-bottom: 1.25rem; counter-increment: etape; }
+.etapes > li::before { content: counter(etape); position: absolute; left: 0; top: -.1em; font-family: var(--ehg-font-serif); font-size: 1.9rem; line-height: 1; color: var(--ehg-or); }
+.etapes > li > strong:first-child { display: block; font-family: var(--ehg-font-titre); font-weight: 500; font-size: 1.05em; margin-bottom: .2rem; }
+.progress { height: 6px; background: var(--ehg-perle); border-radius: 999px; overflow: hidden; margin: .5rem 0 1rem; }
+.progress > span { display: block; height: 100%; background: var(--ehg-or); border-radius: 999px; transition: width .25s; }
+
+/* catégories : pastilles et boutons de choix */
+.cat-B { color: var(--kano-B); } .cat-P { color: var(--kano-P); } .cat-A { color: var(--kano-A); } .cat-I { color: var(--kano-I); } .cat-R { color: var(--kano-R); }
+.fond-B { background: var(--kano-B-pale); } .fond-P { background: var(--kano-P-pale); } .fond-A { background: var(--kano-A-pale); } .fond-I { background: var(--kano-I-pale); } .fond-R { background: var(--kano-R-pale); }
+.choix { display: flex; flex-wrap: wrap; gap: .5rem; margin: .5rem 0 1rem; }
+.choix button { font-family: var(--ehg-font-titre); font-size: .9rem; letter-spacing: .02em; padding: .55rem .95rem; border-radius: var(--ehg-radius); border: 1px solid var(--ehg-perle); background: var(--ehg-blanc); color: var(--ehg-noir); cursor: pointer; transition: background .12s, border-color .12s; line-height: 1.25; }
+.choix button:hover { border-color: var(--ehg-noir); background: var(--ehg-brume); }
+.choix button[aria-pressed="true"], .choix button.actif { border-color: var(--ehg-noir); background: var(--ehg-noir); color: var(--ehg-blanc); }
+.choix button.juste { border-color: var(--ehg-ok); background: var(--ehg-ok-pale); color: var(--ehg-ok); }
+.choix button.faux { border-color: var(--ehg-erreur); background: var(--ehg-erreur-pale); color: var(--ehg-erreur); }
+.choix button[disabled] { cursor: default; opacity: .75; }
+.choix button .lettre { display: inline-block; width: 1.5em; height: 1.5em; line-height: 1.5em; text-align: center; border-radius: 50%; margin-right: .45em; font-family: var(--ehg-font-serif); font-size: .85em; color: #fff; }
+.choix.cats button.actif { color: var(--ehg-blanc); }
+.choix.cats button[data-cat="B"].actif { background: var(--kano-B); border-color: var(--kano-B); }
+.choix.cats button[data-cat="P"].actif { background: var(--kano-P); border-color: var(--kano-P); }
+.choix.cats button[data-cat="A"].actif { background: var(--kano-A); border-color: var(--kano-A); }
+.choix.cats button[data-cat="I"].actif { background: var(--kano-I); border-color: var(--kano-I); }
+.choix.cats button[data-cat="R"].actif { background: var(--kano-R); border-color: var(--kano-R); }
+.lettre-B { background: var(--kano-B); } .lettre-P { background: var(--kano-P); } .lettre-A { background: var(--kano-A); } .lettre-I { background: var(--kano-I); } .lettre-R { background: var(--kano-R); }
+
+/* diagramme SVG */
+.diagramme { width: 100%; height: auto; display: block; font-family: var(--ehg-font-titre); }
+.diagramme text { letter-spacing: 0; }
+.diagramme .axe { stroke: var(--ehg-acier); stroke-width: 2; }
+.diagramme .lib { fill: var(--ehg-graphite); font-size: 24px; }
+.diagramme .lib-petit { fill: var(--ehg-acier); font-size: 19px; }
+.diagramme .titre-axe { fill: var(--ehg-acier); font-size: 17px; font-weight: 500; letter-spacing: 2.4px; }
+.diagramme .courbe { fill: none; stroke-width: 5.5; stroke-linecap: round; transition: opacity .2s; }
+.diagramme .courbe.estompee { opacity: .16; }
+.diagramme .etiquette { font-size: 25px; font-weight: 500; }
+.diagramme .etiquette.estompee { opacity: .25; }
+.diagramme .point { fill: var(--ehg-or); stroke: var(--ehg-or); stroke-width: 3.5; }
+.diagramme .point.creux { fill: #fff; }
+.diagramme .halo { fill: #fff; }
+.diagramme .zone { fill: var(--ehg-brume); }
+.diagramme .zone-lib { fill: var(--ehg-graphite); font-size: 22px; font-weight: 500; }
+.diagramme .guide { stroke: var(--ehg-acier); stroke-width: 1.5; stroke-dasharray: 5 6; }
+.diagramme .point-lib { fill: var(--ehg-graphite); font-size: 22px; font-weight: 500; }
+.diagramme .drag { cursor: grab; }
+.diagramme .drag:active { cursor: grabbing; }
+
+/* pas à pas (théorie) */
+.pas { display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); gap: 1.5rem; align-items: start; }
+@media (max-width: 56rem) { .pas { grid-template-columns: 1fr; } }
+.pas__nav { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.pas__points { display: flex; gap: .4rem; }
+.pas__points button { width: 1.9rem; height: 1.9rem; border-radius: 50%; border: 1px solid var(--ehg-perle); background: var(--ehg-blanc); font-family: var(--ehg-font-serif); color: var(--ehg-graphite); cursor: pointer; font-size: .85rem; padding: 0; }
+.pas__points button[aria-current="step"] { background: var(--ehg-or); border-color: var(--ehg-or); color: #fff; }
+.pas__titre { font-family: var(--ehg-font-titre); font-size: 1.3rem; margin: 0 0 .5rem; }
+.pas__titre .num { font-family: var(--ehg-font-serif); color: var(--ehg-or); margin-right: .6rem; }
+
+/* simulation */
+.sim-modes { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.sim-modes button { font-family: var(--ehg-font-titre); font-size: .85rem; letter-spacing: .04em; padding: .6rem 1.1rem; border-radius: 999px; border: 1px solid var(--ehg-perle); background: var(--ehg-blanc); cursor: pointer; }
+.sim-modes button[aria-pressed="true"] { background: var(--ehg-noir); color: #fff; border-color: var(--ehg-noir); }
+.lecture { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+.lecture div { padding: .9rem 1rem; border-radius: var(--ehg-radius-lg); background: var(--ehg-brume); }
+.lecture .lab { display: block; font-family: var(--ehg-font-titre); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-acier); margin-bottom: .25rem; }
+.lecture .val { font-family: var(--ehg-font-titre); font-size: 1.15rem; }
+
+.champ__label { display: block; font-family: var(--ehg-font-titre); font-size: .85rem; font-weight: 500; margin-bottom: .3rem; }
+
+/* exercices */
+.exo-entete { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+.score { font-family: var(--ehg-font-titre); font-size: .9rem; color: var(--ehg-graphite); }
+.score .chiffre { font-size: 1.3rem; }
+.zone-drag { touch-action: none; user-select: none; }
+.ecran-fin { text-align: left; }
+
+/* exemples horlogers */
+.exemple { border: var(--ehg-filet); border-radius: var(--ehg-radius-lg); padding: 1rem 1.1rem; background: var(--ehg-blanc); box-shadow: var(--ehg-ombre); display: flex; flex-direction: column; gap: .5rem; }
+.exemple .picto { display: block; width: 100%; height: auto; }
+.exemple .cat-titre { font-family: var(--ehg-font-titre); font-size: 1.05rem; }
+.exemple .carac { font-family: var(--ehg-font-titre); font-size: .95rem; color: var(--ehg-graphite); }
+.exemple p { margin: 0; font-size: .92em; }
+/* simulation : du modèle A au modèle B */
+.tableau--donnees td, .tableau--donnees th { padding: .45rem .6rem; font-size: .9em; }
+.tableau--donnees .niv { white-space: nowrap; }
+.jauge { height: 8px; background: var(--ehg-perle); border-radius: 999px; overflow: hidden; display: inline-block; width: 6rem; vertical-align: middle; margin-right: .4rem; }
+.jauge > span { display: block; height: 100%; background: var(--ehg-graphite); border-radius: 999px; }
+.jauge.ok > span { background: var(--ehg-ok); } .jauge.ko > span { background: var(--ehg-erreur); }
+.tuiles { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+.tuile { padding: .9rem 1rem; border-radius: var(--ehg-radius-lg); background: var(--ehg-brume); }
+.tuile .lab { display: block; font-family: var(--ehg-font-titre); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-acier); }
+.tuile .val { font-family: var(--ehg-font-serif); font-size: 2rem; color: var(--ehg-or); line-height: 1.1; }
+.tuile.a .val { color: var(--ehg-graphite); }
+.diagramme .num { font-size: 18px; font-weight: 500; fill: #3A3A3A; }
+.diagramme circle { transition: cx .45s ease, cy .45s ease; }
+.diagramme .drag circle { transition: none; } /* le point glissé suit le doigt sans retard */
+.verif li { margin-bottom: .35rem; }
+
+
+/* point que l'on positionne : couleur vive, réservée à cet usage */
+.diagramme .point-libre .point, .diagramme .drag .point { fill: #F26B1D; stroke: #F26B1D; }
+.diagramme .point-libre .halo, .diagramme .drag .halo { fill: #fff; }
+.reglage { display: flex; gap: 1rem; align-items: center; margin: .5rem 0 1rem; }
+.reglage__icone { flex: 0 0 64px; }
+.reglage__corps { flex: 1; min-width: 0; }
+.choix.toggles button[aria-pressed="false"] { opacity: .45; }
+.exemple--sim { display: grid; grid-template-columns: 7rem 1fr; gap: 1rem; align-items: start; margin-top: .5rem; }
+.exemple--sim .exemple__picto { width: 7rem; }
+@media (max-width: 40rem) { .exemple--sim { grid-template-columns: 1fr; } }
+
+/* situations (exercices) et faces (simulation, exercice 2) */
+.situation { font-size: 1.08em; line-height: 1.55; padding: 1rem 1.25rem; border-left: 3px solid var(--ehg-or); background: var(--ehg-brume); border-radius: 0 var(--ehg-radius-lg) var(--ehg-radius-lg) 0; margin: 0 0 1rem; }
+.situation__carac { display: block; font-family: var(--ehg-font-titre); font-size: 1rem; color: var(--ehg-noir); margin-bottom: .35rem; }
+.situation .src { display: block; font-family: var(--ehg-font-titre); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-acier); margin-top: .5rem; }
+.niveau { font-family: var(--ehg-font-titre); font-weight: 500; }
+.faces { display: grid; gap: .5rem; margin: .6rem 0 .25rem; }
+.faces--texte { margin: .25rem 0 0; }
+.face-ligne { display: grid; gap: .15rem; padding: .5rem .75rem; background: var(--ehg-blanc); border-radius: var(--ehg-radius); border: var(--ehg-filet); }
+.face-ligne__titre { font-family: var(--ehg-font-titre); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ehg-acier); }
+.face-btn { display: grid; gap: .15rem; text-align: left; font: inherit; letter-spacing: inherit; color: var(--ehg-noir); padding: .6rem .8rem; border-radius: var(--ehg-radius); border: 1px solid var(--ehg-perle); background: var(--ehg-blanc); cursor: pointer; transition: border-color .12s, background .12s; }
+.face-btn:hover { border-color: var(--ehg-noir); background: var(--ehg-brume); }
+.face-btn.actif { border-color: var(--ehg-or); background: var(--ehg-or-pale); }
+.face-btn__titre { font-family: var(--ehg-font-titre); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ehg-acier); }
+.face-btn__niveau { font-size: .95em; }
+.btn--large { padding: .8rem 1.4rem; font-size: .85rem; }
+.sim-modes .n { font-family: var(--ehg-font-serif); color: var(--ehg-or); margin-right: .15em; }
+.sim-modes button[aria-pressed="true"] .n { color: var(--ehg-or-clair); }
+details.aide { margin-bottom: 1.5rem; }
+details.aide summary { cursor: pointer; font-family: var(--ehg-font-titre); list-style: none; display: flex; align-items: center; gap: .6rem; }
+details.aide summary::before { content: '+'; font-family: var(--ehg-font-serif); color: var(--ehg-or); font-size: 1.3rem; line-height: 1; width: 1rem; }
+details.aide[open] summary::before { content: '−'; }
+details.aide summary::-webkit-details-marker { display: none; }
+.avant-apres { margin-top: 1.5rem; }
+.carte--or-bord { border-color: var(--ehg-or); }
+.avant-apres .tuile { margin-top: .5rem; }
+.tableau tr.modif td { background: var(--ehg-or-pale); }
+
+/* simulation : poignées (curseurs) sur les axes du diagramme */
+.curseurs .bande { fill: transparent; pointer-events: all; cursor: pointer; }
+.poignee { cursor: grab; outline: none; }
+.poignee:active { cursor: grabbing; }
+.poignee__zone { fill: transparent; pointer-events: all; }
+.poignee__disque { fill: var(--ehg-or); stroke: #fff; stroke-width: 3; filter: drop-shadow(0 1px 2px rgba(20,20,20,.35)); }
+.poignee__grip { stroke: #fff; stroke-width: 2; stroke-linecap: round; fill: none; }
+.poignee:hover .poignee__disque { fill: var(--ehg-or-fonce); }
+.poignee:focus-visible .poignee__disque { stroke: var(--ehg-noir); stroke-width: 4; }
+.lecture-val { display: block; font-family: var(--ehg-font-titre); font-size: 1.15rem; }
+
+/* simulation : modèle A → modèle B (révélation, animation, info-bulles) */
+.m-actions { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin: 0 0 1rem; }
+.m-cache .col-b { display: none; }
+#m-table-wrap.m-cache tr.modif td { background: transparent; }
+#m-table-wrap:not(.m-cache) .col-b { animation: apparait .6s ease both; }
+#m-table tr:nth-child(1) .col-b { animation-delay: .15s; } #m-table tr:nth-child(2) .col-b { animation-delay: .3s; } #m-table tr:nth-child(3) .col-b { animation-delay: .45s; }
+#m-table tr:nth-child(4) .col-b { animation-delay: .6s; } #m-table tr:nth-child(5) .col-b { animation-delay: .75s; } #m-table tr:nth-child(6) .col-b { animation-delay: .9s; }
+@keyframes apparait { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
+.m-carte-b { position: relative; }
+.m-carte-b.m-cache #m-svg-b, .m-carte-b.m-cache .tuile { visibility: hidden; }
+.m-voile { display: none; position: absolute; inset: 3rem 1.5rem 1.5rem; border-radius: var(--ehg-radius-lg); background: var(--ehg-brume); border: 1px dashed var(--ehg-or); flex-direction: column; align-items: center; justify-content: center; gap: .35rem; text-align: center; font-family: var(--ehg-font-titre); font-size: 1.05rem; color: var(--ehg-graphite); padding: 1rem; }
+.m-carte-b.m-cache .m-voile { display: flex; }
+.pts-version circle { transition: none; }
+.pt-version { cursor: pointer; outline: none; }
+.pt-version:focus-visible circle:nth-child(3) { stroke: var(--ehg-noir); stroke-width: 4; }
+.pt-version__anneau { transition: opacity .3s; }
+.pt-version__pulse.pulse-on { animation: pulse .9s ease-out forwards; transform-box: fill-box; transform-origin: center; }
+@keyframes pulse { from { transform: scale(1); opacity: 1; } to { transform: scale(2.4); opacity: 0; } }
+.info { display: inline-flex; align-items: center; justify-content: center; width: 1.35rem; height: 1.35rem; border-radius: 50%; border: 1px solid var(--ehg-or); background: var(--ehg-blanc); color: var(--ehg-or); font-family: var(--ehg-font-serif); font-size: .8rem; line-height: 1; cursor: pointer; vertical-align: middle; padding: 0; }
+.info:hover, .info:focus-visible { background: var(--ehg-or); color: #fff; }
+.bulle { position: absolute; z-index: 60; max-width: 22rem; background: var(--ehg-noir); color: var(--ehg-blanc); padding: .75rem .9rem; border-radius: 6px; font-size: .85rem; line-height: 1.45; box-shadow: 0 6px 18px rgba(20,20,20,.3); letter-spacing: 0; }
+.bulle::after { content: ''; position: absolute; left: 50%; bottom: -7px; width: 14px; height: 14px; background: var(--ehg-noir); transform: translateX(-50%) rotate(45deg); }
+.bulle--dessous::after { bottom: auto; top: -7px; }
+.bulle__item { display: flex; gap: .6rem; align-items: flex-start; }
+.bulle__item + .bulle__item { margin-top: .55rem; padding-top: .55rem; border-top: 1px solid rgba(255,255,255,.2); }
+.bulle__num { font-family: var(--ehg-font-serif); color: var(--ehg-or-clair); font-size: 1.25rem; line-height: 1.1; flex: 0 0 1.2rem; }
+.bulle__chg { color: var(--ehg-or-clair); }
+.bulle .cat-B { color: #E8A6A6; } .bulle .cat-P { color: #A6D3BA; } .bulle .cat-A { color: #E6C766; } .bulle .cat-I { color: #D5D5D5; } .bulle .cat-R { color: #FFFFFF; }
+
+/* Responsive : petits écrans (smartphone) */
+@media (max-width: 48rem) {
+  .page { padding: 0 1rem; }
+  /* onglets collants : toujours accessibles en faisant défiler */
+  .onglets { position: sticky; top: 0; z-index: 20; background: var(--ehg-blanc); margin: 0 -1rem 1.5rem; padding: 0 1rem; box-shadow: 0 1px 0 var(--ehg-perle); }
+  .onglets button { padding: .9rem 0; }
+  .defile { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -1rem; padding: 0 1rem; }
+  .defile .tableau { margin-bottom: .5rem; }
+  .defile .tableau--large { min-width: 40rem; }
+  .defile--large::before { content: 'Tableau large : faire défiler \2192'; display: block; font-family: var(--ehg-font-titre); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ehg-acier); margin-bottom: .35rem; }
+  .tableau th, .tableau td { padding: .45rem .5rem; font-size: .9em; }
+  .defile + .note { margin-top: .25rem; }
+  .lecture, .tuiles { grid-template-columns: 1fr 1fr; gap: .6rem; }
+  .lecture div { padding: .6rem .7rem; } .lecture .val { font-size: 1rem; }
+  .titre { padding: 1.25rem 0 .5rem; }
+  h1 { font-size: 1.6rem; } h2 { font-size: 1.35rem; margin-top: 1.75rem; } h3 { font-size: 1.15rem; }
+  .carte { padding: 1rem; }
+  .exemple--sim { grid-template-columns: 1fr; }
+  .exemple--sim .exemple__picto { width: 6rem; }
+  .reglage { gap: .6rem; } .reglage__icone { flex-basis: 52px; } .reglage__icone svg { width: 52px; height: 52px; }
+  /* cibles tactiles : au moins 44 px de haut, boutons de mode et de validation pleine largeur */
+  .sim-modes { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .sim-modes button { font-size: .8rem; padding: .7rem .6rem; min-height: 44px; }
+  .choix button { font-size: .85rem; padding: .6rem .8rem; min-height: 44px; }
+  .choix.cats { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .choix.cats button { text-align: left; }
+  .choix.cats button:last-child { grid-column: 1 / -1; }
+  .btn { padding: .6rem .9rem; min-height: 40px; }
+  .btn--large { width: 100%; justify-content: center; min-height: 48px; }
+  .btn--petit { min-height: 40px; flex: 1 1 auto; justify-content: center; }
+  .pas__nav { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .pas__points { grid-column: 1 / -1; justify-content: center; flex-wrap: wrap; order: -1; }
+  .pas__points button { width: 2.2rem; height: 2.2rem; }
+  .pas__nav .btn { justify-content: center; min-height: 44px; }
+  .situation { font-size: 1.02em; padding: .8rem 1rem; }
+  .face-ligne, .face-btn { padding: .55rem .65rem; }
+  .encadre { padding: .8rem 1rem; gap: .75rem; }
+  .exo-entete { align-items: center; }
+  .diagramme .lib { font-size: 27px; } .diagramme .lib-petit { font-size: 25px; } .diagramme .etiquette { font-size: 28px; } .diagramme .zone-lib { font-size: 25px; }
+  .pied { flex-direction: column; gap: .35rem; }
+}
+@media (max-width: 30rem) {
+  .onglets { gap: 1rem; } .onglets button { font-size: .8rem; letter-spacing: .05em; }
+  .entete__droite .btn { font-size: .62rem; padding: .4rem .5rem; }
+  .diagramme .titre-axe { display: none; }
+}
+/* smartphone en portrait : le diagramme reste visible pendant qu'on manipule les commandes situées dessous */
+@media (max-width: 48rem) and (orientation: portrait) {
+  .diag-colle { position: sticky; top: var(--onglets-h, 3rem); z-index: 10; }
+  .diag-colle .carte, .carte.diag-colle { padding: .4rem; box-shadow: 0 6px 14px rgba(20,20,20,.12); }
+  .grille--diag { gap: 1rem; }
+}
+
+@media print {
+  @page { size: A4; margin: 18mm 16mm; }
+  body { font-size: 10.5pt; }
+  .onglets, .btn, .entete__droite, .sim-modes { display: none !important; }
+  section[role="tabpanel"] { display: block !important; }
+  .carte { box-shadow: none; break-inside: avoid; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<header class="page entete">
+  <a class="logotype" href="#theorie">École d'Horlo<span class="g">g</span>erie Genève</a>
+  <div class="entete__droite">
+    <span>CPH_HOP_01 · Voix du client</span>
+    <button class="btn btn--secondaire btn--petit" id="btn-confort" type="button" aria-pressed="false" title="Texte plus grand et plus aéré (dyslexie, dysorthographie)">Aa · Confort de lecture</button>
+  </div>
+</header>
+
+<main class="page">
+  <div class="titre">
+    <span class="surtitre">Module CPH_HOP_01 · Voix du client · Application pédagogique</span>
+    <h1>Le diagramme de Kano</h1>
+    <p class="lead texte">Comprendre comment une caractéristique d'un produit ou d'un service agit sur la satisfaction du client, puis s'entraîner à placer des situations sur le diagramme et à reconnaître la catégorie d'une caractéristique.</p>
+  </div>
+
+  <nav class="onglets" role="tablist" aria-label="Sections de l'application">
+    <button role="tab" id="tab-theorie" aria-controls="panel-theorie" aria-selected="true" data-tab="theorie"><span class="n">1</span>Théorie</button>
+    <button role="tab" id="tab-simulation" aria-controls="panel-simulation" aria-selected="false" data-tab="simulation"><span class="n">2</span>Simulation</button>
+    <button role="tab" id="tab-exercices" aria-controls="panel-exercices" aria-selected="false" data-tab="exercices"><span class="n">3</span>Exercices</button>
+  </nav>
+
+  <!-- ================================================================ -->
+  <!-- 1. THÉORIE                                                        -->
+  <!-- ================================================================ -->
+  <section id="panel-theorie" role="tabpanel" aria-labelledby="tab-theorie">
+
+    <h2 style="margin-top:0">1 · La voix du client</h2>
+    <div class="texte">
+      <p>La <strong>voix du client</strong> désigne tout ce que les clients expriment — spontanément ou en réponse à une question — sur ce qu'ils attendent d'un produit ou d'un service. En horlogerie, on l'entend en boutique, dans les avis en ligne, dans les réclamations, au service après-vente, dans les enquêtes de satisfaction. Elle arrive brute : des phrases, des émotions, des chiffres parfois. Le travail consiste à la <strong>traduire</strong> en éléments utiles à l'entreprise.</p>
+    </div>
+    <div class="grille grille--3">
+      <div class="carte carte--brume">
+        <h4><span class="chiffre">1</span> &nbsp;Besoin</h4>
+        <p>« Nécessité ou désir éprouvé par un utilisateur. » Il peut être exprimé ou implicite, latent ou potentiel. <span class="note">Exemple : savoir l'heure pendant une activité aquatique.</span></p>
+        <p class="note" style="margin-bottom:0">Source : NF X 50-150, <em>Analyse de la valeur, analyse fonctionnelle — Vocabulaire</em> (AFNOR, 1990 ; annulée, reprise par NF EN 1325).</p>
+      </div>
+      <div class="carte carte--brume">
+        <h4><span class="chiffre">2</span> &nbsp;Attente</h4>
+        <p>Ce que le client s'attend à obtenir pour satisfaire son besoin, à partir de son expérience et de ce qu'il a vu ailleurs ; elle peut être exprimée ou rester implicite. <span class="note">Exemple : une montre présentée comme adaptée à la natation supportera cet usage sans dommage.</span></p>
+        <p class="note" style="margin-bottom:0">Source : définition de travail du cours, sans définition normative. ISO 9000:2015 (§ 3.9.2, note 1) décrit des attentes pouvant n'être ni formulées ni connues du client avant la livraison.</p>
+      </div>
+      <div class="carte carte--brume">
+        <h4><span class="chiffre">3</span> &nbsp;Exigence</h4>
+        <p>« Besoin ou attente formulé, généralement implicite ou obligatoire. » C'est ce que le produit ou le service doit respecter — à traduire ensuite en critères vérifiables. <span class="note">Exemple : la montre conserve son étanchéité dans les conditions d'utilisation prévues.</span></p>
+        <p class="note" style="margin-bottom:0">Source : ISO 9000:2015, <em>Systèmes de management de la qualité — Principes essentiels et vocabulaire</em>, § 3.6.4.</p>
+      </div>
+    </div>
+
+    <h2>2 · À quoi sert le diagramme de Kano ?</h2>
+    <div class="texte">
+      <p>Le modèle a été proposé en 1984 par Noriaki Kano et ses collègues. Son idée de départ : regarder la qualité en <strong>deux dimensions</strong> — ce que le produit fait réellement, et ce que le client ressent — au lieu de supposer que l'un suit toujours l'autre. Car la satisfaction et l'insatisfaction ne sont pas les deux bouts d'une même règle : une caractéristique peut provoquer une forte insatisfaction quand elle manque sans provoquer la moindre satisfaction quand elle est là ; une autre peut enchanter quand elle est là sans que personne ne la réclame quand elle manque.</p>
+      <p><strong>Son rôle</strong> : trier les caractéristiques d'un produit ou d'un service selon la manière dont elles <strong>agissent sur la satisfaction</strong> du client. Le diagramme ne dit pas si une montre est bonne ou mauvaise ; il dit ce qu'une caractéristique rapporte quand elle est bien réalisée et ce qu'elle coûte quand elle manque.</p>
+    </div>
+    <table class="tableau tableau--zebre">
+      <thead><tr><th style="width:34%">Situation</th><th>Ce que le diagramme apporte</th></tr></thead>
+      <tbody>
+        <tr><td class="cat">Concevoir ou faire évoluer un produit</td><td>Décider ce qui doit être garanti (basique), ce qui doit être performant (proportionnel) et ce qui peut différencier (attractif).</td></tr>
+        <tr><td class="cat">Lire la voix du client</td><td>Comprendre pourquoi un client mécontent et un client enchanté ne parlent pas de la même chose, et classer ce que l'on entend : avis, enquêtes, réclamations, remarques en boutique.</td></tr>
+        <tr><td class="cat">Produire et contrôler</td><td>Repérer les caractéristiques qui exigent un contrôle systématique : celles dont l'absence fait réclamer.</td></tr>
+        <tr><td class="cat">Vendre et assurer le service après-vente</td><td>Ne pas argumenter sur ce que le client considère comme dû ; repérer ce qui crée l'attachement à la marque.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>3 · Lire le diagramme, élément par élément</h2>
+    <p class="texte">Chaque élément du diagramme est expliqué séparément : les deux axes, les zones, le point qui représente un client, puis chacune des cinq courbes. Choisissez l'élément à afficher.</p>
+    <div class="carte">
+      <div class="pas__nav">
+        <button class="btn btn--secondaire btn--petit" id="pas-prec" type="button">◀ Précédent</button>
+        <div class="pas__points" id="pas-points" aria-label="Étapes"></div>
+        <button class="btn btn--petit" id="pas-suiv" type="button">Suivant ▶</button>
+      </div>
+      <div class="pas">
+        <div id="pas-svg"></div>
+        <div id="pas-texte"></div>
+      </div>
+    </div>
+
+    <h2>4 · Les cinq catégories en un tableau</h2>
+    <table class="tableau">
+      <thead><tr><th>Catégorie</th><th>Si la fonction est absente</th><th>Si la fonction est réalisée</th><th>Forme de la courbe</th><th>Comment la reconnaître</th></tr></thead>
+      <tbody id="table-cats"></tbody>
+    </table>
+    <p class="note">Noms d'origine (Kano et al., 1984 ; Sauerwein et al., 1996) : must-be, one-dimensional, attractive, indifferent, reverse. En français, on rencontre aussi : obligatoire ou indispensable pour basique ; de performance ou linéaire pour proportionnel ; attrayant ou d'enthousiasme pour attractif. La couleur n'est qu'une aide : le mot et la forme de la courbe portent toujours le sens.</p>
+
+    <h2>5 · Un point ne suffit pas : les deux questions de Kano</h2>
+    <div class="grille grille--2">
+      <div id="svg-ambigu-a"></div>
+      <div id="svg-ambigu-b"></div>
+    </div>
+    <div class="texte">
+      <p>Un client neutre devant une fonction réalisée est sur l'axe, à droite. Or <strong>deux courbes passent par là</strong> : la basique, plate près de l'axe quand la fonction est là, et l'indifférente. Le point ne permet pas de choisir. Pour trancher, il faut savoir ce que dirait ce client <strong>si la fonction était absente</strong> : s'il réclamait, c'est une basique ; s'il ne remarquait rien, une indifférente. Même chose à gauche : un client neutre devant une fonction absente est sur la courbe attractive… ou sur l'indifférente.</p>
+      <p>C'est pourquoi le questionnaire de Kano pose toujours <strong>deux questions</strong> pour chaque caractéristique : « Que ressentiriez-vous si elle était présente ? » (question <strong>fonctionnelle</strong>) et « … si elle était absente ? » (question <strong>dysfonctionnelle</strong>). La catégorie se lit au croisement des deux réponses (Kano et al., 1984 ; Sauerwein et al., 1996). Kano interroge ainsi de nombreux clients et retient, pour chaque caractéristique, la catégorie la plus fréquente.</p>
+    </div>
+    <h4>Le croisement des deux faces (version simplifiée)</h4>
+    <table class="tableau tableau--zebre">
+      <thead><tr><th>Si la fonction est réalisée, le client est…</th><th>Si elle est absente, le client est…</th><th>Catégorie</th></tr></thead>
+      <tbody>
+        <tr><td>satisfait, voire enchanté</td><td>insatisfait, d'autant plus que le niveau est bas</td><td class="cat cat-P">Proportionnel</td></tr>
+        <tr><td>neutre : « c'est normal »</td><td>insatisfait : il réclame</td><td class="cat cat-B">Basique / obligatoire</td></tr>
+        <tr><td>satisfait, surpris</td><td>neutre : il ne l'attendait pas</td><td class="cat cat-A">Attractif</td></tr>
+        <tr><td>neutre</td><td>neutre</td><td class="cat cat-I">Indifférent</td></tr>
+        <tr><td>insatisfait, agacé</td><td>satisfait</td><td class="cat cat-R">Inverse</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Simplification pédagogique de la table d'évaluation de Kano (Sauerwein et al., 1996), qui prévoit cinq réponses possibles à chaque question et repère aussi les réponses contradictoires.</p>
+
+    <div class="carte carte--brume texte" style="margin-top:2rem">
+      <h3>Ce qu'il faut retenir</h3>
+      <ul class="liste" style="margin-bottom:0">
+        <li><strong>Deux axes.</strong> Horizontal : le degré de réalisation d'une fonction. Vertical : la satisfaction du client.</li>
+        <li><strong>Un point = une observation.</strong> Ce que vit ce client, maintenant.</li>
+        <li><strong>Une courbe = une catégorie.</strong> Comment la satisfaction réagit quand la réalisation change.</li>
+        <li><strong>Un point ne suffit jamais.</strong> Il faut l'autre face : ce que ressentirait le client si c'était l'inverse.</li>
+        <li><span class="cat-B"><strong>Basique</strong></span> : réclame quand ça manque, rien quand c'est là. <span class="cat-P"><strong>Proportionnel</strong></span> : plus, mieux. <span class="cat-A"><strong>Attractif</strong></span> : rien quand ça manque, enthousiasme quand c'est là. <span class="cat-I"><strong>Indifférent</strong></span> : rien. <span class="cat-R"><strong>Inverse</strong></span> : préfère l'absence.</li>
+        <li><strong>Pour l'entreprise</strong> : garantir tout le basique, être compétitif sur le proportionnel, se distinguer par l'attractif (Sauerwein et al., 1996).</li>
+      </ul>
+    </div>
+
+    <h3>Sources</h3>
+    <ul class="liste note">
+      <li>Kano N., Seraku N., Takahashi F., Tsuji S. (1984). Attractive Quality and Must-Be Quality. Journal of the Japanese Society for Quality Control (Hinshitsu), 14(2), 147-156 (pagination souvent citée : 39-48). doi.org/10.20684/quality.14.2_147</li>
+      <li>Berger C. et al. (1993). Kano's methods for understanding customer-defined quality. Center for Quality Management Journal, 2(4), 3-36.</li>
+      <li>Sauerwein E., Bailom F., Matzler K., Hinterhuber H. H. (1996). The Kano Model: How to delight your customers. IX International Working Seminar on Production Economics, Innsbruck/Igls, Preprints vol. I, 313-327.</li>
+      <li>Kano N. (2001). Life cycle and creation of attractive quality. Proceedings of the 4th International QMOD Conference, Linköping, 18-36.</li>
+      <li>ISO 9000:2015. Systèmes de management de la qualité — Principes essentiels et vocabulaire, § 3.6.4 (exigence) et § 3.9.2 (satisfaction du client).</li>
+      <li>NF X 50-150 (1990). Analyse de la valeur, analyse fonctionnelle — Vocabulaire. AFNOR. Norme annulée, remplacée par NF EN 1325-1 (1996) puis NF EN 1325 (2014), Management par la valeur — Vocabulaire. Définition du besoin citée d'après des sources secondaires.</li>
+      <li>La définition de l'attente est une définition de travail propre au cours : aucune définition normative n'a été trouvée pour ce terme.</li>
+      <li>Toutes les situations et tous les clients cités dans cette application sont fictifs, rédigés pour la formation. Les courbes sont des représentations qualitatives : elles illustrent une tendance, pas une mesure.</li>
+    </ul>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- 2. SIMULATION                                                     -->
+  <!-- ================================================================ -->
+  <section id="panel-simulation" role="tabpanel" aria-labelledby="tab-simulation" hidden>
+    <h2 style="margin-top:0">Simulation</h2>
+    <p class="texte">Deux manières de manipuler le diagramme : placer un point — à partir d'un exemple horloger ou librement — et observer sa position par rapport aux courbes affichées ; puis comparer deux versions d'un même modèle de montre.</p>
+    <div class="sim-modes" role="group" aria-label="Mode de simulation">
+      <button type="button" data-mode="courbes" aria-pressed="true">Explorer le diagramme</button>
+      <button type="button" data-mode="modele" aria-pressed="false">Nouvelle version d'un modèle de montre</button>
+    </div>
+
+    <!-- Mode A : explorer le diagramme -->
+    <div id="sim-courbes" class="grille grille--diag">
+      <div class="diag-colle">
+        <div class="carte carte--sim">
+          <div id="sim-svg" class="zone-drag" aria-label="Diagramme de Kano avec deux poignées : degré de réalisation sur l'axe horizontal, satisfaction sur l'axe vertical"></div>
+        </div>
+      </div>
+      <div>
+        <h4 style="margin-top:0">1 · Courbes affichées</h4>
+        <div class="choix cats toggles" id="sim-toggles" role="group" aria-label="Courbes affichées"></div>
+
+        <h4>2 · Un exemple horloger, ou un point libre</h4>
+        <div class="choix" id="sim-exemples" role="group" aria-label="Exemple"></div>
+        <div id="sim-exemple-detail"></div>
+
+        <h4>3 · Lecture du point</h4>
+        <p class="note" style="margin:0 0 .5rem">Faites glisser les <strong>poignées dorées</strong> sur les deux axes du diagramme (ou touchez un axe). Au clavier : flèches, Maj + flèches pour aller plus vite.</p>
+        <div class="reglage">
+          <div class="reglage__icone" id="ico-deg"></div>
+          <div class="reglage__corps">
+            <span class="champ__label">Degré de réalisation de la fonction</span>
+            <span class="lecture-val" id="sim-degre">—</span>
+          </div>
+        </div>
+        <div class="reglage">
+          <div class="reglage__icone" id="ico-sat"></div>
+          <div class="reglage__corps">
+            <span class="champ__label">Satisfaction du client</span>
+            <span class="lecture-val" id="sim-sat">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode B : nouvelle version d'un modèle de montre -->
+    <div id="sim-modele" hidden>
+      <div class="encadre encadre--or">
+        <div class="encadre__icone">→</div>
+        <div>
+          <p><strong>Mise en situation (fictive).</strong> Une manufacture fait évoluer un modèle de montre. Une enquête auprès de 120 clients du <strong>modèle A</strong> a classé six caractéristiques dans une catégorie de Kano et mesuré leur degré de réalisation. Le <strong>modèle B</strong> applique trois décisions : corriger les basiques non atteintes, améliorer une fonction proportionnelle de 25 %, ajouter un nouvel attractif.</p>
+          <p style="margin-bottom:0">Observez d'abord le modèle A. Révélez ensuite le modèle B : chaque caractéristique modifiée se déplace <em>sur sa courbe</em>, et l'effet sur la satisfaction dépend de la courbe autant que du déplacement. Survolez ou touchez un point cerclé pour identifier l'amélioration.</p>
+        </div>
+      </div>
+      <div class="m-actions">
+        <button type="button" class="btn btn--or" id="m-toggle" aria-pressed="false" aria-controls="m-svg-b m-table">Révéler le modèle B ▶</button>
+        <button type="button" class="btn btn--secondaire" id="m-rejouer" hidden>Rejouer l'animation</button>
+      </div>
+      <table class="tableau tableau--donnees m-cache" id="m-table-wrap">
+        <thead><tr><th>N°</th><th>Caractéristique</th><th>Catégorie</th><th>Modèle A</th><th class="col-b">Modèle B</th><th class="col-b">Ce qui change</th></tr></thead>
+        <tbody id="m-table"></tbody>
+      </table>
+      <p class="note">Degré de réalisation : pour une basique, part des montres livrées conformes ; pour une proportionnelle, niveau atteint par rapport au meilleur du marché ; pour un attractif, présence sur le modèle.</p>
+      <div class="grille grille--2 avant-apres">
+        <div class="carte">
+          <span class="surtitre">Avant · modèle A</span>
+          <div id="m-svg-a"></div>
+          <div class="tuile a"><span class="lab">Indice de satisfaction</span><span class="val" id="m-idx-a">—</span></div>
+        </div>
+        <div class="carte carte--or-bord m-carte-b m-cache" id="m-carte-b">
+          <span class="surtitre">Après · modèle B</span>
+          <div id="m-svg-b"></div>
+          <div class="m-voile" id="m-voile"><span>Modèle B masqué</span><span class="note">Révélez-le avec le bouton ci-dessus.</span></div>
+          <div class="tuile"><span class="lab">Indice de satisfaction</span><span class="val" id="m-idx-b">—</span> <span class="delta" id="m-idx-delta"></span></div>
+        </div>
+      </div>
+      <p class="note">Indice de satisfaction : indicateur pédagogique — position moyenne des six caractéristiques sur l'axe de satisfaction, ramenée de 0 à 100. Il illustre l'effet des décisions ; ce n'est pas une mesure du modèle de Kano. Les numéros renvoient au tableau ; sur le modèle B, les caractéristiques modifiées sont cerclées d'or et portent une info-bulle.</p>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- 3. EXERCICES                                                      -->
+  <!-- ================================================================ -->
+  <section id="panel-exercices" role="tabpanel" aria-labelledby="tab-exercices" hidden>
+    <h2 style="margin-top:0">Exercices</h2>
+    <p class="texte">Deux exercices de dix questions, corrigés question par question. Toutes les situations sont fictives ; chacune indique explicitement ce que fait la montre ou le service et ce que ressent le client.</p>
+    <div class="sim-modes" role="group" aria-label="Choix de l'exercice">
+      <button type="button" data-exo="placer" aria-pressed="true"><span class="n">1</span> Placer le point</button>
+      <button type="button" data-exo="categorie" aria-pressed="false"><span class="n">2</span> Identifier la catégorie</button>
+    </div>
+
+    <!-- Exercice 1 : placer le point -->
+    <div id="exo-placer">
+      <div class="exo-entete">
+        <h3 style="margin-top:0">Placer le point</h3>
+        <div class="score" id="e1-score"></div>
+      </div>
+      <p class="texte">Chaque situation donne deux informations : le <strong>degré de réalisation</strong> de la fonction et le <strong>niveau de satisfaction</strong> du client. Glissez le point à l'endroit correspondant. Deux points par question : un pour l'abscisse, un pour l'ordonnée. L'indice est gratuit ; si vous affichez la solution, la question n'est pas comptée.</p>
+      <details class="carte carte--brume aide">
+        <summary>Aide : les niveaux de chaque axe</summary>
+        <div class="grille grille--2" style="margin-top:1rem">
+          <div>
+            <h4 style="margin-top:0">Axe horizontal · degré de réalisation</h4>
+            <table class="tableau" style="font-size:.9em"><tbody id="table-deg"></tbody></table>
+          </div>
+          <div>
+            <h4 style="margin-top:0">Axe vertical · satisfaction du client</h4>
+            <table class="tableau" style="font-size:.9em"><tbody id="table-sat"></tbody></table>
+          </div>
+        </div>
+      </details>
+      <div class="progress"><span id="e1-progress" style="width:0"></span></div>
+      <div id="e1-corps"></div>
+    </div>
+
+    <!-- Exercice 2 : identifier la catégorie -->
+    <div id="exo-categorie" hidden>
+      <div class="exo-entete">
+        <h3 style="margin-top:0">Identifier la catégorie</h3>
+        <div class="score" id="e2-score"></div>
+      </div>
+      <p class="texte">Chaque situation décrit les <strong>deux faces</strong> d'une caractéristique : ce que ressent le client quand elle est réalisée, et ce qu'il ressent quand elle est absente ou peu réalisée. Les deux points sont placés sur le diagramme ; à vous de reconnaître la courbe qui passe par les deux, donc la catégorie. Un point par question.</p>
+      <details class="carte carte--brume aide">
+        <summary>Aide : le croisement des deux faces</summary>
+        <table class="tableau tableau--zebre" style="margin-top:1rem;font-size:.9em">
+          <thead><tr><th>Fonction réalisée : le client est…</th><th>Fonction absente : le client est…</th><th>Catégorie</th></tr></thead>
+          <tbody id="table-croisement"></tbody>
+        </table>
+      </details>
+      <div class="progress"><span id="e2-progress" style="width:0"></span></div>
+      <div id="e2-corps"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="page pied">
+  <span>École d'Horlogerie de Genève · CPH_HOP_01 · Voix du client · N. Derobert</span>
+  <span>Document élaboré avec l'assistance d'outils d'intelligence artificielle.</span>
+</footer>
+
+<script>
+(function () {
+'use strict';
+/* ======================================================================
+   0. Données de référence
+   ====================================================================== */
+const CAT = {
+  B: { nom: 'Basique', syn: 'obligatoire', col: '#9B2C2C', pale: '#F5E4E4', abs: 'Forte insatisfaction : le client réclame.', pres: 'Rien de particulier : « c’est normal ». Au mieux, neutre.', forme: 'Plonge à gauche, plate à droite.', signes: 'Le client la tient pour acquise : il la considère comme un minimum dû, une évidence, et n’en parle que pour réclamer.', entreprise: 'À garantir à 100 % : c’est le domaine du contrôle, pas de l’argument de vente. Une basique manquante coûte cher, une basique réussie ne rapporte rien de visible.' },
+  P: { nom: 'Proportionnel', syn: '', col: '#2E6B4B', pale: '#E4EFE8', abs: 'Insatisfaction, d’autant plus forte que le niveau est bas.', pres: 'Satisfaction, d’autant plus grande que le niveau est haut.', forme: 'Droite qui monte.', signes: 'Le client raisonne en niveaux : il compare, chiffre, en veut un peu plus ou regrette un peu moins.', entreprise: 'Le terrain des spécifications chiffrées et de la comparaison avec la concurrence : chaque cran gagné se voit, chaque cran perdu aussi.' },
+  A: { nom: 'Attractif', syn: '', col: '#AA8802', pale: '#F4EDD6', abs: 'Rien de particulier : le client ne l’attendait pas.', pres: 'Plaisir, surprise, enthousiasme.', forme: 'Plate à gauche, s’envole à droite.', signes: 'Le client ne l’avait ni demandée ni imaginée : il la découvre, s’en étonne, en parle autour de lui.', entreprise: 'La différenciation — à condition que les basiques soient assurées. Avec le temps, l’attractif devient souvent proportionnel puis basique : il faut le renouveler (Kano, 2001).' },
+  I: { nom: 'Indifférent', syn: '', col: '#3A3A3A', pale: '#F6F6F6', abs: 'Rien.', pres: 'Rien.', forme: 'Confondue avec l’axe.', signes: 'Le client ne la remarque pas, qu’elle soit là ou non.', entreprise: 'Un coût sans effet sur la satisfaction de ce client. À reconsidérer — ou à réserver à un autre segment de clientèle.' },
+  R: { nom: 'Inverse', syn: '', col: '#141414', pale: '#EAEAEA', abs: 'Satisfaction : le client préfère l’absence.', pres: 'Insatisfaction.', forme: 'Droite qui descend.', signes: 'Le client la refuse ou la subit : il préférerait une version sans.', entreprise: 'Ce client préfère l’absence : proposer une variante sans cette caractéristique, ou accepter de ne pas viser ce segment.' },
+};
+const ORDRE = ['B', 'P', 'A', 'I', 'R'];
+const nomCat = k => CAT[k].nom + (CAT[k].syn ? ' / ' + CAT[k].syn : '');
+const SAT = [
+  { k: 'E', nom: 'Enchanté', y: 0.8, desc: 'il est surpris, ravi ; il en parle autour de lui' },
+  { k: 'S', nom: 'Satisfait', y: 0.45, desc: 'il est content' },
+  { k: 'N', nom: 'Neutre', y: 0, desc: 'ni content ni mécontent' },
+  { k: 'D', nom: 'Insatisfait', y: -0.45, desc: 'il est déçu, il regrette' },
+  { k: 'T', nom: 'Très insatisfait', y: -0.85, desc: 'il proteste, il réclame' },
+];
+const DEG = [
+  { k: 'abs', nom: 'Absente ou défaillante', x: -0.8, desc: 'la fonction n’est pas fournie, ou ne remplit pas son office' },
+  { k: 'part', nom: 'Partiellement réalisée', x: 0, desc: 'présente, mais à un niveau moyen' },
+  { k: 'plein', nom: 'Pleinement réalisée', x: 0.8, desc: 'présente et bien exécutée' },
+  { k: 'dir', nom: 'Souhait, sans niveau précis', x: 0, desc: 'le client indique une direction (« plus… mieux »), pas un niveau' },
+];
+const satParCle = k => SAT.find(s => s.k === k);
+const degParCle = k => DEG.find(d => d.k === k);
+function satDepuisY(y) { return y > 0.62 ? 'E' : y > 0.2 ? 'S' : y > -0.2 ? 'N' : y > -0.62 ? 'D' : 'T'; }
+function degDepuisX(x) { return x < -0.33 ? 'abs' : x > 0.33 ? 'plein' : 'part'; }
+
+/* ======================================================================
+   1. Géométrie du diagramme (identique aux fiches imprimées)
+   ====================================================================== */
+const W = 1000, H = 660, CX = 500, CY = 330, RX = 430, RY = 280;
+const px = x => +(CX + x * RX).toFixed(1);
+const py = y => +(CY - y * RY).toFixed(1);
+const CURVES = {
+  I: { kind: 'line', a: [-0.93, 0], b: [0.93, 0], dash: '14 11', w: 5 },
+  R: { kind: 'line', a: [-0.93, 0.62], b: [0.93, -0.62], w: 5 },
+  B: { kind: 'bez', p: [[-0.93, -0.93], [-0.55, -0.35], [-0.1, 0.02], [0.93, 0.08]], w: 5.5 },
+  P: { kind: 'line', a: [-0.88, -0.88], b: [0.88, 0.88], w: 5.5 },
+  A: { kind: 'bez', p: [[-0.93, -0.06], [0.15, -0.02], [0.6, 0.15], [0.93, 0.92]], w: 5.5 },
+};
+function bez(P, t) { const u = 1 - t; return [0, 1].map(k => u * u * u * P[0][k] + 3 * u * u * t * P[1][k] + 3 * u * t * t * P[2][k] + t * t * t * P[3][k]); }
+function yOn(cat, x) {
+  const c = CURVES[cat];
+  x = Math.max(-0.93, Math.min(0.93, x));
+  if (c.kind === 'line') { const t = (x - c.a[0]) / (c.b[0] - c.a[0]); return c.a[1] + t * (c.b[1] - c.a[1]); }
+  let lo = 0, hi = 1;
+  for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (bez(c.p, m)[0] < x) lo = m; else hi = m; }
+  return bez(c.p, (lo + hi) / 2)[1];
+}
+function pathD(cat) {
+  const c = CURVES[cat];
+  return c.kind === 'line'
+    ? `M ${px(c.a[0])},${py(c.a[1])} L ${px(c.b[0])},${py(c.b[1])}`
+    : `M ${px(c.p[0][0])},${py(c.p[0][1])} C ${px(c.p[1][0])},${py(c.p[1][1])} ${px(c.p[2][0])},${py(c.p[2][1])} ${px(c.p[3][0])},${py(c.p[3][1])}`;
+}
+const LABEL_POS = {
+  I: { x: -0.62, y: 0.09, anchor: 'middle', text: 'Indifférent' },
+  R: { x: 0.93, y: -0.78, anchor: 'end', text: 'Inverse' },
+  B: { x: -0.58, y: -0.26, anchor: 'middle', text: 'Basique / obligatoire' },
+  P: { x: 0.52, y: 0.52, anchor: 'middle', text: 'Proportionnel', rotate: -33, dy: -14 },
+  A: { x: 0.86, y: 0.9, anchor: 'end', text: 'Attractif' },
+};
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+let idSeq = 0;
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) if (attrs[k] !== undefined && attrs[k] !== null) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function txt(parent, x, y, s, cls, attrs = {}) {
+  const t = el('text', Object.assign({ x, y, class: cls }, attrs), parent);
+  if (Array.isArray(s)) s.forEach((l, i) => { const ts = el('tspan', { x, dy: i ? 27 : 0 }, t); ts.textContent = l; });
+  else t.textContent = s;
+  return t;
+}
+
+
+/* Pictogrammes du diagramme : smileys (satisfaction) et engrenage (fonction) */
+function gearPath(cx, cy, r, teeth = 8) {
+  const pts = [];
+  for (let i = 0; i < teeth * 2; i++) {
+    const a = (Math.PI * 2 * i) / (teeth * 2) - Math.PI / 2;
+    const rr = i % 2 === 0 ? r : r * 0.72;
+    const a2 = a + (i % 2 === 0 ? -0.12 : 0.12);
+    pts.push((i ? 'L' : 'M') + (cx + rr * Math.cos(a2)).toFixed(1) + ',' + (cy + rr * Math.sin(a2)).toFixed(1));
+    const a3 = a + (i % 2 === 0 ? 0.12 : -0.12);
+    pts.push('L' + (cx + rr * Math.cos(a3)).toFixed(1) + ',' + (cy + rr * Math.sin(a3)).toFixed(1));
+  }
+  return pts.join(' ') + ' Z';
+}
+function gear(parent, cx, cy, r, o = {}) {
+  const g = el('g', { class: 'picto' }, parent);
+  el('path', { d: gearPath(cx, cy, r), fill: o.fill || '#F4EDD6', stroke: o.stroke || '#3A3A3A', 'stroke-width': 2.2, 'stroke-linejoin': 'round' }, g);
+  el('circle', { cx, cy, r: r * 0.32, fill: '#fff', stroke: o.stroke || '#3A3A3A', 'stroke-width': 2.2 }, g);
+  if (o.mark === 'x') { el('path', { d: `M${cx + r * 0.95},${cy - r * 0.95} l${r * 0.7},${r * 0.7} m0,-${r * 0.7} l-${r * 0.7},${r * 0.7}`, stroke: '#9B2C2C', 'stroke-width': 3, 'stroke-linecap': 'round', fill: 'none' }, g); }
+  if (o.mark === 'v') { el('path', { d: `M${cx + r * 0.9},${cy - r * 0.45} l${r * 0.3},${r * 0.35} l${r * 0.55},${r * 0.7 * -1}`, stroke: '#2E6B4B', 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none' }, g); }
+  return g;
+}
+function smiley(parent, cx, cy, r, content) {
+  const g = el('g', { class: 'picto' }, parent);
+  el('circle', { cx, cy, r, fill: '#F4EDD6', stroke: '#3A3A3A', 'stroke-width': 2.2 }, g);
+  el('circle', { cx: cx - r * 0.35, cy: cy - r * 0.25, r: r * 0.11, fill: '#3A3A3A' }, g);
+  el('circle', { cx: cx + r * 0.35, cy: cy - r * 0.25, r: r * 0.11, fill: '#3A3A3A' }, g);
+  const w = r * 0.55, k = r * 0.42;
+  const d = content
+    ? `M${cx - w},${cy + r * 0.2} Q${cx},${cy + r * 0.2 + k} ${cx + w},${cy + r * 0.2}`
+    : `M${cx - w},${cy + r * 0.45} Q${cx},${cy + r * 0.45 - k} ${cx + w},${cy + r * 0.45}`;
+  el('path', { d, fill: 'none', stroke: '#3A3A3A', 'stroke-width': 2.2, 'stroke-linecap': 'round' }, g);
+  return g;
+}
+
+/* Construit un diagramme complet à partir d'une description de scène. */
+function renderScene(container, scene) {
+  container.innerHTML = '';
+  const id = 'm' + (++idSeq);
+  const h = scene.h || H;
+  const svg = el('svg', { viewBox: `0 0 ${W} ${h}`, class: 'diagramme', role: 'img', 'aria-label': scene.label || 'Diagramme de Kano' }, container);
+  const defs = el('defs', {}, svg);
+  const marker = el('marker', { id, viewBox: '0 0 10 10', refX: 8, refY: 5, markerUnits: 'userSpaceOnUse', markerWidth: 16, markerHeight: 16, orient: 'auto-start-reverse' }, defs);
+  el('path', { d: 'M0,0 L10,5 L0,10 z', fill: '#898989' }, marker);
+  const cy = scene.cy || CY;
+  const gZ = el('g', {}, svg), gA = el('g', {}, svg), gC = el('g', {}, svg), gP = el('g', {}, svg), gN = el('g', {}, svg);
+  const ax = Object.assign({ x: true, y: true, labelsX: true, labelsY: true, ticksX: false, ticksY: false, ticksXText: true, ticksYText: true }, scene.axes || {});
+
+  // zones (quadrants)
+  if (scene.zones) {
+    const q = (x1, y1, x2, y2) => el('rect', { x: Math.min(px(x1), px(x2)), y: Math.min(py(y1), py(y2)), width: Math.abs(px(x2) - px(x1)), height: Math.abs(py(y2) - py(y1)), class: 'zone' }, gZ);
+    q(0.04, 0.06, 0.96, 0.96); q(-0.96, -0.06, -0.04, -0.96);
+    const lab = (x, y, lines, faded) => txt(gZ, px(x), py(y), lines, 'zone-lib', { 'text-anchor': 'middle', fill: faded ? '#898989' : undefined });
+    lab(0.5, 0.62, ['Fonction réalisée', 'et client satisfait', 'la réaction attendue']);
+    lab(-0.5, -0.5, ['Fonction absente', 'et client insatisfait', 'la réaction attendue']);
+    lab(0.5, -0.5, ['Fonction réalisée', 'et pourtant client insatisfait', 'plus rare, mais possible'], true);
+    lab(-0.5, 0.62, ['Fonction absente', 'et pourtant client satisfait', 'plus rare, mais possible'], true);
+  }
+  // axes
+  if (ax.x) el('line', { x1: 30, y1: cy, x2: W - 30, y2: cy, class: 'axe', 'marker-start': `url(#${id})`, 'marker-end': `url(#${id})` }, gA);
+  if (ax.y) el('line', { x1: CX, y1: h - 26, x2: CX, y2: 26, class: 'axe', 'marker-start': `url(#${id})`, 'marker-end': `url(#${id})` }, gA);
+  if (ax.labelsX) {
+    gear(gA, 50, cy + 36, 13, { mark: 'x' });
+    txt(gA, 80, cy + 44, 'Fonction absente', 'lib');
+    gear(gA, W - 50, cy + 36, 13, { mark: 'v', fill: '#AA8802', stroke: '#7D6400' });
+    txt(gA, W - 84, cy + 44, 'Fonction pleinement réalisée', 'lib', { 'text-anchor': 'end' });
+    txt(gA, W - 30, h - 14, 'DEGRÉ DE RÉALISATION DE LA FONCTION', 'titre-axe', { 'text-anchor': 'end' });
+    gear(gA, W - 458, h - 21, 10, {});
+  }
+  if (ax.y && ax.labelsY) {
+    smiley(gA, CX - 210, 22, 17, true);
+    txt(gA, CX - 16, 30, 'Client satisfait', 'lib', { 'text-anchor': 'end' });
+    smiley(gA, CX - 232, h - 22, 17, false);
+    txt(gA, CX - 16, h - 14, 'Client insatisfait', 'lib', { 'text-anchor': 'end' });
+    txt(gA, 0, 0, 'SATISFACTION DU CLIENT', 'titre-axe', { 'text-anchor': 'middle', transform: 'translate(26 150) rotate(-90)' });
+  }
+  if (ax.ticksX) [[-0.8, 'absente ou défaillante'], [0, 'partiellement réalisée'], [0.8, 'pleinement réalisée']].forEach(([x, l]) => {
+    el('line', { x1: px(x), y1: cy - 8, x2: px(x), y2: cy + 8, class: 'axe' }, gA);
+    if (ax.ticksXText) txt(gA, px(x), cy - 16, l, 'lib-petit', { 'text-anchor': 'middle' });
+  });
+  if (ax.ticksY) [[0.8, 'enchanté'], [0.4, 'satisfait'], [-0.4, 'insatisfait'], [-0.8, 'très insatisfait']].forEach(([y, l]) => {
+    el('line', { x1: CX - 8, y1: py(y), x2: CX + 8, y2: py(y), class: 'axe' }, gA);
+    if (ax.ticksYText) txt(gA, CX + 16, py(y) + 6, l, 'lib-petit');
+  });
+  if (ax.neutre !== undefined) {
+    el('circle', { cx: CX, cy: CY, r: 6, fill: '#fff', stroke: '#898989', 'stroke-width': 2 }, gA);
+    if (ax.neutre) txt(gA, CX - 16, CY + 36, ax.neutre, 'lib-petit', { 'text-anchor': 'end' });
+  }
+  // courbes
+  (scene.curves || []).forEach(c => {
+    const cv = CURVES[c.cat];
+    const p = el('path', { d: pathD(c.cat), class: 'courbe' + (c.faded ? ' estompee' : ''), stroke: CAT[c.cat].col, 'stroke-width': cv.w, 'data-cat': c.cat }, gC);
+    if (c.dashed) p.setAttribute('stroke-dasharray', '16 12'); else if (cv.dash) p.setAttribute('stroke-dasharray', cv.dash);
+    if (c.label !== false) {
+      const L = Object.assign({}, LABEL_POS[c.cat], c.labelPos || {});
+      const attrs = { 'text-anchor': L.anchor, fill: CAT[c.cat].col };
+      if (L.rotate) { attrs.transform = `translate(${px(L.x)} ${py(L.y)}) rotate(${L.rotate})`; attrs.dy = L.dy; }
+      txt(gC, L.rotate ? 0 : px(L.x), L.rotate ? 0 : py(L.y), L.text, 'etiquette' + (c.faded ? ' estompee' : ''), attrs);
+    }
+  });
+  (scene.custom || []).forEach(c => el('path', { d: c.d, class: 'courbe', stroke: c.col, 'stroke-width': 5.5, 'stroke-dasharray': c.dash || null }, gC));
+  // points
+  (scene.points || []).forEach(pt => {
+    const X = px(pt.x), Y = py(pt.y);
+    if (pt.guides) {
+      el('line', { x1: X, y1: Y, x2: X, y2: CY, class: 'guide' }, gP);
+      el('line', { x1: X, y1: Y, x2: CX, y2: Y, class: 'guide' }, gP);
+    }
+    const g = el('g', { class: pt.cls || '', 'data-id': pt.id || null }, gP);
+    el('circle', { cx: X, cy: Y, r: (pt.r || 11) + 5, class: 'halo' }, g);
+    el('circle', { cx: X, cy: Y, r: pt.r || 11, class: 'point' + (pt.hollow ? ' creux' : '') + (pt.attendu ? ' attendu' : ''), stroke: pt.col || null, fill: pt.hollow ? '#fff' : (pt.col || null) }, g);
+    if (pt.label) {
+      const anchor = pt.anchor || 'start';
+      const dx = pt.dx !== undefined ? pt.dx : (anchor === 'end' ? -20 : anchor === 'middle' ? 0 : 20);
+      const dy = pt.dy !== undefined ? pt.dy : 8;
+      const lines = Array.isArray(pt.label) ? pt.label : [pt.label];
+      txt(gP, X + dx, Y + dy - (lines.length - 1) * 13, lines, 'point-lib', { 'text-anchor': anchor });
+    }
+    if (pt.badge) {
+      const bx = X + (pt.badgeDx || -34), by = Y + (pt.badgeDy || -30);
+      el('circle', { cx: bx, cy: by, r: 17, fill: '#141414' }, gP);
+      txt(gP, bx, by + 7, pt.badge, '', { 'text-anchor': 'middle', fill: '#fff', 'font-size': 20, 'font-weight': 500 });
+    }
+  });
+  (scene.notes || []).forEach(n => txt(gN, px(n.x), py(n.y), n.text, n.cls || 'lib-petit', { 'text-anchor': n.anchor || 'start', fill: n.fill || null, 'font-weight': n.bold ? 500 : null }));
+  return svg;
+}
+
+/* ======================================================================
+   2. Utilitaires d'interface
+   ====================================================================== */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+function h(tag, attrs = {}, children = []) {
+  const e = document.createElement(tag);
+  for (const k in attrs) {
+    if (k === 'class') e.className = attrs[k];
+    else if (k === 'html') e.innerHTML = attrs[k];
+    else if (k === 'text') e.textContent = attrs[k];
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]);
+    else if (attrs[k] !== null && attrs[k] !== undefined) e.setAttribute(k, attrs[k]);
+  }
+  (Array.isArray(children) ? children : [children]).forEach(c => { if (c === null || c === undefined) return; e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+  return e;
+}
+function melange(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function boutonsCat(onChoix, opts = {}) {
+  const wrap = h('div', { class: 'choix cats', role: 'group' });
+  ORDRE.forEach(k => {
+    const b = h('button', { type: 'button', 'data-cat': k }, [h('span', { class: 'lettre lettre-' + k, text: k }), nomCat(k)]);
+    b.addEventListener('click', () => onChoix(k, b, wrap));
+    wrap.appendChild(b);
+  });
+  return wrap;
+}
+function marquer(wrap, choisi, attendu, alternatives = []) {
+  wrap.querySelectorAll('button').forEach(b => {
+    const k = b.dataset.cat ?? b.dataset.k;
+    b.disabled = true;
+    if (k === attendu) b.classList.add('juste');
+    else if (k === choisi && alternatives.includes(k)) b.classList.add('juste');
+    else if (k === choisi) b.classList.add('faux');
+  });
+}
+function encadre(type, html) {
+  const ic = { ok: '✓', erreur: '✗', or: '→', brume: '!' }[type] || '→';
+  return h('div', { class: 'encadre encadre--' + type }, [h('div', { class: 'encadre__icone', text: ic }), h('div', { html })]);
+}
+
+/* ======================================================================
+   3. Onglets, confort de lecture
+   ====================================================================== */
+function activerOnglet(nom) {
+  $$('.onglets [role="tab"]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === nom ? 'true' : 'false'));
+  $$('section[role="tabpanel"]').forEach(s => { s.hidden = s.id !== 'panel-' + nom; });
+  // L'adresse garde l'onglet ouvert (#theorie, #simulation, #exercices) quand le navigateur l'autorise ;
+  // dans un aperçu isolé (iframe « sandbox », origine nulle) l'historique est verrouillé : on ignore simplement.
+  try { if (location.hash !== '#' + nom) history.replaceState(null, '', '#' + nom); } catch (e) { /* aperçu isolé : sans conséquence */ }
+  try { window.scrollTo({ top: 0 }); } catch (e) { /* idem */ }
+}
+$$('.onglets [role="tab"]').forEach(b => b.addEventListener('click', () => activerOnglet(b.dataset.tab)));
+$$('.onglets [role="tab"]').forEach((b, i, arr) => b.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const j = (i + (e.key === 'ArrowRight' ? 1 : -1) + arr.length) % arr.length; arr[j].focus(); activerOnglet(arr[j].dataset.tab); }
+}));
+$('#btn-confort').addEventListener('click', e => {
+  const on = !document.body.classList.contains('confort');
+  document.body.classList.toggle('confort', on);
+  e.currentTarget.setAttribute('aria-pressed', on ? 'true' : 'false');
+});
+
+// Tableaux : enveloppe défilante sur petits écrans (les tableaux larges, ≥ 4 colonnes, gardent leurs colonnes lisibles et se font défiler du doigt)
+$$('table.tableau').forEach(t => {
+  const wrap = h('div', { class: 'defile' });
+  t.parentNode.insertBefore(wrap, t); wrap.appendChild(t);
+  const cols = t.tHead && t.tHead.rows[0] ? t.tHead.rows[0].cells.length : (t.rows[0] ? t.rows[0].cells.length : 0);
+  if (cols >= 4) { t.classList.add('tableau--large'); wrap.classList.add('defile--large'); }
+});
+
+// hauteur de la barre d'onglets (collante sur petit écran) : sert de décalage aux diagrammes collants
+const majOngletsH = () => { try { document.documentElement.style.setProperty('--onglets-h', $('.onglets').offsetHeight + 'px'); } catch (e) {} };
+majOngletsH(); window.addEventListener('resize', majOngletsH);
+
+/* ======================================================================
+   4. Théorie — le diagramme pas à pas
+   ====================================================================== */
+const PAS = [
+  { titre: 'L’axe horizontal : le degré de réalisation de la fonction',
+    html: `<p>L’axe horizontal représente <strong>une caractéristique</strong> du produit ou du service — l’étanchéité, la précision, le délai d’un rendez-vous SAV, la boîte de livraison — et le niveau auquel elle est réalisée.</p>
+      <ul class="liste"><li><strong>À gauche</strong>, la caractéristique est <strong>absente ou défaillante</strong> : elle n’est pas fournie, ou elle ne remplit pas son office — une montre annoncée étanche qui prend l’eau.</li>
+      <li><strong>Au centre</strong>, elle est <strong>partiellement réalisée</strong> : présente, mais à un niveau moyen.</li>
+      <li><strong>À droite</strong>, elle est <strong>pleinement réalisée</strong> : présente et bien exécutée.</li></ul>
+      <p class="note">Le mot <strong>fonction</strong> désigne ce que la caractéristique fait pour le client, pas la pièce : ce n’est pas « le joint », c’est « la montre reste étanche ». Dans la littérature, l’axe va de « exigence non réalisée » à « exigence pleinement réalisée » (Sauerwein et al., 1996).</p>`,
+    scene: { h: 300, cy: 150, axes: { y: false, ticksX: true }, notes: [{ x: -0.93, y: 0.35, text: 'De gauche à droite, la caractéristique est de mieux en mieux réalisée →', cls: 'lib-petit' }] } },
+  { titre: 'L’axe vertical : la satisfaction du client',
+    html: `<p>L’axe vertical représente <strong>ce que ressent le client</strong>. En haut, il est satisfait ; en bas, insatisfait. Cinq niveaux suffisent : enchanté, satisfait, neutre, insatisfait, très insatisfait.</p>
+      <p>Le croisement des deux axes est le <strong>point neutre</strong> : le client n’est ni content ni mécontent, il ne dit rien de particulier.</p>
+      <p>La satisfaction est une <strong>perception</strong> : d’après ISO 9000:2015 (§ 3.9.2), c’est le niveau auquel le client estime que ses attentes ont été satisfaites. Elle se lit dans ce qu’il dit ou fait — il réclame, il hausse les épaules, il recommande.</p>`,
+    scene: { axes: { ticksX: true, ticksY: true, neutre: 'point neutre : ni content ni mécontent' } } },
+  { titre: 'Le point neutre et les quatre zones',
+    html: `<p>Les deux axes découpent le plan en <strong>quatre zones</strong>.</p>
+      <ul class="liste"><li>En haut à droite, la fonction est réalisée et le client satisfait ; en bas à gauche, elle est absente et il est insatisfait. Ce sont les réactions que l’on attend.</li>
+      <li>Les deux autres zones surprennent : fonction réalisée et client insatisfait, ou fonction absente et client satisfait. Elles existent pourtant — le client qui n’aime pas la date sur le cadran s’y trouve.</li>
+      <li>Le long de l’axe horizontal, une bande où le client reste neutre, quel que soit le degré de réalisation.</li></ul>
+      <p><strong>Le diagramme n’interdit aucune zone.</strong> Tout dépend de la caractéristique et du client.</p>`,
+    scene: { zones: true, axes: { ticksX: true, ticksXText: false, ticksY: true, ticksYText: false, neutre: '' } } },
+  { titre: 'Un client, un point',
+    html: `<p>Un client, face à une caractéristique, est <strong>un point</strong> du diagramme. Son abscisse vient du degré de réalisation ; son ordonnée, de l’état de satisfaction. Trois clients fictifs :</p>
+      <ul class="liste"><li><span class="chiffre"><strong>A</strong></span> Le fermoir s’est ouvert tout seul deux fois dans la journée → fonction défaillante, client très insatisfait : en bas à gauche.</li>
+      <li><span class="chiffre"><strong>B</strong></span> 70 heures de réserve de marche : posée le vendredi soir, la montre tourne encore le lundi → fonction pleinement réalisée, client satisfait : en haut à droite.</li>
+      <li><span class="chiffre"><strong>C</strong></span> Le numéro de série est gravé sur le fond, mais ce client ne retourne jamais sa montre → fonction réalisée, client neutre : sur l’axe, à droite.</li></ul>
+      <p><strong>Le point est une observation.</strong> Il dit où est le client, pas encore sur quelle courbe.</p>`,
+    scene: { axes: { ticksX: true, ticksXText: false, ticksY: true, neutre: '' }, points: [
+      { x: -0.85, y: -0.78, label: ['fermoir défaillant :', 'très insatisfait'], dx: 26, dy: -30, guides: true, badge: 'A' },
+      { x: 0.7, y: 0.7, label: ['70 h de réserve :', 'satisfait'], dx: 26, dy: 8, guides: true, badge: 'B' },
+      { x: 0.7, y: 0, label: ['gravure du numéro de série :', 'neutre'], anchor: 'end', dx: -26, dy: -40, badge: 'C', badgeDx: 34 } ] } },
+  { titre: 'La courbe proportionnelle',
+    html: `<p>Un point dit <strong>où se trouve</strong> un client. Une courbe dit <strong>comment sa satisfaction changerait</strong> si le degré de réalisation changeait. Chaque catégorie de Kano est une courbe.</p>
+      <p>La plus intuitive : <strong>une droite qui monte</strong>. Plus la fonction est réalisée, plus le client est satisfait ; moins elle l’est, plus il est déçu. La satisfaction est graduée, elle se mesure.</p>
+      <p><strong>Exemples</strong> : la réserve de marche, la précision de marche, le délai d’un rendez-vous SAV, l’autonomie d’une pile, la lisibilité des index la nuit.</p>
+      <p><strong>Comment le reconnaître</strong> : le client raisonne en niveaux ; il compare — avec sa montre précédente, avec une autre marque — et en veut un peu plus, ou regrette un peu moins.</p>
+      <p><strong>Pour l’entreprise</strong> : le terrain des spécifications chiffrées et de la comparaison avec la concurrence.</p>`,
+    scene: { axes: { ticksX: true, ticksXText: false, ticksY: true, ticksYText: false }, curves: [{ cat: 'P' }], points: [
+      { x: -0.6, y: -0.6, label: '36 h de réserve : déçu', dx: 26, dy: 18 }, { x: 0.05, y: 0.05, label: '48 h : neutre', anchor: 'end', dx: -30, dy: -34 }, { x: 0.7, y: 0.7, label: '70 h : très satisfait', anchor: 'end', dx: -26, dy: -30 }],
+      notes: [{ x: -0.9, y: 0.85, text: 'Plus la fonction est réalisée,' }, { x: -0.9, y: 0.76, text: 'plus le client est satisfait.' }] } },
+  { titre: 'La courbe basique, ou obligatoire',
+    html: `<p>La courbe est <strong>asymétrique</strong>. À gauche, elle plonge : quand la fonction manque, le client est très insatisfait, il réclame. À droite, elle s’aplatit près de l’axe : quand la fonction est là, il ne ressent rien de particulier — « c’est normal ». Au mieux, un client neutre.</p>
+      <p>Une caractéristique basique est <strong>tenue pour acquise</strong> : on n’en parle que quand elle fait défaut. Le client ne la demande pas avant l’achat, il la suppose.</p>
+      <p><strong>Exemples</strong> : le verre sans rayure à la livraison, l’étanchéité annoncée, le respect de la date promise, une garantie identique à celle de toutes les marques.</p>
+      <p><strong>Comment le reconnaître</strong> : le client la considère comme un minimum dû, une évidence ; il ne la demande pas, il la suppose — et n’en parle que pour réclamer.</p>
+      <p><strong>Pour l’entreprise</strong> : à garantir à 100 %. C’est le domaine du contrôle, pas de l’argument de vente.</p>`,
+    scene: { axes: { ticksX: true, ticksXText: false, ticksY: true, ticksYText: false }, curves: [{ cat: 'B', labelPos: { x: -0.35, y: -0.75 } }], points: [
+      { x: -0.85, y: yOn('B', -0.85), label: ['de l’eau sous le verre :', 'très insatisfait'], dx: 26, dy: 46 }, { x: 0.8, y: yOn('B', 0.8), label: ['étanche, comme prévu :', 'rien de particulier'], anchor: 'end', dx: -24, dy: -26 }],
+      notes: [{ x: -0.9, y: 0.85, text: 'Absente : forte insatisfaction.' }, { x: -0.9, y: 0.76, text: 'Réalisée : rien de particulier.' }] } },
+  { titre: 'La courbe attractive',
+    html: `<p>Le <strong>miroir</strong> de la basique. À gauche, la courbe reste près de l’axe : quand la fonction manque, le client ne s’en plaint pas — il ne l’attendait pas. À droite, elle s’envole : quand elle est là, il est surpris, touché, enthousiaste.</p>
+      <p>Une caractéristique attractive n’est pas exigée ; elle est <strong>découverte</strong>. Le client ne savait pas qu’elle existait.</p>
+      <p><strong>Exemples</strong> : un appel du SAV six mois après l’achat, une carte manuscrite de l’horloger, un second bracelet offert, un fond transparent découvert en boutique.</p>
+      <p><strong>Comment le reconnaître</strong> : le client ne l’avait ni demandée ni imaginée ; il la découvre, s’en étonne et en parle autour de lui.</p>
+      <p><strong>Pour l’entreprise</strong> : la différenciation — à condition que les basiques soient assurées. Avec le temps, une caractéristique attractive devient souvent proportionnelle, puis basique : le client s’y habitue, puis l’exige (Kano, 2001).</p>`,
+    scene: { axes: { ticksX: true, ticksXText: false, ticksY: true, ticksYText: false }, curves: [{ cat: 'A' }], points: [
+      { x: -0.8, y: yOn('A', -0.8), label: ['pas d’appel du SAV :', 'rien de particulier'], dx: 26, dy: -40 }, { x: 0.85, y: yOn('A', 0.85), label: ['appel du SAV six mois après :', 'enchanté'], anchor: 'end', dx: -26, dy: 4 }],
+      notes: [{ x: -0.9, y: 0.85, text: 'Absente : rien de particulier.' }, { x: -0.9, y: 0.76, text: 'Réalisée : surprise, enthousiasme.' }] } },
+  { titre: 'Les courbes indifférente et inverse',
+    html: `<p><span class="cat-I"><strong>Indifférent</strong></span> : la courbe est <strong>confondue avec l’axe</strong>. Présente ou absente, la caractéristique ne change rien à la satisfaction. Exemple : le numéro de série gravé sur le fond, pour un client qui ne le regarde jamais. On le reconnaît à ceci : le client ne remarque ni la présence ni l’absence.</p>
+      <p><span class="cat-R"><strong>Inverse</strong></span> : <strong>la droite descend</strong>. Le client préfère l’absence de la caractéristique ; sa présence l’agace. Exemples : la date sur le cadran pour un amateur de cadrans épurés ; le remontage automatique pour qui aimait remonter sa montre chaque matin. On le reconnaît à ceci : le client refuse ou subit la caractéristique et préférerait une version sans.</p>
+      <p>Ces deux catégories rappellent que <strong>la catégorie dépend du client</strong> : la même date sur le cadran est proportionnelle pour l’un, inverse pour l’autre.</p>`,
+    scene: { axes: { ticksX: true, ticksXText: false, ticksY: true, ticksYText: false }, curves: [{ cat: 'I' }, { cat: 'R', labelPos: { y: -0.86 } }], points: [
+      { x: -0.55, y: 0, label: ['sans gravure :', 'rien'], dx: 24, dy: 46 }, { x: 0.45, y: 0, label: ['avec gravure :', 'rien non plus'], dx: 24, dy: -40 },
+      { x: -0.8, y: yOn('R', -0.8), label: ['cadran sans date :', 'satisfait'], dx: 26, dy: -30 }, { x: 0.8, y: yOn('R', 0.8), label: ['cadran avec date :', 'agacé'], anchor: 'end', dx: -26, dy: 46 }] } },
+  { titre: 'Le diagramme complet',
+    html: `<p>Les cinq courbes réunies, avec le code couleur utilisé dans tout le module. Retenez la forme avant la couleur : <span class="cat-B"><strong>plonge puis s’aplatit</strong></span> (basique), <span class="cat-P"><strong>monte tout droit</strong></span> (proportionnel), <span class="cat-A"><strong>plate puis s’envole</strong></span> (attractif), <span class="cat-I"><strong>sur l’axe</strong></span> (indifférent), <span class="cat-R"><strong>descend</strong></span> (inverse).</p>
+      <p>Un point dit où est le client ; la courbe dit comment il réagirait si la réalisation changeait. Or un même point peut appartenir à deux courbes — c’est l’objet de la partie 5 : il faut toujours imaginer l’autre face.</p>
+      <p>L’onglet <strong>Simulation</strong> permet de déplacer un client le long de chaque courbe.</p>`,
+    scene: { axes: {}, curves: [{ cat: 'I' }, { cat: 'R' }, { cat: 'B' }, { cat: 'P' }, { cat: 'A' }] } },
+];
+let pasCourant = 0;
+function afficherPas(i) {
+  pasCourant = Math.max(0, Math.min(PAS.length - 1, i));
+  const p = PAS[pasCourant];
+  renderScene($('#pas-svg'), p.scene);
+  $('#pas-texte').innerHTML = `<span class="surtitre">Élément ${pasCourant + 1} sur ${PAS.length}</span><h3 class="pas__titre">${p.titre}</h3>${p.html}`;
+  $$('#pas-points button').forEach((b, k) => { if (k === pasCourant) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  $('#pas-prec').disabled = pasCourant === 0;
+  $('#pas-suiv').disabled = pasCourant === PAS.length - 1;
+}
+PAS.forEach((p, k) => $('#pas-points').appendChild(h('button', { type: 'button', text: String(k + 1), title: p.titre, 'aria-label': 'Élément ' + (k + 1) + ' : ' + p.titre, onclick: () => afficherPas(k) })));
+$('#pas-prec').addEventListener('click', () => afficherPas(pasCourant - 1));
+$('#pas-suiv').addEventListener('click', () => afficherPas(pasCourant + 1));
+afficherPas(0);
+
+// tableau des cinq catégories
+ORDRE.forEach(k => {
+  const c = CAT[k];
+  $('#table-cats').appendChild(h('tr', {}, [
+    h('td', { class: 'cat', style: `background:${c.pale}` }, [h('span', { class: 'cat-' + k, text: c.nom }), c.syn ? h('small', { text: ' / ' + c.syn }) : null, h('br'), h('small', { text: 'lettre ' + k })]),
+    h('td', { text: c.abs }), h('td', { text: c.pres }), h('td', { text: c.forme }), h('td', { class: 'note', text: c.signes }),
+  ]));
+});
+// les deux diagrammes « un point ne suffit pas »
+renderScene($('#svg-ambigu-a'), { axes: { ticksX: true, ticksXText: false, ticksY: true }, curves: [{ cat: 'B', dashed: true }, { cat: 'I', dashed: true }],
+  points: [{ x: 0.75, y: 0.03, label: ['fonction réalisée,', 'client neutre'], anchor: 'end', dx: -26, dy: -40 }],
+  notes: [{ x: -0.9, y: 0.85, text: 'Basique ou indifférent ?', cls: 'lib', bold: true }, { x: -0.9, y: 0.75, text: 'Il faut savoir ce que dirait le client' }, { x: -0.9, y: 0.66, text: 'si la fonction était absente.' }] });
+renderScene($('#svg-ambigu-b'), { axes: { ticksX: true, ticksXText: false, ticksY: true }, curves: [{ cat: 'A', dashed: true }, { cat: 'I', dashed: true, labelPos: { x: -0.35, y: -0.13 } }],
+  points: [{ x: -0.8, y: -0.03, label: ['fonction absente,', 'client neutre'], dx: 26, dy: -44 }],
+  notes: [{ x: -0.9, y: 0.85, text: 'Attractif ou indifférent ?', cls: 'lib', bold: true }, { x: -0.9, y: 0.75, text: 'Il faut savoir ce que dirait le client' }, { x: -0.9, y: 0.66, text: 'si la fonction était réalisée.' }] });
+
+/* ======================================================================
+   5. Simulation
+   ====================================================================== */
+
+/* ======================================================================
+   4 bis. Théorie — cinq exemples horlogers (pictogrammes + mini-courbes)
+   ====================================================================== */
+const EXEMPLES = [
+  { cat: 'B', carac: 'Étanche aux éclaboussures', picto: 'eau', xR: 0.8, xA: -0.8,
+    satR: 'N', pres: 'le client n’y pense même pas : c’est normal.',
+    satA: 'T', abs: 'quelques gouttes de pluie et de la buée sous le verre : il réclame et doute de la marque.' },
+  { cat: 'P', carac: 'Réserve de marche', picto: 'reserve', xR: 0.5, xA: -0.5,
+    satR: 'S', pres: '70 heures : posée le vendredi soir, la montre tourne encore le lundi.',
+    satA: 'D', abs: '30 heures : elle s’arrête chaque lundi matin.' },
+  { cat: 'A', carac: 'Carte manuscrite de l’horloger dans l’écrin', picto: 'carte', xR: 0.85, xA: -0.8,
+    satR: 'E', pres: 'surpris et touché, le client la montre à ses proches.',
+    satA: 'N', abs: 'rien : le client n’y pensait pas.' },
+  { cat: 'I', carac: 'Numéro de série gravé sur le fond', picto: 'serie', xR: 0.8, xA: -0.8,
+    satR: 'N', pres: 'ce client ne retourne jamais sa montre : il ne le voit pas.',
+    satA: 'N', abs: 'il ne s’en aperçoit pas davantage.' },
+  { cat: 'R', carac: 'Grande fenêtre de date, pour un amateur de cadrans épurés', picto: 'date', xR: 0.8, xA: -0.8,
+    satR: 'D', pres: 'elle gâche le cadran à ses yeux : il est agacé.',
+    satA: 'S', abs: 'un cadran épuré : exactement ce qu’il cherchait.' },
+];
+// pictogrammes : traits graphite, un accent or (charte EHG)
+function picto(kind) {
+  const svg = el('svg', { viewBox: '0 0 160 100', class: 'picto', role: 'img', 'aria-hidden': 'true' });
+  const G = '#3A3A3A', OR = '#AA8802', PALE = '#F4EDD6';
+  const st = { fill: 'none', stroke: G, 'stroke-width': 2.4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
+  const boitier = (cx, cy, r) => {
+    el('rect', Object.assign({ x: cx - r * 0.55, y: cy - r - 16, width: r * 1.1, height: 14, rx: 3 }, st), svg);
+    el('rect', Object.assign({ x: cx - r * 0.55, y: cy + r + 2, width: r * 1.1, height: 14, rx: 3 }, st), svg);
+    el('circle', Object.assign({ cx, cy, r, fill: '#fff' }, st), svg);
+    el('circle', Object.assign({ cx, cy, r: r - 6 }, st, { 'stroke-width': 1.5 }), svg);
+  };
+  if (kind === 'eau') {
+    boitier(70, 50, 30);
+    el('path', Object.assign({ d: 'M70,32 L60,50 L80,50 Z' }, st, { 'stroke-width': 1.5 }), svg);
+    el('line', Object.assign({ x1: 70, y1: 50, x2: 70, y2: 34 }, st), svg); el('line', Object.assign({ x1: 70, y1: 50, x2: 82, y2: 56 }, st), svg);
+    [[118, 30], [134, 52], [120, 74]].forEach(([x, y]) => el('path', Object.assign({ d: `M${x},${y - 12} C${x + 9},${y - 2} ${x + 9},${y + 6} ${x},${y + 6} C${x - 9},${y + 6} ${x - 9},${y - 2} ${x},${y - 12} Z`, fill: PALE }, st, { stroke: OR }), svg));
+  } else if (kind === 'reserve') {
+    el('path', Object.assign({ d: 'M30,80 A50,50 0 0 1 130,80' }, st), svg);
+    for (let i = 0; i <= 6; i++) { const a = Math.PI + Math.PI * i / 6; const x1 = 80 + 50 * Math.cos(a), y1 = 80 + 50 * Math.sin(a), x2 = 80 + 42 * Math.cos(a), y2 = 80 + 42 * Math.sin(a); el('line', Object.assign({ x1, y1, x2, y2 }, st, { 'stroke-width': 1.6 }), svg); }
+    el('path', Object.assign({ d: 'M30,80 A50,50 0 0 1 108,36', stroke: OR, 'stroke-width': 6, fill: 'none', 'stroke-linecap': 'round' }), svg);
+    el('line', Object.assign({ x1: 80, y1: 80, x2: 104, y2: 42 }, st, { 'stroke-width': 3 }), svg);
+    el('circle', { cx: 80, cy: 80, r: 4, fill: G }, svg);
+    txt(svg, 22, 96, '0 h', '', { 'font-size': 11, fill: G }); txt(svg, 118, 96, '70 h', '', { 'font-size': 11, fill: G });
+  } else if (kind === 'carte') {
+    el('rect', Object.assign({ x: 22, y: 18, width: 116, height: 68, rx: 4, fill: '#fff' }, st), svg);
+    el('path', Object.assign({ d: 'M22,18 L80,52 L138,18' }, st, { 'stroke-width': 1.6 }), svg);
+    [34, 46, 58].forEach((y, i) => el('path', Object.assign({ d: `M${36},${y + 30} q8,-6 16,0 t16,0 t16,0 t${i === 2 ? 8 : 16},0` }, st, { 'stroke-width': 1.6, stroke: i === 1 ? OR : G }), svg));
+    el('path', Object.assign({ d: 'M112,88 L134,50 L142,54 L120,92 Z', fill: PALE }, st, { stroke: OR, 'stroke-width': 2 }), svg);
+  } else if (kind === 'serie') {
+    el('circle', Object.assign({ cx: 80, cy: 50, r: 40, fill: '#fff' }, st), svg);
+    el('circle', Object.assign({ cx: 80, cy: 50, r: 30 }, st, { 'stroke-width': 1.5 }), svg);
+    [0, 60, 120, 180, 240, 300].forEach(a => { const r = a * Math.PI / 180; el('circle', { cx: 80 + 35 * Math.cos(r), cy: 50 + 35 * Math.sin(r), r: 2.2, fill: G }, svg); });
+    txt(svg, 80, 46, 'N° 0421', '', { 'font-size': 11, fill: OR, 'text-anchor': 'middle', 'font-weight': 500, 'letter-spacing': 1 });
+    txt(svg, 80, 60, 'SWISS MADE', '', { 'font-size': 7, fill: G, 'text-anchor': 'middle', 'letter-spacing': 1.2 });
+  } else if (kind === 'date') {
+    boitier(70, 50, 30);
+    el('line', Object.assign({ x1: 70, y1: 50, x2: 70, y2: 30 }, st), svg); el('line', Object.assign({ x1: 70, y1: 50, x2: 58, y2: 60 }, st), svg);
+    el('rect', Object.assign({ x: 84, y: 44, width: 14, height: 12, fill: PALE }, st, { stroke: OR, 'stroke-width': 1.8 }), svg);
+    txt(svg, 91, 54, '15', '', { 'font-size': 9, fill: G, 'text-anchor': 'middle', 'font-weight': 500 });
+    el('circle', Object.assign({ cx: 128, cy: 50, r: 14 }, st, { stroke: '#9B2C2C' }), svg);
+    el('line', Object.assign({ x1: 118, y1: 40, x2: 138, y2: 60 }, st, { stroke: '#9B2C2C' }), svg);
+  }
+  return svg;
+}
+const marqueur = plein => { const sv = el('svg', { viewBox: '0 0 20 20', width: 12, height: 12, 'aria-hidden': 'true', style: 'margin-right:.35rem;vertical-align:-1px' }); el('circle', { cx: 10, cy: 10, r: 7, fill: plein ? '#AA8802' : '#fff', stroke: '#AA8802', 'stroke-width': 3 }, sv); return sv; };
+
+/* ======================================================================
+   5. Simulation
+   ====================================================================== */
+$$('.sim-modes button[data-mode]').forEach(b => b.addEventListener('click', () => {
+  $$('.sim-modes button[data-mode]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+  ['courbes', 'modele'].forEach(m => { $('#sim-' + m).hidden = m !== b.dataset.mode; });
+}));
+
+// --- Mode A : explorer le diagramme --------------------------------------
+const FLASH = '#F26B1D'; // couleur vive, réservée au point que l'on positionne
+const S = { visibles: new Set(ORDRE), exemple: null, x: 0.8, y: 0, face: null };
+
+// icônes dynamiques (hors graphique)
+function iconeDegre(container, x) {
+  container.innerHTML = '';
+  const svg = el('svg', { viewBox: '0 0 80 80', width: 64, height: 64, role: 'img', 'aria-label': 'Degré de réalisation' }, container);
+  const id = 'clip' + (++idSeq);
+  const defs = el('defs', {}, svg);
+  const clip = el('clipPath', { id }, defs);
+  const part = (x + 1) / 2;
+  el('rect', { x: 10, y: 8, width: 60 * part, height: 64 }, clip);
+  el('path', { d: gearPath(40, 40, 28), fill: '#fff', stroke: '#3A3A3A', 'stroke-width': 2.4, 'stroke-linejoin': 'round' }, svg);
+  el('path', { d: gearPath(40, 40, 28), fill: '#AA8802', 'clip-path': `url(#${id})` }, svg);
+  el('circle', { cx: 40, cy: 40, r: 9, fill: '#fff', stroke: '#3A3A3A', 'stroke-width': 2.4 }, svg);
+  if (x < -0.33) el('path', { d: 'M56,10 l16,16 m0,-16 l-16,16', stroke: '#9B2C2C', 'stroke-width': 4, 'stroke-linecap': 'round', fill: 'none' }, svg);
+  else if (x > 0.33) el('path', { d: 'M54,20 l8,8 l14,-16', stroke: '#2E6B4B', 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', fill: 'none' }, svg);
+}
+function iconeSatisfaction(container, y) {
+  container.innerHTML = '';
+  const svg = el('svg', { viewBox: '0 0 80 80', width: 64, height: 64, role: 'img', 'aria-label': 'Satisfaction du client' }, container);
+  const fill = y > 0.2 ? '#F4EDD6' : y < -0.2 ? '#F5E4E4' : '#F6F6F6';
+  el('circle', { cx: 40, cy: 40, r: 30, fill, stroke: '#3A3A3A', 'stroke-width': 2.4 }, svg);
+  const ey = 32 - Math.max(0, y) * 2;
+  el('circle', { cx: 29, cy: ey, r: 3.2, fill: '#3A3A3A' }, svg); el('circle', { cx: 51, cy: ey, r: 3.2, fill: '#3A3A3A' }, svg);
+  // bouche : courbure proportionnelle à la satisfaction
+  const k = y * 16, my = 50 + Math.abs(y) * 2;
+  el('path', { d: `M26,${my} Q40,${my + k} 54,${my}`, fill: y > 0.62 ? '#3A3A3A' : 'none', stroke: '#3A3A3A', 'stroke-width': 2.6, 'stroke-linecap': 'round' }, svg);
+  if (y > 0.62) el('path', { d: `M30,${my + 1} Q40,${my + 9} 50,${my + 1}`, fill: '#fff' }, svg);
+  if (y < -0.62) { el('path', { d: 'M22,26 l12,4', stroke: '#3A3A3A', 'stroke-width': 2.4, 'stroke-linecap': 'round' }, svg); el('path', { d: 'M58,26 l-12,4', stroke: '#3A3A3A', 'stroke-width': 2.4, 'stroke-linecap': 'round' }, svg); }
+}
+
+// boutons de catégories (bascules)
+ORDRE.forEach(k => {
+  const b = h('button', { type: 'button', 'data-cat': k, 'aria-pressed': 'true', class: 'actif' }, [h('span', { class: 'lettre lettre-' + k, text: k }), nomCat(k)]);
+  b.addEventListener('click', () => { if (S.visibles.has(k)) S.visibles.delete(k); else S.visibles.add(k); b.setAttribute('aria-pressed', S.visibles.has(k) ? 'true' : 'false'); b.classList.toggle('actif', S.visibles.has(k)); majSim(); });
+  $('#sim-toggles').appendChild(b);
+});
+// exemples horlogers (déplacés depuis la théorie)
+const exBtns = [];
+const btnLibre = h('button', { type: 'button', text: 'Point libre', class: 'actif' });
+btnLibre.addEventListener('click', () => { S.exemple = null; majExemple(); majSim(); });
+$('#sim-exemples').appendChild(btnLibre); exBtns.push(btnLibre);
+EXEMPLES.forEach((e, i) => {
+  const b = h('button', { type: 'button' }, [h('span', { class: 'lettre lettre-' + e.cat, text: e.cat }), e.carac.split(',')[0]]);
+  b.addEventListener('click', () => { S.exemple = i; S.visibles.add(e.cat); $$('#sim-toggles button').forEach(t => { const on = S.visibles.has(t.dataset.cat); t.setAttribute('aria-pressed', on ? 'true' : 'false'); t.classList.toggle('actif', on); }); S.face = 'R'; majExemple(); placerSur(e.cat, e.xR); });
+  $('#sim-exemples').appendChild(b); exBtns.push(b);
+});
+function majExemple() {
+  exBtns.forEach((b, i) => b.classList.toggle('actif', (S.exemple === null && i === 0) || S.exemple === i - 1));
+  const d = $('#sim-exemple-detail'); d.innerHTML = '';
+  if (S.exemple === null) { d.appendChild(h('p', { class: 'note', text: 'Point libre : réglez les deux curseurs et observez où le point se place par rapport aux courbes affichées.' })); return; }
+  const e = EXEMPLES[S.exemple];
+  const face = (plein, cle, texte) => h('button', { type: 'button', class: 'face-btn', 'data-face': plein ? 'R' : 'A', onclick: () => { S.face = plein ? 'R' : 'A'; placerSur(e.cat, plein ? e.xR : e.xA); } }, [
+    h('span', { class: 'face-btn__titre' }, [marqueur(plein), plein ? 'Fonction réalisée' : 'Fonction absente ou peu réalisée']),
+    h('span', { class: 'face-btn__niveau' }, [h('strong', { text: 'Client ' + satParCle(cle).nom.toLowerCase() }), ' — ' + texte]),
+  ]);
+  d.appendChild(h('div', { class: 'exemple exemple--sim' }, [
+    h('div', { class: 'exemple__picto' }, picto(e.picto)),
+    h('div', {}, [
+      h('div', { class: 'cat-titre cat-' + e.cat, text: nomCat(e.cat) }),
+      h('div', { class: 'carac', text: e.carac }),
+      h('div', { class: 'faces' }, [face(true, e.satR, e.pres), face(false, e.satA, e.abs)]),
+      h('p', { class: 'note', style: 'margin:.5rem 0 0', text: 'Touchez une face pour placer le point sur la courbe ; les curseurs permettent ensuite de le déplacer.' }),
+    ]),
+  ]));
+}
+function placerSur(cat, x) { S.x = x; S.y = yOn(cat, x); majSim(); }
+// poignées (curseurs) dessinées sur les axes du diagramme
+const clampSim = v => Math.max(-0.95, Math.min(0.95, v));
+function poignees(svg) {
+  const g = el('g', { class: 'curseurs' }, svg);
+  // bandes tactiles le long des axes (invisibles)
+  el('rect', { x: px(-0.95) - 24, y: CY - 40, width: px(0.95) - px(-0.95) + 48, height: 80, class: 'bande', 'data-curseur': 'x' }, g);
+  el('rect', { x: CX - 40, y: py(0.95) - 24, width: 80, height: py(-0.95) - py(0.95) + 48, class: 'bande', 'data-curseur': 'y' }, g);
+  // sur un petit écran (téléphone), poignées plus grandes pour le doigt
+  const petit = (svg.getBoundingClientRect().width || 600) < 520, R = petit ? 24 : 16, Z = petit ? 48 : 34, gr = petit ? 8 : 6;
+  const poignee = (axe, X, Y, label, now, texte) => {
+    const p = el('g', { class: 'poignee', 'data-curseur': axe, tabindex: 0, role: 'slider', 'aria-label': label, 'aria-valuemin': -100, 'aria-valuemax': 100, 'aria-valuenow': now, 'aria-valuetext': texte, 'aria-orientation': axe === 'x' ? 'horizontal' : 'vertical' }, g);
+    el('circle', { cx: X, cy: Y, r: Z, class: 'poignee__zone' }, p);
+    el('circle', { cx: X, cy: Y, r: R, class: 'poignee__disque' }, p);
+    const d = axe === 'x' ? `M${X - 5},${Y - gr} v${2 * gr} M${X + 5},${Y - gr} v${2 * gr}` : `M${X - gr},${Y - 5} h${2 * gr} M${X - gr},${Y + 5} h${2 * gr}`;
+    el('path', { d, class: 'poignee__grip' }, p);
+    el('title', {}, p).textContent = label + ' : ' + texte;
+  };
+  poignee('x', px(S.x), CY, 'Degré de réalisation de la fonction', Math.round(S.x * 100), degParCle(degDepuisX(S.x)).nom);
+  poignee('y', CX, py(S.y), 'Satisfaction du client', Math.round(S.y * 100), satParCle(satDepuisY(S.y)).nom);
+}
+function majSim() {
+  const curves = ORDRE.filter(k => S.visibles.has(k)).map(k => ({ cat: k, faded: S.exemple !== null && EXEMPLES[S.exemple].cat !== k }));
+  const svg = renderScene($('#sim-svg'), { axes: { ticksX: true, ticksXText: false, ticksY: true }, curves, points: [{ x: S.x, y: S.y, guides: true, r: 13, col: FLASH, cls: 'point-libre' }] });
+  poignees(svg);
+  $('#sim-degre').textContent = degParCle(degDepuisX(S.x)).nom;
+  $('#sim-sat').textContent = satParCle(satDepuisY(S.y)).nom;
+  iconeDegre($('#ico-deg'), S.x); iconeSatisfaction($('#ico-sat'), S.y);
+  $$('#sim-exemple-detail .face-btn').forEach(b => b.classList.toggle('actif', b.dataset.face === S.face));
+}
+// glisser les poignées : les écouteurs sont posés sur le conteneur, qui survit au redessin du SVG
+{
+  const zone = $('#sim-svg'); let axe = null;
+  const coord = ev => { const r = zone.querySelector('svg').getBoundingClientRect(); return { x: ((ev.clientX - r.left) / r.width * W - CX) / RX, y: (CY - (ev.clientY - r.top) / r.height * H) / RY }; };
+  const appliquer = c => { if (axe === 'x') S.x = clampSim(c.x); else S.y = clampSim(c.y); S.face = null; majSim(); };
+  zone.addEventListener('pointerdown', ev => { const t = ev.target.closest('[data-curseur]'); if (!t) return; axe = t.dataset.curseur; try { zone.setPointerCapture(ev.pointerId); } catch (e) {} ev.preventDefault(); appliquer(coord(ev)); });
+  zone.addEventListener('pointermove', ev => { if (axe) appliquer(coord(ev)); });
+  zone.addEventListener('pointerup', () => { axe = null; });
+  zone.addEventListener('pointercancel', () => { axe = null; });
+  zone.addEventListener('keydown', ev => {
+    const p = ev.target.closest && ev.target.closest('.poignee'); if (!p) return;
+    const a = p.dataset.curseur, pas = ev.shiftKey ? 0.2 : 0.05; let d = 0;
+    if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') d = pas; else if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') d = -pas;
+    else if (ev.key === 'Home') d = -2; else if (ev.key === 'End') d = 2; else return;
+    ev.preventDefault();
+    if (a === 'x') S.x = clampSim(S.x + d); else S.y = clampSim(S.y + d);
+    S.face = null; majSim();
+    const np = zone.querySelector('.poignee[data-curseur="' + a + '"]'); if (np) np.focus();
+  });
+}
+majExemple(); majSim();
+
+// --- Mode B : nouvelle version d'un modèle de montre (mise en situation fictive) ---
+const VERSIONS = [
+  { id: 1, nom: 'Étanche aux éclaboussures', cat: 'B', a: 100, b: 100, chg: 'inchangée : basique déjà atteinte' },
+  { id: 2, nom: 'Verre livré sans rayure', cat: 'B', a: 60, b: 100, chg: 'basique corrigée : contrôle avant expédition' },
+  { id: 3, nom: 'Notice en français', cat: 'B', a: 0, b: 100, chg: 'basique ajoutée' },
+  { id: 4, nom: 'Réserve de marche', cat: 'P', a: 55, b: 80, chg: 'proportionnelle améliorée de 25 % (42 h → 60 h)' },
+  { id: 5, nom: 'Précision de marche', cat: 'P', a: 45, b: 45, chg: 'inchangée' },
+  { id: 6, nom: 'Appel de l’horloger six mois après l’achat', cat: 'A', a: 0, b: 100, chg: 'nouvel attractif' },
+];
+const xNiv = niv => -0.93 + 1.86 * Math.max(0, Math.min(100, niv)) / 100;
+const indice = cle => { const ys = VERSIONS.map(v => yOn(v.cat, xNiv(v[cle]))); return Math.round((ys.reduce((a, b) => a + b, 0) / ys.length + 1) / 2 * 100); };
+const posNiv = (v, cle) => { const x = xNiv(v[cle]); return { X: px(x), Y: py(yOn(v.cat, x)) }; };
+const libNiv = (v, cle) => { const n = v[cle]; return v.cat === 'B' ? (n >= 100 ? 'atteinte' : n + ' % conformes') : v.cat === 'P' ? n + ' % du meilleur' : (n >= 100 ? 'présent' : 'absent'); };
+const cleGroupe = (v, cle) => v.cat + ':' + Math.round(v[cle] / 4);
+const reduit = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+
+// --- info-bulle (une seule, partagée) ---------------------------------------
+const bulle = h('div', { class: 'bulle', role: 'tooltip', id: 'bulle' }); bulle.hidden = true; document.body.appendChild(bulle);
+let bulleAncre = null, bulleScroll = 0;
+function montrerBulle(ancre, html) {
+  bulle.innerHTML = html; bulle.hidden = false; bulleAncre = ancre; bulleScroll = window.pageYOffset;
+  const r = ancre.getBoundingClientRect(), sx = window.pageXOffset, sy = window.pageYOffset, bw = bulle.offsetWidth, bh = bulle.offsetHeight;
+  let left = r.left + sx + r.width / 2 - bw / 2, top = r.top + sy - bh - 12;
+  left = Math.max(sx + 8, Math.min(left, sx + document.documentElement.clientWidth - bw - 8));
+  const dessous = top < sy + 60;
+  bulle.classList.toggle('bulle--dessous', dessous);
+  if (dessous) top = r.bottom + sy + 12;
+  bulle.style.left = left + 'px'; bulle.style.top = top + 'px';
+}
+function cacherBulle() { bulle.hidden = true; bulleAncre = null; }
+document.addEventListener('pointerdown', ev => { if (bulleAncre && !bulleAncre.contains(ev.target) && !bulle.contains(ev.target)) cacherBulle(); });
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') cacherBulle(); });
+window.addEventListener('scroll', () => { if (bulleAncre && Math.abs(window.pageYOffset - bulleScroll) > 40) cacherBulle(); }, { passive: true });
+// attache une info-bulle à un élément (survol, focus clavier, toucher)
+function avecBulle(elm, html) {
+  elm.addEventListener('pointerenter', ev => { if (ev.pointerType !== 'touch') montrerBulle(elm, html); });
+  elm.addEventListener('pointerleave', ev => { if (ev.pointerType !== 'touch') cacherBulle(); });
+  let pointeur = 'mouse';
+  elm.addEventListener('pointerdown', ev => { pointeur = ev.pointerType || 'mouse'; });
+  // au toucher, un appui affiche / masque ; à la souris, la bulle est déjà affichée par le survol et le clic la maintient
+  elm.addEventListener('click', ev => { ev.stopPropagation(); if (pointeur === 'touch' && bulleAncre === elm) cacherBulle(); else montrerBulle(elm, html); });
+  elm.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); if (bulleAncre === elm) cacherBulle(); else montrerBulle(elm, html); } });
+  elm.addEventListener('focus', () => montrerBulle(elm, html));
+  elm.addEventListener('blur', cacherBulle);
+}
+const bulleHtml = vs => vs.map(v => {
+  const modif = v.a !== v.b;
+  return `<div class="bulle__item${modif ? ' bulle__item--modif' : ''}"><span class="bulle__num">${v.id}</span><div><strong>${v.nom}</strong><br><span class="cat-${v.cat}">${nomCat(v.cat)}</span> · modèle A : ${libNiv(v, 'a')}${modif ? ` → <strong>modèle B : ${libNiv(v, 'b')}</strong>` : ''}<br><span class="bulle__chg">${modif ? '★ ' : ''}${v.chg}</span></div></div>`;
+}).join('');
+
+// --- diagrammes A et B ---------------------------------------------------------
+// Dessine les points d'une version ; pour B, ils partent des positions A et sont animés ensuite (revelerB)
+function diagrammeVersion(container, cle) {
+  const svg = renderScene(container, { axes: { ticksX: true, ticksXText: false, ticksY: true, ticksYText: false }, curves: ORDRE.map(k => ({ cat: k, faded: true })) });
+  const g = el('g', { class: 'pts-version' }, svg);
+  const src = cle === 'b' ? 'a' : cle; // B : positions de départ = A
+  const grp = {};
+  VERSIONS.forEach(v => { const k = cleGroupe(v, cle); (grp[k] = grp[k] || []).push(v); });
+  const items = VERSIONS.map(v => {
+    const de = posNiv(v, src), vers = posNiv(v, cle), modif = cle === 'b' && v.a !== v.b;
+    const pg = el('g', { class: 'pt-version' + (modif ? ' pt-version--modif' : ''), tabindex: 0, role: 'button', 'aria-label': `${v.id} · ${v.nom} · ${v.chg}` }, g);
+    el('circle', { cx: de.X, cy: de.Y, r: 16, fill: '#fff' }, pg);
+    const ring = el('circle', { cx: de.X, cy: de.Y, r: 19, class: 'pt-version__anneau', fill: 'none', stroke: '#AA8802', 'stroke-width': 3, 'stroke-dasharray': '5 4', opacity: 0 }, pg);
+    el('circle', { cx: de.X, cy: de.Y, r: 11, fill: '#AA8802', stroke: '#AA8802', 'stroke-width': 3 }, pg);
+    const pulse = modif ? el('circle', { cx: de.X, cy: de.Y, r: 19, class: 'pt-version__pulse', fill: 'none', stroke: '#AA8802', 'stroke-width': 3, opacity: 0 }, pg) : null;
+    avecBulle(pg, bulleHtml(grp[cleGroupe(v, cle)]));
+    return { v, pg, ring, pulse, de, vers, modif };
+  });
+  // libellés numérotés, à la position finale
+  const labels = Object.values(grp).map((vs, i) => {
+    const P = posNiv(vs[0], cle);
+    return txt(g, P.X, P.Y + (i % 2 ? 36 : -22), vs.map(q => q.id).join('·'), 'num', { 'text-anchor': 'middle' });
+  });
+  return { svg, items, labels };
+}
+const ease = t => 1 - Math.pow(1 - t, 3);
+function tween(dur, delay, onUpdate, onEnd) {
+  const t0 = performance.now() + delay;
+  const step = now => { const t = Math.max(0, Math.min(1, (now - t0) / dur)); onUpdate(ease(t)); if (t < 1) requestAnimationFrame(step); else if (onEnd) onEnd(); };
+  requestAnimationFrame(step);
+}
+function placerItem(it, k) {
+  const X = it.de.X + (it.vers.X - it.de.X) * k, Y = it.de.Y + (it.vers.Y - it.de.Y) * k;
+  it.pg.querySelectorAll('circle').forEach(c => { c.setAttribute('cx', X); c.setAttribute('cy', Y); });
+}
+let animB = 0;
+function revelerB(anime) {
+  const seq = ++animB;
+  const D = diagrammeVersion($('#m-svg-b'), 'b');
+  const ia = indice('a'), ib = indice('b');
+  const fin = () => {
+    D.items.forEach(it => { placerItem(it, 1); if (it.modif) it.ring.setAttribute('opacity', 1); });
+    D.labels.forEach(l => l.setAttribute('opacity', 1));
+    $('#m-idx-b').textContent = ib; $('#m-idx-delta').textContent = (ib >= ia ? '+' : '') + (ib - ia);
+  };
+  if (!anime || reduit()) { fin(); return; }
+  D.labels.forEach(l => l.setAttribute('opacity', 0));
+  $('#m-idx-b').textContent = ia; $('#m-idx-delta').textContent = '';
+  // les points modifiés se déplacent l'un après l'autre, dans l'ordre du tableau
+  const mods = D.items.filter(it => it.modif);
+  mods.forEach((it, i) => {
+    const delay = 400 + i * 900;
+    tween(800, delay, k => { if (seq === animB) placerItem(it, k); }, () => {
+      if (seq !== animB) return;
+      it.ring.setAttribute('opacity', 1);
+      it.pulse.setAttribute('opacity', 1); it.pulse.classList.add('pulse-on');
+      setTimeout(() => { if (seq === animB) it.pulse.setAttribute('opacity', 0); }, 900);
+    });
+  });
+  const total = 400 + mods.length * 900 + 200;
+  tween(900, Math.max(600, total - 900), k => { if (seq === animB) $('#m-idx-b').textContent = Math.round(ia + (ib - ia) * k); }, () => {
+    if (seq !== animB) return;
+    $('#m-idx-delta').textContent = (ib >= ia ? '+' : '') + (ib - ia);
+    D.labels.forEach(l => l.setAttribute('opacity', 1));
+  });
+}
+{
+  const tb = $('#m-table');
+  const niv = (v, cle) => { const n = v[cle]; const ok = v.cat !== 'B' || n >= 100; return h('span', { class: 'niv' }, [h('span', { class: 'jauge ' + (v.cat === 'B' ? (ok ? 'ok' : 'ko') : '') }, h('span', { style: 'width:' + n + '%' })), libNiv(v, cle)]); };
+  VERSIONS.forEach(v => {
+    const modif = v.a !== v.b;
+    const info = modif ? h('button', { type: 'button', class: 'info', 'aria-label': 'Détail de l’amélioration ' + v.id, text: 'i' }) : null;
+    if (info) avecBulle(info, bulleHtml([v]));
+    tb.appendChild(h('tr', { class: modif ? 'modif' : '' }, [
+      h('td', { class: 'chiffre', text: v.id }), h('td', { text: v.nom }), h('td', { class: 'cat cat-' + v.cat, text: nomCat(v.cat) }),
+      h('td', {}, niv(v, 'a')), h('td', { class: 'col-b' }, niv(v, 'b')), h('td', { class: 'col-b ' + (modif ? 'cat-A' : 'note') }, [info, (modif ? ' ' : '') + v.chg]),
+    ]));
+  });
+  const A = diagrammeVersion($('#m-svg-a'), 'a'); A.items.forEach(it => placerItem(it, 1));
+  $('#m-idx-a').textContent = indice('a');
+  revelerB(false); // état initial (masqué) : B déjà dessiné, prêt à être révélé
+  const btn = $('#m-toggle'), rejouer = $('#m-rejouer');
+  let visible = false;
+  const majB = () => {
+    $('#m-table-wrap').classList.toggle('m-cache', !visible); $('#m-carte-b').classList.toggle('m-cache', !visible);
+    btn.setAttribute('aria-pressed', visible ? 'true' : 'false'); btn.textContent = visible ? 'Masquer le modèle B' : 'Révéler le modèle B ▶';
+    rejouer.hidden = !visible;
+  };
+  btn.addEventListener('click', () => {
+    visible = !visible; majB();
+    if (visible) { revelerB(true); try { $('#m-carte-b').scrollIntoView({ behavior: reduit() ? 'auto' : 'smooth', block: 'center' }); } catch (e) {} }
+    else { animB++; cacherBulle(); }
+  });
+  rejouer.addEventListener('click', () => { cacherBulle(); revelerB(true); });
+  majB();
+}
+
+/* ======================================================================
+   6. Exercices — données (toutes les situations sont fictives)
+   ====================================================================== */
+// Exercice 1 : placer le point. Chaque situation dit explicitement le degré de réalisation et le niveau de satisfaction.
+const SITUATIONS = [
+  { n: 1, carac: 'Étanchéité annoncée', ctx: 'réclamation en boutique', deg: 'abs', sat: 'T', x: -0.85, y: -0.85,
+    txt: 'Vendue étanche, la montre a pris l’eau lors d’une baignade : de la buée s’est formée sous le verre. La fonction est défaillante. Le client est très insatisfait : il réclame un échange.' },
+  { n: 2, carac: 'Précision de marche', ctx: 'contrôle après un mois', deg: 'plein', sat: 'E', x: 0.8, y: 0.8,
+    txt: 'Contrôlée après un mois, la montre avance de 2 secondes par jour ; la précédente montre du client en faisait 15. La fonction est pleinement réalisée. Le client est enchanté.' },
+  { n: 3, carac: 'Gravure des initiales', ctx: 'vente en boutique', deg: 'abs', sat: 'N', x: -0.8, y: 0,
+    txt: 'La boutique ne propose pas de gravure des initiales. La fonction est absente. Le client n’y avait pas pensé : il est neutre, ni content ni mécontent.' },
+  { n: 4, carac: 'Délai de rendez-vous au service après-vente', ctx: 'appel au SAV', deg: 'part', sat: 'D', x: -0.3, y: -0.45,
+    txt: 'Le service après-vente propose un rendez-vous dans six semaines ; le client en espérait trois. La fonction est partiellement réalisée. Le client est insatisfait.' },
+  { n: 5, carac: 'Carte manuscrite de l’horloger', ctx: 'ouverture de l’écrin', deg: 'plein', sat: 'E', x: 0.85, y: 0.8,
+    txt: 'Dans l’écrin, le client découvre une carte manuscrite de l’horloger qui a assemblé sa montre. La fonction est pleinement réalisée. Le client, surpris, est enchanté.' },
+  { n: 6, carac: 'Lunette tournante', ctx: 'essai en boutique', deg: 'plein', sat: 'D', x: 0.8, y: -0.45,
+    txt: 'Le modèle proposé possède une lunette tournante qui fonctionne parfaitement ; ce client cherchait une montre habillée. La fonction est pleinement réalisée. Le client est insatisfait : elle le gêne.' },
+  { n: 7, carac: 'Notice en français', ctx: 'avis en ligne', deg: 'abs', sat: 'D', x: -0.8, y: -0.45,
+    txt: 'La notice n’existe qu’en anglais et en chinois, pour une montre vendue à Genève. La fonction est absente. Le client est insatisfait.' },
+  { n: 8, carac: 'Message de suivi après l’achat', ctx: 'lendemain de l’achat', deg: 'plein', sat: 'S', x: 0.65, y: 0.4,
+    txt: 'Le lendemain de l’achat, la boutique envoie un message pour s’assurer que tout va bien. La fonction est réalisée. Le client est satisfait, sans plus.' },
+  { n: 9, carac: 'État de la montre à la livraison', ctx: 'réception du colis', deg: 'plein', sat: 'N', x: 0.8, y: 0,
+    txt: 'La montre est livrée sans rayure ni poussière sous le verre. La fonction est pleinement réalisée. Le client est neutre : « c’est le minimum ».' },
+  { n: 10, carac: 'Lisibilité de nuit', ctx: 'avis en ligne', deg: 'part', sat: 'S', x: 0.1, y: 0.45,
+    txt: 'Dans le noir, les aiguilles restent lisibles une bonne partie de la nuit, sans égaler les meilleures montres. La fonction est partiellement réalisée. Le client est satisfait.' },
+];
+
+// Exercice 2 : identifier la catégorie. Les deux faces sont données, avec le niveau de satisfaction de chacune.
+const DEUX_FACES = [
+  { n: 1, cat: 'B', catAlt: [], carac: 'Tenue de la teinture du bracelet cuir', xR: 0.8, xA: -0.8,
+    satR: 'N', txtR: 'le bracelet garde sa couleur ; le client n’y pense même pas.',
+    satA: 'T', txtA: 'le bracelet déteint sur le poignet dès la première semaine ; le client réclame.',
+    just: 'Rien de particulier quand c’est là, réclamation quand ça manque : la caractéristique est tenue pour acquise.' },
+  { n: 2, cat: 'P', catAlt: [], carac: 'Réserve de marche', xR: 0.5, xA: -0.5,
+    satR: 'S', txtR: '70 heures : posée le vendredi soir, la montre tourne encore le lundi.',
+    satA: 'D', txtA: '30 heures : elle s’arrête chaque lundi matin.',
+    just: 'La satisfaction suit le niveau, dans les deux sens : plus la réserve est longue, plus le client est content.' },
+  { n: 3, cat: 'A', catAlt: [], carac: 'Réglage du bracelet offert pendant l’attente', xR: 0.85, xA: -0.8,
+    satR: 'E', txtR: 'le vendeur règle le bracelet pendant que le client prend un café ; surpris, il en parle autour de lui.',
+    satA: 'N', txtA: 'aucun réglage proposé ; le client n’y pensait pas.',
+    just: 'Rien n’était attendu : l’absence ne coûte rien, la présence surprend et enchante.' },
+  { n: 4, cat: 'I', catAlt: [], carac: 'Certificat d’origine, pour ce client', xR: 0.8, xA: -0.8,
+    satR: 'N', txtR: 'le certificat est dans la boîte ; le client ne l’a même pas sorti.',
+    satA: 'N', txtA: 'pas de certificat ; il ne s’en apercevrait pas.',
+    just: 'Ni la présence ni l’absence ne changent quelque chose pour ce client. Pour un collectionneur, ce serait une basique.' },
+  { n: 5, cat: 'R', catAlt: [], carac: 'Fermoir déployant, pour un client attaché à la boucle ardillon', xR: 0.8, xA: -0.8,
+    satR: 'D', txtR: 'le fermoir déployant est là ; le client le trouve compliqué et regrette son ardillon.',
+    satA: 'S', txtA: 'une simple boucle ardillon ; c’est ce qu’il voulait.',
+    just: 'Le client préfère l’absence à la présence : la courbe descend quand la fonction est réalisée.' },
+  { n: 6, cat: 'B', catAlt: [], carac: 'Garantie internationale', xR: 0.8, xA: -0.8,
+    satR: 'N', txtR: 'la garantie est fournie, comme sur toutes les montres de la gamme ; le client trouve cela normal.',
+    satA: 'T', txtA: 'pas de garantie ; le client proteste et renonce à l’achat.',
+    just: 'La garantie est supposée acquise : elle ne réjouit pas, mais son absence fait réclamer.' },
+  { n: 7, cat: 'P', catAlt: [], carac: 'Précision de marche', xR: 0.8, xA: -0.8,
+    satR: 'E', txtR: '+2 secondes par jour ; le client est bluffé.',
+    satA: 'T', txtA: '+25 secondes par jour ; le client proteste.',
+    just: 'Chaque seconde compte : la satisfaction est graduée avec la performance, vers le haut comme vers le bas.' },
+  { n: 8, cat: 'A', catAlt: [], carac: 'Suivi photo pendant la révision', xR: 0.85, xA: -0.8,
+    satR: 'E', txtR: 'le SAV envoie une photo du mouvement avec un mot de l’horloger ; le client ne savait pas que cela se faisait.',
+    satA: 'N', txtA: 'pas de suivi ; le client n’attendait rien de tel.',
+    just: 'Découverte totale : rien n’aurait manqué sans ce suivi, sa présence enchante.' },
+  { n: 9, cat: 'R', catAlt: [], carac: 'Grande fenêtre de date, pour un amateur de cadrans épurés', xR: 0.8, xA: -0.8,
+    satR: 'D', txtR: 'la fenêtre est là ; elle gâche le cadran à ses yeux, il est agacé.',
+    satA: 'S', txtA: 'pas de fenêtre ; un cadran épuré, exactement ce qu’il cherchait.',
+    just: 'Présence qui déplaît, absence qui plaît : inverse pour ce client — attractive ou proportionnelle pour un autre.' },
+  { n: 10, cat: 'I', catAlt: [], carac: 'Fond transparent, pour un client qui ne retourne jamais sa montre', xR: 0.8, xA: -0.8,
+    satR: 'N', txtR: 'le fond est transparent ; le client ne le regarde jamais.',
+    satA: 'N', txtA: 'fond plein ; il ne voit pas la différence.',
+    just: 'Présent ou absent, le fond transparent ne change rien pour ce client : la courbe est confondue avec l’axe.' },
+];
+const CROISEMENT = [
+  ['satisfait, voire enchanté', 'insatisfait, d’autant plus que le niveau est bas', 'P'],
+  ['neutre : « c’est normal »', 'insatisfait ou très insatisfait : il réclame', 'B'],
+  ['satisfait ou enchanté, surpris', 'neutre : il ne l’attendait pas', 'A'],
+  ['neutre', 'neutre', 'I'],
+  ['insatisfait, agacé', 'satisfait', 'R'],
+];
+
+/* ======================================================================
+   7. Exercices — moteur
+   ====================================================================== */
+// tables d'aide
+DEG.filter(d => d.k !== 'dir').forEach(d => $('#table-deg').appendChild(h('tr', {}, [h('td', { class: 'cat', text: d.nom }), h('td', { class: 'note', text: d.desc })])));
+SAT.forEach(s => $('#table-sat').appendChild(h('tr', {}, [h('td', { class: 'cat', text: s.nom }), h('td', { class: 'note', text: s.desc })])));
+CROISEMENT.forEach(([r, a, k]) => $('#table-croisement').appendChild(h('tr', {}, [h('td', { text: r }), h('td', { text: a }), h('td', { class: 'cat', style: 'background:' + CAT[k].pale }, h('span', { class: 'cat-' + k, text: nomCat(k) }))])));
+
+// choix de l'exercice
+$$('.sim-modes button[data-exo]').forEach(b => b.addEventListener('click', () => {
+  $$('.sim-modes button[data-exo]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+  ['placer', 'categorie'].forEach(m => { $('#exo-' + m).hidden = m !== b.dataset.exo; });
+}));
+
+function progression(id, i, n) { $('#' + id + '-progress').style.width = (100 * i / n).toFixed(0) + '%'; }
+function scoreHtml(id, pts, max) { $('#' + id + '-score').innerHTML = `<span class="chiffre">${pts}</span> / ${max} points`; }
+function ecranFin(corps, titre, pts, max, onRestart) {
+  corps.innerHTML = '';
+  const pct = Math.round(100 * pts / max);
+  const appreciation = pct >= 85 ? 'Excellent : la lecture du diagramme est en place.' : pct >= 65 ? 'Bien. Relisez les corrections des questions manquées.' : 'À retravailler : reprenez les parties 3 à 5 de l’onglet Théorie, puis l’onglet Simulation, avant de recommencer.';
+  corps.appendChild(h('div', { class: 'carte carte--brume ecran-fin' }, [
+    h('span', { class: 'surtitre', text: titre }),
+    h('p', { html: `<span class="chiffre" style="font-size:2.4rem">${pts}</span> / ${max} — ${appreciation}` }),
+    h('button', { class: 'btn btn--or', type: 'button', text: 'Recommencer', onclick: onRestart }),
+  ]));
+}
+const scrollVers = id => { try { const y = $('#' + id).getBoundingClientRect().top + window.pageYOffset - 70; window.scrollTo({ top: y }); } catch (e) {} };
+const niveau = cle => h('strong', { class: 'niveau', text: 'Client ' + satParCle(cle).nom.toLowerCase() });
+
+// diagramme avec point à glisser ; renvoie { svg, position(), verrouiller(), montrerSolution(item), reveler(item) }
+function diagrammeDrag(container, onMove) {
+  const svg = renderScene(container, { axes: { ticksX: true, ticksY: true }, points: [{ x: 0, y: 0, r: 15, cls: 'drag', id: 'drag' }] });
+  const gPt = svg.querySelector('[data-id="drag"]');
+  let pos = { x: 0, y: 0 }, drag = false, fini = false;
+  const versSvg = ev => { const r = svg.getBoundingClientRect(); return { x: Math.max(-0.95, Math.min(0.95, ((ev.clientX - r.left) / r.width * W - CX) / RX)), y: Math.max(-0.95, Math.min(0.95, (CY - (ev.clientY - r.top) / r.height * H) / RY)) }; };
+  const placer = p => { pos = p; gPt.querySelectorAll('circle').forEach(c => { c.setAttribute('cx', px(p.x)); c.setAttribute('cy', py(p.y)); }); onMove(p); };
+  svg.addEventListener('pointerdown', ev => { if (fini) return; drag = true; try { svg.setPointerCapture(ev.pointerId); } catch (e) {} placer(versSvg(ev)); });
+  svg.addEventListener('pointermove', ev => { if (drag) placer(versSvg(ev)); });
+  svg.addEventListener('pointerup', () => { drag = false; });
+  svg.addEventListener('pointercancel', () => { drag = false; });
+  return {
+    svg, position: () => pos, verrouiller: () => { fini = true; },
+    montrerSolution: item => {
+      if (svg.querySelector('.solution')) return;
+      const g = el('g', { class: 'solution' }, svg);
+      el('line', { x1: px(item.x), y1: py(item.y), x2: px(item.x), y2: CY, class: 'guide' }, g);
+      el('line', { x1: px(item.x), y1: py(item.y), x2: CX, y2: py(item.y), class: 'guide' }, g);
+      el('circle', { cx: px(item.x), cy: py(item.y), r: 15, fill: 'none', stroke: '#141414', 'stroke-width': 3, 'stroke-dasharray': '6 5' }, g);
+      svg.insertBefore(g, gPt.parentNode);
+    },
+  };
+}
+function lectureEl() {
+  return h('div', { class: 'lecture' }, [
+    h('div', {}, [h('span', { class: 'lab', text: 'Degré de réalisation' }), h('span', { class: 'val lecture-deg', text: 'Partiellement réalisée' })]),
+    h('div', {}, [h('span', { class: 'lab', text: 'Satisfaction' }), h('span', { class: 'val lecture-sat', text: 'Neutre' })]),
+  ]);
+}
+function verifPosition(pos, item) {
+  const okX = degDepuisX(pos.x) === item.deg || Math.abs(pos.x - item.x) <= 0.3;
+  const okY = satDepuisY(pos.y) === item.sat || Math.abs(pos.y - item.y) <= 0.25;
+  return { okX, okY };
+}
+const texteVerif = (v, item) => `<strong>Degré de réalisation</strong> : ${v.okX ? 'juste' : 'à revoir'} — attendu « ${degParCle(item.deg).nom.toLowerCase()} ». <strong>Satisfaction</strong> : ${v.okY ? 'juste' : 'à revoir'} — attendu « ${satParCle(item.sat).nom.toLowerCase()} ».`;
+const boutonSuivant = (i, n, onclick) => h('button', { class: 'btn btn--large', type: 'button', text: i + 1 < n ? 'Question suivante ▶' : 'Voir le bilan', onclick });
+
+// --- Exercice 1 : placer le point -------------------------------------------
+const E1 = { liste: [], i: 0, pts: 0 };
+function e1Depart() { E1.liste = melange(SITUATIONS); E1.i = 0; E1.pts = 0; e1Afficher(); }
+function e1Afficher() {
+  const corps = $('#e1-corps'); corps.innerHTML = '';
+  const n = E1.liste.length;
+  if (E1.i >= n) { ecranFin(corps, 'Bilan · placer le point', E1.pts, 2 * n, e1Depart); progression('e1', n, n); return; }
+  const s = E1.liste[E1.i];
+  progression('e1', E1.i, n); scoreHtml('e1', E1.pts, 2 * n);
+  corps.appendChild(h('p', { class: 'note', text: `Question ${E1.i + 1} sur ${n}` }));
+  corps.appendChild(h('div', { class: 'situation' }, [
+    h('span', { class: 'situation__carac', text: s.carac }),
+    s.txt,
+    h('span', { class: 'src', text: 'Situation fictive · ' + s.ctx }),
+  ]));
+  const grille = h('div', { class: 'grille grille--diag' }); const zoneSvg = h('div', { class: 'carte zone-drag diag-colle' }); const droite = h('div');
+  grille.append(zoneSvg, droite); corps.appendChild(grille);
+  droite.appendChild(h('h4', { style: 'margin-top:0', text: 'Placez le point' }));
+  const lecture = lectureEl(); droite.appendChild(lecture);
+  const D = diagrammeDrag(zoneSvg, p => { lecture.querySelector('.lecture-deg').textContent = degParCle(degDepuisX(p.x)).nom; lecture.querySelector('.lecture-sat').textContent = satParCle(satDepuisY(p.y)).nom; });
+  let solutionVue = false;
+  const aide = h('div');
+  const btnIndice = h('button', { class: 'btn btn--secondaire btn--petit', type: 'button', text: 'Indice' });
+  const btnSolution = h('button', { class: 'btn btn--secondaire btn--petit', type: 'button', text: 'Voir la solution' });
+  droite.appendChild(h('div', { class: 'choix', style: 'margin:.25rem 0 .5rem' }, [btnIndice, btnSolution]));
+  droite.appendChild(aide);
+  btnIndice.addEventListener('click', () => {
+    btnIndice.disabled = true;
+    aide.appendChild(encadre('brume', `<strong>Indice.</strong> La phrase donne le degré de réalisation : <strong>${degParCle(s.deg).nom.toLowerCase()}</strong> — c’est l’abscisse. Cherchez maintenant le niveau de satisfaction du client : c’est l’ordonnée.`));
+  });
+  btnSolution.addEventListener('click', () => {
+    if (solutionVue) return; solutionVue = true; btnSolution.disabled = true; btnIndice.disabled = true;
+    D.montrerSolution(s);
+    aide.appendChild(encadre('or', `<strong>Solution.</strong> Degré de réalisation : <strong>${degParCle(s.deg).nom.toLowerCase()}</strong> ; satisfaction : <strong>${satParCle(s.sat).nom.toLowerCase()}</strong>. Le cercle en pointillé montre où placer le point — déplacez le vôtre dessus, puis validez. Cette question n’est pas comptée.`));
+  });
+  const btn = h('button', { class: 'btn btn--or btn--large', type: 'button', text: 'Valider la position' }); droite.appendChild(btn);
+  const fb = h('div', { style: 'margin-top:1rem' }); droite.appendChild(fb);
+  btn.addEventListener('click', () => {
+    D.verrouiller(); btn.disabled = true; btnIndice.disabled = true; btnSolution.disabled = true;
+    const vp = verifPosition(D.position(), s);
+    const pts = solutionVue ? 0 : (vp.okX ? 1 : 0) + (vp.okY ? 1 : 0);
+    E1.pts += pts; scoreHtml('e1', E1.pts, 2 * n);
+    D.montrerSolution(s);
+    fb.appendChild(encadre(vp.okX && vp.okY ? 'ok' : 'erreur', texteVerif(vp, s) + (solutionVue ? ' <span class="note">(solution affichée : question non comptée)</span>' : '') + `<br><span class="note">Le cercle en pointillé marque la position attendue. Caractéristique : ${s.carac}.</span>`));
+    fb.appendChild(boutonSuivant(E1.i, n, () => { E1.i++; e1Afficher(); scrollVers('exo-placer'); }));
+  });
+}
+
+// --- Exercice 2 : identifier la catégorie -----------------------------------
+const E2 = { liste: [], i: 0, pts: 0 };
+function e2Depart() { E2.liste = melange(DEUX_FACES); E2.i = 0; E2.pts = 0; e2Afficher(); }
+function pointsFaces(f) {
+  return [
+    { x: f.xA, y: satParCle(f.satA).y, hollow: true, r: 13, label: 'absente', anchor: f.satA === 'N' ? 'middle' : 'start', dy: f.satA === 'N' ? -44 : 8 },
+    { x: f.xR, y: satParCle(f.satR).y, r: 13, label: 'réalisée', anchor: f.satR === 'N' ? 'middle' : 'end', dy: f.satR === 'N' ? -44 : 8 },
+  ];
+}
+function e2Afficher() {
+  const corps = $('#e2-corps'); corps.innerHTML = '';
+  const n = E2.liste.length;
+  if (E2.i >= n) { ecranFin(corps, 'Bilan · identifier la catégorie', E2.pts, n, e2Depart); progression('e2', n, n); return; }
+  const f = E2.liste[E2.i];
+  progression('e2', E2.i, n); scoreHtml('e2', E2.pts, n);
+  corps.appendChild(h('p', { class: 'note', text: `Question ${E2.i + 1} sur ${n}` }));
+  corps.appendChild(h('div', { class: 'situation' }, [
+    h('span', { class: 'situation__carac', text: f.carac }),
+    h('div', { class: 'faces faces--texte' }, [
+      h('div', { class: 'face-ligne' }, [h('span', { class: 'face-ligne__titre' }, [marqueur(true), 'Fonction réalisée']), h('span', {}, [niveau(f.satR), ' — ' + f.txtR])]),
+      h('div', { class: 'face-ligne' }, [h('span', { class: 'face-ligne__titre' }, [marqueur(false), 'Fonction absente ou peu réalisée']), h('span', {}, [niveau(f.satA), ' — ' + f.txtA])]),
+    ]),
+    h('span', { class: 'src', text: 'Situation fictive' }),
+  ]));
+  const grille = h('div', { class: 'grille grille--diag' }); const zoneSvg = h('div', { class: 'carte diag-colle' }); const droite = h('div');
+  grille.append(zoneSvg, droite); corps.appendChild(grille);
+  renderScene(zoneSvg, { axes: { ticksX: true, ticksY: true }, points: pointsFaces(f) });
+  droite.appendChild(h('h4', { style: 'margin-top:0', text: 'Quelle courbe passe par les deux points ?' }));
+  let choix = null;
+  const cats = boutonsCat((k, btn, wrap) => { choix = k; wrap.querySelectorAll('button').forEach(b => b.classList.toggle('actif', b === btn)); });
+  droite.appendChild(cats);
+  const btn = h('button', { class: 'btn btn--or btn--large', type: 'button', text: 'Valider' }); droite.appendChild(btn);
+  const fb = h('div', { style: 'margin-top:1rem' }); droite.appendChild(fb);
+  btn.addEventListener('click', () => {
+    if (choix === null) { fb.innerHTML = ''; fb.appendChild(encadre('brume', 'Choisissez d’abord une catégorie.')); return; }
+    btn.disabled = true;
+    const ok = choix === f.cat || f.catAlt.includes(choix);
+    marquer(cats, choix, f.cat, f.catAlt);
+    E2.pts += ok ? 1 : 0; scoreHtml('e2', E2.pts, n);
+    renderScene(zoneSvg, { axes: { ticksX: true, ticksY: true }, curves: [{ cat: f.cat }], points: pointsFaces(f) });
+    fb.innerHTML = '';
+    fb.appendChild(encadre(ok ? 'ok' : 'erreur', `<strong>Catégorie</strong> : ${ok ? 'juste' : 'à revoir'} — <strong class="cat-${f.cat}">${nomCat(f.cat)}</strong>${f.catAlt.length ? ' (accepté aussi : ' + f.catAlt.map(nomCat).join(', ') + ')' : ''}. ${f.just}`));
+    fb.appendChild(boutonSuivant(E2.i, n, () => { E2.i++; e2Afficher(); scrollVers('exo-categorie'); }));
+  });
+}
+e1Depart(); e2Depart();
+
+/* ======================================================================
+   8. Démarrage : onglet demandé dans l'adresse (#theorie, #simulation, #exercices)
+   ====================================================================== */
+try {
+  const hash = location.hash.replace('#', '');
+  if (['theorie', 'simulation', 'exercices'].includes(hash)) activerOnglet(hash);
+} catch (e) { /* adresse inaccessible dans un aperçu isolé : on reste sur la théorie */ }
+
+})();
+</script>
+</body>
+</html>
