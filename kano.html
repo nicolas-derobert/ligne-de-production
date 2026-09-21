@@ -299,7 +299,11 @@ ul.liste { padding-left: 1.2rem; } ul.liste li { margin-bottom: .35rem; } ul.lis
 .bulle__chg { color: var(--ehg-or-clair); }
 .bulle .cat-B { color: #E8A6A6; } .bulle .cat-P { color: #A6D3BA; } .bulle .cat-A { color: #E6C766; } .bulle .cat-I { color: #D5D5D5; } .bulle .cat-R { color: #FFFFFF; }
 
+.situation--parole { display: grid; grid-template-columns: 56px 1fr; gap: 1rem; align-items: start; }
 .situation--parole .citation { margin: 0; font-size: 1.05em; line-height: 1.6; }
+.situation__picto svg { display: block; width: 56px; height: 56px; }
+.face-btn__niveau { display: flex; gap: .5rem; align-items: flex-start; }
+.face-btn__niveau .picto-client { flex: 0 0 30px; margin-top: .1rem; }
 .exo-entete__droite { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
 /* modale (QR code) */
 .modale { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; }
@@ -380,6 +384,8 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
   .pas__points button { width: 2.2rem; height: 2.2rem; }
   .pas__nav .btn { justify-content: center; min-height: 44px; }
   .situation { font-size: 1.02em; padding: .8rem 1rem; }
+  .situation--parole { grid-template-columns: 44px 1fr; gap: .7rem; }
+  .situation__picto svg { width: 44px; height: 44px; }
   .face-btn { padding: .55rem .65rem; }
   .encadre { padding: .8rem 1rem; gap: .75rem; }
   .exo-entete { align-items: center; }
@@ -949,6 +955,16 @@ function h(tag, attrs = {}, children = []) {
   (Array.isArray(children) ? children : [children]).forEach(c => { if (c === null || c === undefined) return; e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
   return e;
 }
+// pictogramme : un client qui parle (buste + bulle), traits graphite, accent or (charte EHG)
+function pictoClient(taille = 40) {
+  const svg = el('svg', { viewBox: '0 0 64 64', width: taille, height: taille, class: 'picto-client', role: 'img', 'aria-label': 'Parole de client' });
+  const st = { fill: 'none', stroke: '#3A3A3A', 'stroke-width': 2.6, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
+  el('path', Object.assign({ d: 'M31,10 h25 a5,5 0 0 1 5,5 v13 a5,5 0 0 1 -5,5 h-13 l-8,7 v-7 h-4 a5,5 0 0 1 -5,-5 v-13 a5,5 0 0 1 5,-5 z', fill: '#F4EDD6' }, st, { stroke: '#AA8802' }), svg);
+  el('text', { x: 43.5, y: 27, 'text-anchor': 'middle', 'font-size': 15, 'font-family': 'Georgia, serif', fill: '#AA8802' }, svg).textContent = '“ ”';
+  el('circle', Object.assign({ cx: 20, cy: 27, r: 8.5, fill: '#fff' }, st), svg);
+  el('path', Object.assign({ d: 'M5,58 c0,-11 7,-17 15,-17 s15,6 15,17', fill: '#fff' }, st), svg);
+  return svg;
+}
 function melange(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function boutonsCat(onChoix, opts = {}) {
   const wrap = h('div', { class: 'choix cats', role: 'group' });
@@ -1154,20 +1170,20 @@ renderScene($('#svg-ambigu-b'), { axes: { ticksX: true, ticksXText: false, ticks
    ====================================================================== */
 const EXEMPLES = [
   { cat: 'B', carac: 'Étanche aux éclaboussures', picto: 'eau', xR: 0.8, xA: -0.8,
-    satR: 'N', pres: 'le client n’y pense même pas : c’est normal.',
-    satA: 'T', abs: 'quelques gouttes de pluie et de la buée sous le verre : il réclame et doute de la marque.' },
+    satR: 'N', pres: 'Étanche aux éclaboussures ? Je n’y pense même pas, c’est normal.',
+    satA: 'T', abs: 'Quelques gouttes de pluie et déjà de la buée sous le verre ! Je réclame, et je doute de la marque.' },
   { cat: 'P', carac: 'Réserve de marche', picto: 'reserve', xR: 0.5, xA: -0.5,
-    satR: 'S', pres: '70 heures : posée le vendredi soir, la montre tourne encore le lundi.',
-    satA: 'D', abs: '30 heures : elle s’arrête chaque lundi matin.' },
+    satR: 'S', pres: '70 heures de réserve : posée le vendredi soir, elle tourne encore le lundi. Je suis content.',
+    satA: 'D', abs: '30 heures seulement : elle s’arrête chaque lundi matin, c’est décevant.' },
   { cat: 'A', carac: 'Carte manuscrite de l’horloger dans l’écrin', picto: 'carte', xR: 0.85, xA: -0.8,
-    satR: 'E', pres: 'surpris et touché, le client la montre à ses proches.',
-    satA: 'N', abs: 'rien : le client n’y pensait pas.' },
+    satR: 'E', pres: 'Une carte écrite à la main par l’horloger, dans l’écrin ! Ça m’a touché, je l’ai montrée à tout le monde.',
+    satA: 'N', abs: 'Une carte ? Je n’y aurais même pas pensé.' },
   { cat: 'I', carac: 'Numéro de série gravé sur le fond', picto: 'serie', xR: 0.8, xA: -0.8,
-    satR: 'N', pres: 'ce client ne retourne jamais sa montre : il ne le voit pas.',
-    satA: 'N', abs: 'il ne s’en aperçoit pas davantage.' },
-  { cat: 'R', carac: 'Grande fenêtre de date, pour un amateur de cadrans épurés', picto: 'date', xR: 0.8, xA: -0.8,
-    satR: 'D', pres: 'elle gâche le cadran à ses yeux : il est agacé.',
-    satA: 'S', abs: 'un cadran épuré : exactement ce qu’il cherchait.' },
+    satR: 'N', pres: 'Un numéro gravé sur le fond ? Je ne retourne jamais ma montre, je ne le vois pas.',
+    satA: 'N', abs: 'S’il n’y était pas, je ne m’en apercevrais pas davantage.' },
+  { cat: 'R', carac: 'Grand guichet de date, pour un amateur de cadrans épurés', picto: 'date', xR: 0.8, xA: -0.8,
+    satR: 'D', pres: 'Ce grand guichet gâche le cadran, ça m’agace.',
+    satA: 'S', abs: 'Un cadran épuré, sans guichet : exactement ce que je cherche.' },
 ];
 // pictogrammes : traits graphite, un accent or (charte EHG)
 function picto(kind) {
@@ -1281,7 +1297,7 @@ function majExemple() {
     const cible = plein ? e.xR : e.xA, nom = plein ? 'R' : 'A';
     const b = h('button', { type: 'button', class: 'face-btn', 'data-face': nom }, [
       h('span', { class: 'face-btn__titre' }, [marqueur(plein), plein ? 'Fonction réalisée' : 'Fonction absente ou peu réalisée']),
-      h('span', { class: 'face-btn__niveau' }, [h('strong', { text: 'Client ' + satParCle(cle).nom.toLowerCase() }), ' — ' + texte]),
+      h('span', { class: 'face-btn__niveau' }, [pictoClient(30), h('span', {}, [h('strong', { text: 'Client ' + satParCle(cle).nom.toLowerCase() }), ' — « ' + texte + ' »'])]),
     ]);
     // survol (souris) : aperçu du déplacement le long de la courbe ; on revient en arrière si l'on ressort sans cliquer
     b.addEventListener('pointerenter', ev => { if (ev.pointerType === 'touch' || S.face === nom) return; if (!S.retour) S.retour = { x: S.x, y: S.y, face: S.face }; animerVers(e.cat, cible, 1400); });
@@ -1577,8 +1593,8 @@ const DEUX_FACES = [
   { n: 8, cat: 'A', catAlt: [], carac: 'Suivi photo pendant la révision', src: 'avis en ligne', xR: 0.85, xA: -0.8, satR: 'E', satA: 'N',
     verbatim: 'Le SAV m’a envoyé une photo du mouvement avec un mot de l’horloger. Je ne savais pas que ça se faisait, j’ai adoré. Sans ce suivi, je n’aurais rien attendu de particulier.',
     just: 'Découverte totale : rien n’aurait manqué sans ce suivi, sa présence enchante.' },
-  { n: 9, cat: 'R', catAlt: [], carac: 'Grande fenêtre de date, pour un amateur de cadrans épurés', src: 'entendu en boutique', xR: 0.8, xA: -0.8, satR: 'D', satA: 'S',
-    verbatim: 'Cette grande fenêtre de date gâche le cadran, ça m’agace. Sans fenêtre, un cadran épuré, exactement ce que je cherche : j’en serais content.',
+  { n: 9, cat: 'R', catAlt: [], carac: 'Grand guichet de date, pour un amateur de cadrans épurés', src: 'entendu en boutique', xR: 0.8, xA: -0.8, satR: 'D', satA: 'S',
+    verbatim: 'Ce grand guichet de date gâche le cadran, ça m’agace. Sans guichet, un cadran épuré, exactement ce que je cherche : j’en serais content.',
     just: 'Présence qui déplaît, absence qui plaît : inverse pour ce client — attractive ou proportionnelle pour un autre.' },
   { n: 10, cat: 'I', catAlt: [], carac: 'Fond transparent, pour un client qui ne retourne jamais sa montre', src: 'entendu en boutique', xR: 0.8, xA: -0.8, satR: 'N', satA: 'N',
     verbatim: 'Un fond transparent ? Je ne retourne jamais ma montre, je ne le regarde pas, ça m’est égal. Avec un fond plein, je ne verrais pas la différence.',
@@ -1729,9 +1745,12 @@ function e2Afficher() {
   progression('e2', E2.i, n); scoreHtml('e2', E2.pts, n);
   corps.appendChild(h('p', { class: 'note', text: `Question ${E2.i + 1} sur ${n}` }));
   corps.appendChild(h('div', { class: 'situation situation--parole' }, [
-    h('span', { class: 'situation__carac', text: f.carac }),
-    h('p', { class: 'citation', text: '« ' + f.verbatim + ' »' }),
-    h('span', { class: 'src', text: 'Client fictif · ' + f.src }),
+    h('div', { class: 'situation__picto' }, pictoClient(56)),
+    h('div', {}, [
+      h('span', { class: 'situation__carac', text: f.carac }),
+      h('p', { class: 'citation', text: '« ' + f.verbatim + ' »' }),
+      h('span', { class: 'src', text: 'Client fictif · ' + f.src }),
+    ]),
   ]));
   const grille = h('div', { class: 'grille grille--diag' }); const zoneSvg = h('div', { class: 'carte diag-colle' }); const droite = h('div');
   grille.append(zoneSvg, droite); corps.appendChild(grille);
