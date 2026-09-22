@@ -1396,7 +1396,10 @@ btnLibre.addEventListener('click', () => { animPt++; S.trace = []; S.retour = nu
 $('#sim-exemples').appendChild(btnLibre); exBtns.push(btnLibre);
 EXEMPLES.forEach((e, i) => {
   const b = h('button', { type: 'button', class: 'ex-btn', style: '--cat:' + CAT[e.cat].col + ';--cat-pale:' + CAT[e.cat].pale }, [h('span', { class: 'ex-num', text: String(i + 1) }), h('span', { class: 'ex-txt' }, [h('span', { class: 'ex-lab', text: 'Exemple n° ' + (i + 1) }), e.carac.split(',')[0]]), h('span', { class: 'lettre lettre-' + e.cat, text: e.cat, title: nomCat(e.cat) })]);
-  b.addEventListener('click', () => { S.exemple = i; S.visibles.add(e.cat); $$('#sim-toggles button').forEach(t => { const on = S.visibles.has(t.dataset.cat); t.setAttribute('aria-pressed', on ? 'true' : 'false'); t.classList.toggle('actif', on); }); S.face = 'R'; majExemple(); placerSur(e.cat, e.xR); ficheVisible(); });
+  b.addEventListener('click', () => { S.exemple = i; S.visibles.add(e.cat); $$('#sim-toggles button').forEach(t => { const on = S.visibles.has(t.dataset.cat); t.setAttribute('aria-pressed', on ? 'true' : 'false'); t.classList.toggle('actif', on); }); S.face = 'R'; majExemple();
+    // le point part de la face « absente » et remonte le long de la courbe jusqu'à la face « réalisée » : la trace suit la courbe
+    animPt++; S.retour = null; S.trace = []; S.x = e.xA; S.y = yOn(e.cat, e.xA); majSim();
+    animerVers(e.cat, e.xR, 1800); ficheVisible(); });
   $('#sim-exemples').appendChild(b); exBtns.push(b);
 });
 function majExemple() {
@@ -1413,7 +1416,12 @@ function majExemple() {
     ]);
     // survol (souris) : aperçu du déplacement le long de la courbe ; on revient en arrière si l'on ressort sans cliquer
     b.addEventListener('pointerenter', ev => { if (ev.pointerType === 'touch' || S.face === nom) return; if (!S.retour) S.retour = { x: S.x, y: S.y, face: S.face }; animerVers(e.cat, cible, 1400); });
-    b.addEventListener('pointerleave', ev => { if (ev.pointerType === 'touch' || !S.retour) return; const r = S.retour; S.retour = null; animerVers(null, r.x, 700, r.y, () => { S.face = r.face; majSim(); }); });
+    b.addEventListener('pointerleave', ev => {
+      if (ev.pointerType === 'touch' || !S.retour) return; const r = S.retour; S.retour = null;
+      // retour : le long de la courbe si le point y était déjà (face d'exemple), sinon en ligne droite (point libre)
+      if (r.face) animerVers(e.cat, r.x, 1000, undefined, () => { S.face = r.face; majSim(); });
+      else animerVers(null, r.x, 700, r.y, () => { S.face = r.face; majSim(); });
+    });
     b.addEventListener('click', () => { S.retour = null; S.face = nom; animerVers(e.cat, cible, 1400); });
     return b;
   };
