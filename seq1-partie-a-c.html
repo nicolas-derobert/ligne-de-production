@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#141414">
+<meta name="apple-mobile-web-app-title" content="Révision · EHG">
+<title>Du client au bon produit</title>
+<meta name="description" content="Application de révision autonome : fiches, exercices interactifs, test et suivi des erreurs sur les pages 1 à 40 du cours Lignes de production (CPH_HOP_01), École d'Horlogerie de Genève.">
+<!--
+  ============================================================================
+  Du client au bon produit · Révision des pages 1 à 40
+  Cours CPH_HOP_01 « Lignes de production » · École d'Horlogerie de Genève
+  Application pédagogique autonome (un seul fichier, sans dépendance obligatoire)
+  Trois onglets : Théorie (lecteur PDF, constante PDF_COURS) · Exercices (QCM parties A, B, C) · Mes erreurs
+  Charte graphique EHG : Century Gothic (titres, graisse régulière), Calibri
+  (texte), Cambria (chiffres, or #AA8802), or unique, gris neutres, filets fins.
+  Document élaboré avec l'assistance d'outils d'intelligence artificielle.
+  ============================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500&family=Source+Sans+3:wght@400;600&family=Playfair+Display:wght@400;600&display=swap">
+<style>
+/* ---------- 1. Tokens (charte EHG, source : ehg.css v1.0) — thème unique, fond blanc ---------- */
+:root {
+  --ehg-noir: #141414; --ehg-or: #AA8802; --ehg-blanc: #FFFFFF;
+  --ehg-or-clair: #D4B24C; --ehg-or-pale: #F4EDD6; --ehg-or-fonce: #7D6400;
+  --ehg-graphite: #3A3A3A; --ehg-acier: #898989; --ehg-perle: #EAEAEA; --ehg-brume: #F6F6F6;
+  --ehg-ok: #2E6B4B; --ehg-ok-pale: #E4EFE8; --ehg-erreur: #9B2C2C; --ehg-erreur-pale: #F5E4E4;
+  /* Code couleur des trois catégories de Kano (identique aux fiches et à l'application Kano) */
+  --kano-O: #9B2C2C; --kano-O-pale: #F5E4E4;
+  --kano-P: #2E6B4B; --kano-P-pale: #E4EFE8;
+  --kano-A: #AA8802; --kano-A-pale: #F4EDD6;
+  /* Couleur complémentaire (hors charte EHG, fonctionnelle) : tout ce que l'élève manipule — étiquettes, zones de dépôt,
+     boutons d'action, choix sélectionnés, mots-clés des définitions. L'or reste réservé au contenu du cours. */
+  --ehg-bleu: #1F4E79; --ehg-bleu-pale: #E7EFF6; --ehg-bleu-fonce: #163A5A;
+  --vif: var(--ehg-bleu);
+  --ehg-font-titre: "Century Gothic", "Jost", "Futura", "Avenir Next", "Calibri Light", sans-serif;
+  --ehg-font-texte: "Calibri", "Source Sans 3", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --ehg-font-serif: "Cambria", "Playfair Display", "Georgia", "Times New Roman", serif;
+  --ehg-radius: 4px; --ehg-radius-lg: 8px; --ehg-filet: 1px solid var(--ehg-perle);
+  --ehg-ombre: 0 1px 2px rgba(20,20,20,.06), 0 4px 12px rgba(20,20,20,.06);
+  --ehg-largeur: 72rem;
+  --fs: 1.0625rem; --lh: 1.6; --ls: 0.01em;
+  color-scheme: light;
+}
+body.confort { --fs: 1.1875rem; --lh: 1.85; --ls: 0.03em; word-spacing: .12em; }
+
+/* ---------- 2. Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body { margin: 0; font-family: var(--ehg-font-texte); font-size: var(--fs); line-height: var(--lh); letter-spacing: var(--ls);
+  color: var(--ehg-noir); background: var(--ehg-blanc); -webkit-font-smoothing: antialiased; text-align: left; }
+h1, h2, h3, h4 { font-family: var(--ehg-font-titre); font-weight: 400; line-height: 1.2; color: var(--ehg-noir); margin: 0 0 .75rem; letter-spacing: 0; text-wrap: balance; }
+h1 { font-size: 2.1rem; } h2 { font-size: 1.55rem; margin-top: 2.25rem; } h3 { font-size: 1.25rem; margin-top: 1.5rem; } h4 { font-size: 1.05rem; font-weight: 500; margin-top: 1.25rem; }
+p, ul, ol, table, figure { margin: 0 0 1rem; }
+p.lead { font-size: 1.12em; color: var(--ehg-graphite); }
+small, .note { font-size: .875em; color: var(--ehg-acier); }
+strong, b { font-weight: 600; }
+a { color: var(--ehg-noir); text-decoration: underline; text-decoration-color: var(--ehg-or); text-underline-offset: 3px; }
+a:hover { color: var(--ehg-or-fonce); }
+:focus-visible { outline: 2px solid var(--ehg-or); outline-offset: 2px; }
+::selection { background: var(--ehg-or-pale); }
+ul.liste { padding-left: 1.2rem; } ul.liste li { margin-bottom: .35rem; } ul.liste li::marker { color: var(--ehg-or); }
+.chiffre { font-family: var(--ehg-font-serif); color: var(--ehg-or); font-variant-numeric: lining-nums; }
+.surtitre { display: block; font-family: var(--ehg-font-titre); font-size: .74rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--ehg-acier); margin-bottom: .5rem; }
+.page { max-width: var(--ehg-largeur); margin: 0 auto; padding-inline: 1.5rem; }
+.texte { max-width: 46rem; }
+[hidden] { display: none !important; }
+button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+/* ---------- 3. En-tête, onglets, pied ---------- */
+.entete { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; padding-block: 1rem; border-bottom: var(--ehg-filet); }
+.logotype { font-family: var(--ehg-font-titre); font-size: 1.25rem; color: var(--ehg-noir); text-decoration: none; }
+.logotype .g { color: var(--ehg-or); }
+.entete__droite { display: flex; align-items: center; gap: 1rem; font-family: var(--ehg-font-titre); font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ehg-acier); }
+.titre { padding: 2rem 0 .75rem; }
+.titre h1 { margin-bottom: .25rem; }
+.titre .lead { margin: 0; }
+.onglets { display: flex; gap: 1.75rem; border-bottom: var(--ehg-filet); margin-bottom: 2rem; overflow-x: auto; }
+.onglets button { font-family: var(--ehg-font-titre); font-size: .88rem; letter-spacing: .08em; text-transform: uppercase; background: none; border: 0;
+  border-bottom: 2px solid transparent; padding: .8rem 0; margin-bottom: -1px; color: var(--ehg-acier); cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: .45rem; }
+.onglets button:hover { color: var(--ehg-noir); }
+.onglets button[aria-selected="true"] { color: var(--ehg-noir); border-bottom-color: var(--ehg-or); }
+.onglets button .ico { width: 18px; height: 18px; display: inline-block; }
+.onglets button .pastille { display: inline-block; min-width: 1.35em; padding: 0 .35em; border-radius: 999px; background: var(--ehg-erreur); color: #fff; font-size: .7rem; text-align: center; letter-spacing: 0; line-height: 1.5; }
+.pied { border-top: var(--ehg-filet); padding-block: 1.5rem; margin-top: 4rem; display: flex; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; font-size: .85rem; color: var(--ehg-acier); }
+
+/* ---------- 4. Composants ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; font-family: var(--ehg-font-titre); font-size: .8rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase;
+  padding: .65rem 1.2rem; border-radius: var(--ehg-radius); border: 1px solid var(--ehg-noir); background: var(--ehg-noir); color: var(--ehg-blanc); cursor: pointer; line-height: 1.15; transition: background .15s, color .15s; text-decoration: none; }
+.btn:hover { background: var(--ehg-graphite); border-color: var(--ehg-graphite); color: var(--ehg-blanc); }
+.btn--secondaire { background: transparent; color: var(--ehg-noir); }
+.btn--secondaire:hover { background: var(--ehg-brume); color: var(--ehg-noir); border-color: var(--ehg-noir); }
+.btn--or { background: var(--ehg-or); border-color: var(--ehg-or); }
+.btn--or:hover { background: var(--ehg-or-fonce); border-color: var(--ehg-or-fonce); }
+.btn--bleu { background: var(--ehg-bleu); border-color: var(--ehg-bleu); color: #fff; }
+.btn--bleu:hover { background: var(--ehg-bleu-fonce); border-color: var(--ehg-bleu-fonce); color: #fff; }
+.btn--discret { background: none; border-color: transparent; color: var(--ehg-graphite); padding-left: .2rem; padding-right: .2rem; }
+.btn--discret:hover { background: none; border-color: transparent; color: var(--ehg-or-fonce); }
+.btn[disabled] { opacity: .4; cursor: not-allowed; }
+.btn--petit { padding: .45rem .8rem; font-size: .72rem; }
+.btn--large { padding: .85rem 1.5rem; font-size: .85rem; }
+.carte { background: var(--ehg-blanc); border: var(--ehg-filet); border-radius: var(--ehg-radius-lg); padding: 1.5rem; box-shadow: var(--ehg-ombre); }
+.carte h3, .carte h4 { margin-top: 0; }
+.carte--brume { background: var(--ehg-brume); border-color: transparent; box-shadow: none; }
+.carte--or { background: var(--ehg-or-pale); border-color: transparent; box-shadow: none; }
+.encadre { display: flex; gap: 1rem; align-items: flex-start; padding: 1rem 1.25rem; border-radius: var(--ehg-radius-lg); background: var(--ehg-perle); margin-bottom: 1.25rem; }
+.encadre > :last-child { margin-bottom: 0; }
+.encadre > div > :last-child { margin-bottom: 0; }
+.encadre__icone { flex: 0 0 1.5rem; font-family: var(--ehg-font-serif); font-size: 1.4rem; line-height: 1.2; color: var(--ehg-graphite); }
+.encadre--or { background: var(--ehg-or-pale); } .encadre--or .encadre__icone { color: var(--ehg-or); }
+.encadre--ok { background: var(--ehg-ok-pale); } .encadre--ok .encadre__icone { color: var(--ehg-ok); }
+.encadre--erreur { background: var(--ehg-erreur-pale); } .encadre--erreur .encadre__icone { color: var(--ehg-erreur); }
+.encadre--brume { background: var(--ehg-brume); }
+.badge { display: inline-block; font-family: var(--ehg-font-titre); font-size: .68rem; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; padding: .25em .7em; border-radius: 999px; background: var(--ehg-perle); color: var(--ehg-graphite); line-height: 1.4; vertical-align: middle; }
+.badge--or { background: var(--ehg-or); color: var(--ehg-blanc); } .badge--noir { background: var(--ehg-noir); color: var(--ehg-blanc); }
+.badge--ok { background: var(--ehg-ok-pale); color: var(--ehg-ok); } .badge--erreur { background: var(--ehg-erreur-pale); color: var(--ehg-erreur); }
+.badge--contour { background: transparent; border: 1px solid currentColor; }
+.tableau { width: 100%; border-collapse: collapse; font-size: .95em; }
+.tableau th, .tableau td { padding: .6rem .8rem; text-align: left; vertical-align: top; border-bottom: var(--ehg-filet); }
+.tableau thead th { font-family: var(--ehg-font-titre); font-weight: 500; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-graphite); border-bottom: 2px solid var(--ehg-noir); }
+.tableau--zebre tbody tr:nth-child(even) { background: var(--ehg-brume); }
+.tableau .cat { font-family: var(--ehg-font-titre); }
+.tableau td.or { color: var(--ehg-or-fonce); font-family: var(--ehg-font-titre); }
+.grille { display: grid; gap: 1.25rem; }
+.grille > * { min-width: 0; }
+.grille--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grille--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grille--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 56rem) { .grille--2, .grille--3, .grille--4 { grid-template-columns: 1fr; } h1 { font-size: 1.7rem; } }
+.progress { height: 6px; background: var(--ehg-perle); border-radius: 999px; overflow: hidden; margin: .5rem 0 1rem; }
+.progress > span { display: block; height: 100%; background: var(--ehg-or); border-radius: 999px; transition: width .25s; }
+.defile { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.vu { display: inline-flex; align-items: center; gap: .35rem; font-family: var(--ehg-font-titre); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ehg-bleu); background: var(--ehg-bleu-pale); padding: .15em .6em; border-radius: 999px; vertical-align: middle; }
+.def { font-family: var(--ehg-font-titre); font-size: 1.05em; color: var(--ehg-noir); }
+.def .mot { color: var(--ehg-bleu); }
+.pages { font-family: var(--ehg-font-serif); color: var(--ehg-or); }
+
+/* catégories de Kano */
+.cat-O { color: var(--kano-O); } .cat-P { color: var(--kano-P); } .cat-A { color: var(--kano-A); }
+.fond-O { background: var(--kano-O-pale); } .fond-P { background: var(--kano-P-pale); } .fond-A { background: var(--kano-A-pale); }
+.lettre { display: inline-block; width: 1.5em; height: 1.5em; line-height: 1.5em; text-align: center; border-radius: 50%; margin-right: .45em; font-family: var(--ehg-font-serif); font-size: .85em; color: #fff; }
+.lettre-O { background: var(--kano-O); } .lettre-P { background: var(--kano-P); } .lettre-A { background: var(--kano-A); }
+
+/* ---------- 5. Accueil ---------- */
+.entrees { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; margin: 1.25rem 0 2rem; }
+.entree { display: flex; flex-direction: column; gap: .5rem; align-items: flex-start; text-align: left; background: var(--ehg-blanc); border: var(--ehg-filet); border-radius: var(--ehg-radius-lg); padding: 1.25rem; box-shadow: var(--ehg-ombre); cursor: pointer; font: inherit; letter-spacing: inherit; color: var(--ehg-noir); transition: border-color .15s, transform .15s; }
+.entree:hover { border-color: var(--ehg-bleu); transform: translateY(-2px); }
+.entree .ico { width: 34px; height: 34px; color: var(--ehg-bleu); }
+.entree strong { font-family: var(--ehg-font-titre); font-weight: 400; font-size: 1.15rem; }
+.entree span { font-size: .92em; color: var(--ehg-graphite); }
+.maitrise { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem 1.5rem; }
+.maitrise__ligne { display: grid; grid-template-columns: 2.4rem 1fr 6rem; align-items: center; gap: .6rem; padding: .45rem 0; border-bottom: var(--ehg-filet); }
+.maitrise__ligne .id { font-family: var(--ehg-font-serif); color: var(--ehg-or); font-size: 1.05rem; }
+.maitrise__ligne .nom { font-family: var(--ehg-font-titre); font-size: .95rem; line-height: 1.25; }
+.maitrise__ligne .nom button { font: inherit; letter-spacing: inherit; background: none; border: 0; padding: 0; color: inherit; cursor: pointer; text-align: left; text-decoration: underline; text-decoration-color: var(--ehg-perle); text-underline-offset: 3px; }
+.maitrise__ligne .nom button:hover { text-decoration-color: var(--ehg-or); }
+.jauge { display: flex; align-items: center; gap: .5rem; font-family: var(--ehg-font-titre); font-size: .72rem; letter-spacing: .04em; color: var(--ehg-graphite); }
+.jauge__barre { flex: 1; height: 8px; background: var(--ehg-perle); border-radius: 999px; overflow: hidden; }
+.jauge__barre > span { display: block; height: 100%; border-radius: 999px; background: var(--ehg-acier); transition: width .3s; }
+.jauge.ok .jauge__barre > span { background: var(--ehg-ok); } .jauge.moyen .jauge__barre > span { background: var(--ehg-or); } .jauge.faible .jauge__barre > span { background: var(--ehg-erreur); }
+.tuiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 1rem 0; }
+.tuile { padding: .9rem 1rem; border-radius: var(--ehg-radius-lg); background: var(--ehg-brume); }
+.tuile .lab { display: block; font-family: var(--ehg-font-titre); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-acier); }
+.tuile .val { font-family: var(--ehg-font-serif); font-size: 2rem; color: var(--ehg-or); line-height: 1.1; }
+
+.legende-couleurs { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; font-family: var(--ehg-font-titre); font-size: .8rem; color: var(--ehg-graphite); margin: .5rem 0 0; }
+.legende-couleurs span::before { content: ''; display: inline-block; width: .85em; height: .85em; border-radius: 2px; margin-right: .4em; vertical-align: -1px; }
+.legende-couleurs .or::before { background: var(--ehg-or); } .legende-couleurs .bleu::before { background: var(--ehg-bleu); } .legende-couleurs .ok::before { background: var(--ehg-ok); } .legende-couleurs .err::before { background: var(--ehg-erreur); }
+.reinit { display: grid; gap: .5rem; }
+.reinit__ligne { display: grid; grid-template-columns: 1fr auto; gap: .75rem; align-items: center; padding: .5rem 0; border-bottom: var(--ehg-filet); font-size: .95em; }
+.reinit__ligne:last-child { border-bottom: 0; }
+.reinit__ligne small { display: block; color: var(--ehg-acier); }
+.qr-accueil { display: grid; grid-template-columns: 9rem 1fr; gap: 1rem; align-items: center; }
+.qr-accueil svg { width: 100%; height: auto; display: block; border: var(--ehg-filet); border-radius: var(--ehg-radius); }
+.qr-accueil a { word-break: break-all; color: var(--ehg-bleu); text-decoration-color: var(--ehg-bleu); }
+@media (max-width: 30rem) { .qr-accueil { grid-template-columns: 1fr; } .qr-accueil svg { width: 11rem; } .reinit__ligne { grid-template-columns: 1fr; } }
+.qr-lien { text-align: center; margin: .25rem 0 0; }
+.qr-lien a { color: var(--ehg-bleu); text-decoration-color: var(--ehg-bleu); word-break: break-all; }
+
+/* ---------- 6. Réviser le cours ---------- */
+.cours { display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: 2.5rem; align-items: start; }
+.cours > * { min-width: 0; }
+.som { position: sticky; top: 1rem; font-family: var(--ehg-font-titre); font-size: .85rem; }
+.som__partie { margin: 0 0 .9rem; }
+.som__partie > span { display: block; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ehg-acier); margin-bottom: .3rem; }
+.som a { display: block; padding: .25rem 0 .25rem .6rem; border-left: 2px solid transparent; text-decoration: none; color: var(--ehg-graphite); line-height: 1.3; }
+.som a:hover { color: var(--ehg-noir); border-left-color: var(--ehg-perle); }
+.som a.actif { color: var(--ehg-noir); border-left-color: var(--ehg-or); }
+.som a .n { font-family: var(--ehg-font-serif); color: var(--ehg-or); margin-right: .35em; }
+.fiche { padding: 1.75rem 0 1rem; border-top: var(--ehg-filet); scroll-margin-top: 1rem; }
+.fiche:first-of-type { border-top: 0; padding-top: .25rem; }
+.fiche h2 { margin-top: 0; }
+.fiche__entete { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.fiche__actions { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: 1rem; }
+.retenir { background: var(--ehg-or-pale); border-radius: var(--ehg-radius-lg); padding: 1rem 1.25rem; margin: 1.25rem 0 0; }
+.retenir h4 { margin: 0 0 .5rem; font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ehg-or-fonce); }
+.retenir ul { margin: 0; padding-left: 1.1rem; } .retenir li { margin-bottom: .3rem; } .retenir li::marker { color: var(--ehg-or); }
+.definition { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.definition > div { background: var(--ehg-brume); border-radius: var(--ehg-radius-lg); padding: 1rem 1.1rem; }
+.definition h4 { margin: 0 0 .4rem; font-size: 1.1rem; }
+.definition .ex { display: block; margin-top: .6rem; padding-top: .6rem; border-top: 1px solid var(--ehg-perle); font-size: .92em; color: var(--ehg-graphite); }
+.definition .ex em { font-style: normal; color: var(--ehg-noir); }
+/* la grande image */
+.gi { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .5rem; align-items: stretch; margin: 1rem 0 .5rem; }
+.gi__etape { position: relative; border: 1px solid var(--ehg-perle); border-radius: var(--ehg-radius-lg); padding: .8rem .9rem .8rem; background: var(--ehg-blanc); }
+.gi__etape.actif { background: var(--ehg-or-pale); border-color: var(--ehg-or); }
+.gi__etape .num { font-family: var(--ehg-font-serif); color: var(--ehg-or); font-size: .95rem; }
+.gi__etape .nom { display: block; font-family: var(--ehg-font-titre); font-size: 1rem; margin: .1rem 0 .25rem; }
+.gi__etape .role { display: block; font-size: .86em; color: var(--ehg-graphite); line-height: 1.35; }
+.gi__etape + .gi__etape::before { content: '→'; position: absolute; left: -.72rem; top: 50%; transform: translateY(-50%); color: var(--ehg-acier); font-size: 1.1rem; }
+.gi__retour { grid-column: 1 / -1; display: flex; align-items: center; gap: .6rem; font-family: var(--ehg-font-titre); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-acier); }
+.gi__retour::before, .gi__retour::after { content: ''; flex: 1; border-top: 1px dashed var(--ehg-acier); }
+.gi__parties { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .4rem; margin: .75rem 0 0; }
+.gi__partie { border-radius: var(--ehg-radius); background: var(--ehg-brume); padding: .5rem .55rem; font-size: .8rem; line-height: 1.25; }
+.gi__partie .l { font-family: var(--ehg-font-serif); color: var(--ehg-or); margin-right: .3em; }
+.gi__partie.seq { background: var(--ehg-blanc); border: 1px dashed var(--ehg-perle); color: var(--ehg-graphite); }
+.gi__partie.actif { background: var(--ehg-or-pale); }
+@media (max-width: 56rem) {
+  .gi { grid-template-columns: 1fr; }
+  .gi__etape + .gi__etape::before { content: '↓'; left: 50%; top: -.95rem; transform: translateX(-50%); }
+  .gi__parties { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* calendrier des séquences */
+.sequences { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; }
+.sequence { background: var(--ehg-brume); border-radius: var(--ehg-radius-lg); padding: .9rem 1rem; }
+.sequence .quand { display: block; font-family: var(--ehg-font-titre); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-acier); }
+.sequence .nom { display: flex; align-items: center; gap: .5rem; font-family: var(--ehg-font-titre); margin: .3rem 0 .4rem; }
+.sequence .nom .num { flex: 0 0 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--ehg-noir); color: #fff; font-family: var(--ehg-font-serif); font-size: .85rem; display: inline-flex; align-items: center; justify-content: center; }
+.sequence.actif .nom .num { background: var(--ehg-or); }
+.sequence ul { margin: 0; padding-left: 1rem; font-size: .86em; color: var(--ehg-graphite); } .sequence li { margin-bottom: .15rem; }
+/* chaîne verbatim → exigence */
+.chaine { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
+.chaine > div { position: relative; background: var(--ehg-brume); border-radius: var(--ehg-radius-lg); padding: .8rem .9rem; }
+.chaine > div + div::before { content: '→'; position: absolute; left: -.7rem; top: .7rem; color: var(--ehg-acier); }
+.chaine .lab { display: block; font-family: var(--ehg-font-titre); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-acier); margin-bottom: .25rem; }
+.chaine .val { font-family: var(--ehg-font-titre); }
+/* boucle qualité */
+.boucle { display: grid; grid-template-columns: 1fr auto 1fr; grid-template-areas: 'q3 f34 q4' 'f23 . f41' 'q2 f12 q1'; gap: .5rem .75rem; max-width: 38rem; margin: 1rem 0; }
+.boucle__f { font-size: 1.7rem; line-height: 1; color: var(--ehg-or); text-align: center; align-self: center; justify-self: center; }
+.boucle__q { position: relative; background: var(--ehg-brume); border-radius: var(--ehg-radius-lg); padding: .8rem .9rem; }
+.boucle__q .num { font-family: var(--ehg-font-serif); font-size: 1.4rem; color: var(--ehg-or); line-height: 1; }
+.boucle__q .nom { display: block; font-family: var(--ehg-font-titre); font-size: 1rem; margin: .15rem 0; }
+.boucle__q .qui { display: block; font-size: .84em; color: var(--ehg-graphite); }
+.boucle__q.client { border: 1px solid var(--ehg-or); background: var(--ehg-or-pale); }
+.boucle__legende { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: .85em; color: var(--ehg-graphite); margin-top: .25rem; }
+.boucle__legende span::before { content: ''; display: inline-block; width: .8em; height: .8em; border-radius: 2px; margin-right: .4em; vertical-align: -1px; background: var(--ehg-brume); border: 1px solid var(--ehg-perle); }
+.boucle__legende span.client::before { background: var(--ehg-or-pale); border-color: var(--ehg-or); }
+/* boutique et manufacture */
+.bm { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: center; margin: 1rem 0; }
+.bm__acteur { text-align: center; font-family: var(--ehg-font-titre); font-size: 1.1rem; }
+.bm__acteur svg { width: 72px; height: 72px; display: block; margin: 0 auto .35rem; }
+.bm__fleches { display: grid; gap: .6rem; font-size: .84em; color: var(--ehg-graphite); text-align: center; }
+.bm__fleches span { display: block; }
+.bm__fleches .f { font-size: 1.3rem; color: var(--ehg-or); line-height: 1; }
+.exigences { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: .5rem; }
+.exigences > div { background: var(--ehg-brume); border-radius: var(--ehg-radius-lg); padding: 1rem 1.1rem; }
+.exigences h4 { margin: 0 0 .5rem; }
+.exigences ul { margin: 0; padding-left: 1.1rem; } .exigences li { margin-bottom: .3rem; }
+.exigences .lien { display: grid; grid-template-columns: 1fr auto 1fr; gap: .5rem; align-items: center; padding: .35rem 0; border-bottom: 1px solid var(--ehg-perle); }
+.exigences .lien:last-child { border-bottom: 0; }
+.exigences .lien .fl { color: var(--ehg-or); }
+.exigences .lien b { font-family: var(--ehg-font-titre); font-weight: 500; color: var(--ehg-or-fonce); }
+.exigences .lien.partie { background: var(--ehg-or-pale); margin: 0 -.5rem; padding: .35rem .5rem; border-radius: var(--ehg-radius); }
+/* kano */
+.kano-wrap { display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); gap: 1.25rem; align-items: start; }
+.diagramme { width: 100%; height: auto; display: block; font-family: var(--ehg-font-titre); }
+.diagramme text { letter-spacing: 0; }
+.diagramme .axe { stroke: var(--ehg-acier); stroke-width: 2; }
+.diagramme .lib { fill: var(--ehg-graphite); font-size: 24px; }
+.diagramme .lib-petit { fill: var(--ehg-acier); font-size: 19px; }
+.diagramme .titre-axe { fill: var(--ehg-acier); font-size: 17px; font-weight: 500; letter-spacing: 2.4px; }
+.diagramme .courbe { fill: none; stroke-width: 6; stroke-linecap: round; transition: opacity .2s; cursor: pointer; }
+.diagramme .courbe.estompee { opacity: .18; }
+.diagramme .courbe.mystere { stroke: var(--ehg-acier); }
+.diagramme .courbe.mystere.cible { stroke: var(--ehg-bleu); }
+.diagramme .etiquette { font-size: 25px; font-weight: 500; cursor: pointer; }
+.diagramme .etiquette.estompee { opacity: .25; }
+.diagramme .etiquette-2 { font-size: 20px; font-style: italic; }
+.kano-cats { display: grid; gap: .6rem; }
+.kano-cat { text-align: left; font: inherit; letter-spacing: inherit; color: var(--ehg-noir); background: var(--ehg-blanc); border: 1px solid var(--ehg-perle); border-radius: var(--ehg-radius-lg); padding: .7rem .9rem; cursor: pointer; transition: border-color .15s, background .15s; }
+.kano-cat:hover { border-color: var(--ehg-noir); }
+.kano-cat.actif { border-color: var(--ehg-or); background: var(--ehg-or-pale); }
+.kano-cat .nom { display: block; font-family: var(--ehg-font-titre); font-size: 1.05rem; }
+.kano-cat .cle { display: block; font-family: var(--ehg-font-serif); font-style: italic; color: var(--ehg-graphite); }
+.kano-cat .syn { display: block; font-size: .8em; color: var(--ehg-acier); }
+.kano-detail { margin-top: 1rem; }
+.kano-detail dl { display: grid; grid-template-columns: 9rem 1fr; gap: .4rem .8rem; margin: 0; }
+.kano-detail dt { font-family: var(--ehg-font-titre); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ehg-acier); padding-top: .15rem; }
+.kano-detail dd { margin: 0; }
+@media (max-width: 56rem) { .kano-wrap, .definition, .chaine, .sequences, .exigences, .bm, .maitrise, .cours { grid-template-columns: 1fr; } .chaine > div + div::before { content: '↓'; left: 50%; top: -.95rem; transform: translateX(-50%); } .som { position: static; } .kano-detail dl { grid-template-columns: 1fr; } .bm__fleches { order: 2; } .bm__acteur:last-child { order: 3; } }
+/* lexique */
+.lexique { columns: 2; column-gap: 2rem; }
+.lexique > div { break-inside: avoid; padding: .45rem 0; border-bottom: var(--ehg-filet); }
+.lexique dt { font-family: var(--ehg-font-titre); font-size: 1rem; }
+.lexique dd { margin: .1rem 0 0; font-size: .92em; color: var(--ehg-graphite); }
+.lexique dd a { font-family: var(--ehg-font-serif); color: var(--ehg-bleu); text-decoration: none; margin-left: .3em; }
+@media (max-width: 48rem) { .lexique { columns: 1; } }
+
+/* ---------- 6 bis. Théorie : lecteur PDF ---------- */
+.pdf__entete { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.pdf__outils { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.pdf__page { display: inline-flex; align-items: center; gap: .4rem; font-family: var(--ehg-font-titre); font-size: .85rem; color: var(--ehg-graphite); }
+.pdf__page .input { width: 5rem; padding: .4rem .5rem; }
+.pdf__cadre { position: relative; border: var(--ehg-filet); border-radius: var(--ehg-radius-lg); background: var(--ehg-brume); height: min(80vh, 60rem); min-height: 28rem; overflow: hidden; }
+.pdf__cadre iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
+.pdf__vide { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: .5rem; padding: 2rem 1.5rem; border: 2px dashed rgba(31,78,121,.35); border-radius: var(--ehg-radius-lg); color: var(--ehg-graphite); }
+.pdf__vide svg { color: var(--ehg-or); }
+.pdf__vide h3 { margin: .25rem 0 0; }
+.pdf__vide p { max-width: 34rem; margin: 0; }
+.pdf__essai { margin-top: .75rem; width: min(30rem, 100%); text-align: left; }
+.pdf__essai summary { cursor: pointer; font-family: var(--ehg-font-titre); font-size: .9rem; color: var(--ehg-bleu); text-align: center; }
+#pdf-note-mobile { display: none; margin-top: .5rem; }
+@media (max-width: 48rem) { .pdf__cadre { height: 70vh; min-height: 22rem; } #pdf-note-mobile { display: block; } }
+.progression { margin-top: 2.5rem; }
+.modes.modes--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 56rem) { .modes.modes--3 { grid-template-columns: 1fr; } }
+
+/* ---------- 7. Exercices : questionnaire ---------- */
+.mode-emploi { list-style: none; counter-reset: me; padding: 0; margin: 0 0 1.75rem; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.mode-emploi li { counter-increment: me; position: relative; background: var(--ehg-brume); border-radius: var(--ehg-radius-lg); padding: .9rem 1rem .9rem 3.2rem; font-size: .95em; line-height: 1.45; }
+.mode-emploi li::before { content: counter(me); position: absolute; left: 1rem; top: .75rem; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--ehg-bleu); color: #fff; font-family: var(--ehg-font-serif); display: flex; align-items: center; justify-content: center; }
+.mode-emploi strong { display: block; font-family: var(--ehg-font-titre); font-weight: 500; }
+.series { display: grid; gap: .75rem; }
+.serie { display: grid; grid-template-columns: 4rem 1fr auto; align-items: center; gap: 1rem; background: var(--ehg-blanc); border: var(--ehg-filet); border-radius: var(--ehg-radius-lg); padding: 1rem 1.25rem; box-shadow: var(--ehg-ombre); }
+.serie__lettre { font-family: var(--ehg-font-serif); font-size: 2.2rem; line-height: 1; color: var(--ehg-or); text-align: center; }
+.serie--toutes .serie__lettre { font-size: 1.1rem; }
+.serie--toutes { background: var(--ehg-bleu-pale); border-color: transparent; box-shadow: none; }
+.serie__titre { margin: 0; font-size: 1.15rem; }
+.serie__sous { margin: .15rem 0 0; color: var(--ehg-graphite); font-size: .92em; }
+.serie__score { margin: .2rem 0 0; font-size: .92em; }
+.serie__score .chiffre { font-size: 1.15rem; }
+.quiz__barre { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1rem; padding-bottom: .5rem; border-bottom: var(--ehg-filet); }
+.quiz__titre { font-family: var(--ehg-font-titre); font-size: 1rem; text-align: center; }
+.quiz__score { font-family: var(--ehg-font-titre); font-size: .85rem; color: var(--ehg-graphite); }
+.quiz__score .chiffre { font-size: 1.3rem; margin-left: .25rem; }
+.piste { list-style: none; display: flex; flex-wrap: wrap; gap: .35rem; padding: 0; margin: 1rem 0; }
+.piste__pt { width: 2rem; height: 2rem; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-family: var(--ehg-font-titre); font-size: .8rem; background: var(--ehg-perle); color: var(--ehg-graphite); }
+.piste__pt.courant { background: var(--ehg-blanc); color: var(--ehg-noir); box-shadow: 0 0 0 2px var(--ehg-or); font-weight: 600; }
+.piste__pt.juste { background: var(--ehg-ok); color: #fff; }
+.piste__pt.faux { background: var(--ehg-erreur); color: #fff; }
+.question { background: var(--ehg-blanc); border: var(--ehg-filet); border-radius: var(--ehg-radius-lg); padding: 1.5rem; box-shadow: var(--ehg-ombre); animation: carte-entre .3s ease both; }
+.question__num { display: flex; align-items: baseline; gap: .35rem; margin: 0 0 .5rem; font-family: var(--ehg-font-titre); font-size: .95rem; color: var(--ehg-graphite); }
+.question__num .chiffre { font-size: 1.6rem; }
+.question__num .badge { margin-left: auto; }
+.question__texte { margin: 0 0 .35rem; font-size: 1.3rem; line-height: 1.4; }
+.question__consigne { margin: 0 0 1rem; font-size: .9em; color: var(--ehg-acier); }
+.reponses { display: grid; gap: .55rem; }
+.reponse { display: grid; grid-template-columns: 2.2rem 1fr; align-items: center; gap: .75rem; text-align: left; font: inherit; letter-spacing: inherit; line-height: 1.4; color: var(--ehg-noir); background: var(--ehg-blanc); border: 1px solid var(--ehg-bleu); border-radius: var(--ehg-radius-lg); padding: .75rem .9rem; min-height: 3.2rem; cursor: pointer; transition: background .12s, border-color .12s; }
+.reponse:hover { background: var(--ehg-bleu-pale); }
+.reponse__lettre { width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 1.5px solid var(--ehg-bleu); color: var(--ehg-bleu); display: inline-flex; align-items: center; justify-content: center; font-family: var(--ehg-font-titre); font-weight: 500; }
+.reponse[aria-checked="true"] { background: var(--ehg-bleu-pale); border-width: 2px; }
+.reponse[aria-checked="true"] .reponse__lettre { background: var(--ehg-bleu); color: #fff; }
+.reponse.juste { background: var(--ehg-ok-pale); border-color: var(--ehg-ok); border-width: 2px; }
+.reponse.juste .reponse__lettre { background: var(--ehg-ok); border-color: var(--ehg-ok); color: #fff; }
+.reponse.faux { background: var(--ehg-erreur-pale); border-color: var(--ehg-erreur); border-width: 2px; }
+.reponse.faux .reponse__lettre { background: var(--ehg-erreur); border-color: var(--ehg-erreur); color: #fff; }
+.reponse.eteinte { opacity: .5; }
+.reponse[disabled] { cursor: default; }
+.question__actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.25rem; }
+.correction { margin-top: 1.25rem; border-radius: var(--ehg-radius-lg); padding: 1rem 1.25rem; animation: carte-entre .3s ease both; }
+.correction--ok { background: var(--ehg-ok-pale); }
+.correction--faux { background: var(--ehg-erreur-pale); }
+.correction__verdict { margin: 0 0 .75rem; font-family: var(--ehg-font-titre); font-size: 1.05rem; }
+.correction--ok .correction__verdict span { color: var(--ehg-ok); }
+.correction--faux .correction__verdict span { color: var(--ehg-erreur); }
+.citation { margin: 0; background: var(--ehg-blanc); border-radius: var(--ehg-radius); padding: .85rem 1rem; box-shadow: inset 3px 0 0 var(--ehg-or); }
+.citation__source { font-family: var(--ehg-font-titre); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ehg-or-fonce); margin-bottom: .4rem; }
+.citation__texte { margin: 0; font-family: var(--ehg-font-serif); font-size: 1.05rem; line-height: 1.55; color: var(--ehg-noir); }
+.resultat { background: var(--ehg-brume); border-radius: var(--ehg-radius-lg); padding: 1.5rem; margin-top: 1rem; animation: carte-entre .3s ease both; }
+.resultat__score { margin: 0; font-family: var(--ehg-font-titre); font-size: 1.4rem; }
+.resultat__score .chiffre { font-size: 3rem; line-height: 1; }
+.resultat__msg { margin: .5rem 0 0; font-size: 1.05rem; }
+.recap { list-style: none; padding: 0; margin: 0; display: grid; gap: .35rem; }
+.recap li { display: grid; grid-template-columns: 1.8rem 1.4rem 1fr auto; gap: .5rem; align-items: start; background: var(--ehg-blanc); border-radius: var(--ehg-radius); padding: .45rem .7rem; font-size: .95em; }
+.recap__num { font-family: var(--ehg-font-serif); color: var(--ehg-or); }
+.recap li.juste .recap__etat { color: var(--ehg-ok); } .recap li.faux .recap__etat { color: var(--ehg-erreur); font-weight: 600; }
+.err-groupe .err-liste li .chiffre { margin-right: .35rem; }
+@media (max-width: 48rem) {
+  .mode-emploi { grid-template-columns: 1fr; }
+  .serie { grid-template-columns: 3rem 1fr; }
+  .serie > .btn { grid-column: 1 / -1; width: 100%; }
+  .quiz__barre { grid-template-columns: auto auto; }
+  .quiz__titre { grid-column: 1 / -1; grid-row: 2; text-align: left; font-size: .92rem; }
+  .question { padding: 1rem; }
+  .question__texte { font-size: 1.15rem; }
+  .question__actions .btn { flex: 1 1 100%; }
+  .piste__pt { width: 1.7rem; height: 1.7rem; font-size: .72rem; }
+  .recap li { grid-template-columns: 1.5rem 1.2rem 1fr; } .recap__p { grid-column: 3; }
+}
+
+/* ---------- 7 bis. Anciens jeux (inutilisés) ---------- */
+.tuiles--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.etoiles { font-family: var(--ehg-font-serif); color: var(--ehg-or); letter-spacing: .05em; font-size: 1.05rem; white-space: nowrap; }
+.modes { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 0 0 1.5rem; }
+.mode { display: grid; grid-template-columns: 2.6rem 1fr; grid-template-rows: auto auto; column-gap: .8rem; align-items: center; text-align: left; font: inherit; letter-spacing: inherit; color: var(--ehg-noir); background: var(--ehg-bleu-pale); border: 1px solid transparent; border-radius: var(--ehg-radius-lg); padding: 1rem 1.1rem; cursor: pointer; transition: border-color .15s, transform .15s; }
+.mode:hover { border-color: var(--ehg-bleu); transform: translateY(-2px); }
+.mode__ico { grid-row: 1 / span 2; width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--ehg-bleu); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+.mode strong { font-family: var(--ehg-font-titre); font-weight: 400; font-size: 1.1rem; }
+.mode span:not(.mode__ico) { font-size: .9em; color: var(--ehg-graphite); }
+/* tri éclair */
+.tri__entete { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; font-family: var(--ehg-font-titre); font-size: .85rem; color: var(--ehg-graphite); }
+.tri__serie { color: var(--ehg-or-fonce); }
+.tri__serie .chiffre { font-size: 1.2rem; display: inline-block; }
+.tri__serie.pop .chiffre { animation: pop .45s ease; }
+.tri__progress { margin: .35rem 0 1rem; }
+.tri__pile { position: relative; margin-bottom: .9rem; }
+.tri__carte { position: relative; background: var(--ehg-brume); border: 2px solid transparent; border-radius: var(--ehg-radius-lg); padding: 1.25rem 1.4rem; min-height: 6.5rem; display: flex; flex-direction: column; justify-content: center; gap: .5rem; transition: border-color .15s, background .15s; animation: carte-entre .3s ease both; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.tri__carte.balayable { cursor: grab; }
+.tri__carte.glisse { transition: none; animation: none; cursor: grabbing; }
+.tri__carte.retour { transition: transform .25s ease; }
+.tri__carte.sort-droite { animation: sort-droite .4s ease forwards; }
+.tri__carte.sort-gauche { animation: sort-gauche .4s ease forwards; }
+.tri__carte .badge { align-self: flex-start; }
+.tri__texte { margin: 0; font-family: var(--ehg-font-titre); font-size: 1.2rem; line-height: 1.4; text-wrap: balance; }
+.tri__carte.juste { border-color: var(--ehg-ok); background: var(--ehg-ok-pale); }
+.tri__carte.faux { border-color: var(--ehg-erreur); background: var(--ehg-erreur-pale); animation: secoue .35s ease; }
+.tri__figure { margin: 0 auto .25rem; max-width: 26rem; width: 100%; }
+.tri__indices { display: flex; justify-content: space-between; font-family: var(--ehg-font-titre); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ehg-acier); margin: .45rem 0 .6rem; }
+.tri__indices span { display: inline-flex; align-items: center; gap: .3rem; }
+.tri__tampon { position: absolute; top: .6rem; font-family: var(--ehg-font-titre); font-size: 1rem; letter-spacing: .12em; text-transform: uppercase; padding: .25em .6em; border: 2px solid; border-radius: var(--ehg-radius); opacity: 0; transform: rotate(-8deg); transition: opacity .1s; pointer-events: none; background: rgba(255,255,255,.85); }
+.tri__tampon--d { left: .8rem; color: var(--ehg-ok); border-color: var(--ehg-ok); }
+.tri__tampon--g { right: .8rem; color: var(--ehg-bleu); border-color: var(--ehg-bleu); transform: rotate(8deg); }
+.tri__choix { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .5rem; }
+.tri__btn { font: inherit; font-family: var(--ehg-font-titre); font-size: .98rem; letter-spacing: .01em; line-height: 1.3; color: var(--ehg-noir); background: var(--ehg-blanc); border: 1px solid var(--ehg-bleu); border-radius: var(--ehg-radius-lg); padding: .8rem .9rem; min-height: 3.2rem; cursor: pointer; transition: background .12s, transform .1s; text-align: center; }
+.tri__btn:hover { background: var(--ehg-bleu-pale); }
+.tri__btn:active { transform: scale(.98); }
+.tri__btn.juste { background: var(--ehg-ok); border-color: var(--ehg-ok); color: #fff; animation: pop .35s ease; }
+.tri__btn.faux { background: var(--ehg-erreur); border-color: var(--ehg-erreur); color: #fff; }
+.tri__btn.attendu { border-color: var(--ehg-ok); border-style: dashed; color: var(--ehg-ok); }
+.tri__btn[disabled] { cursor: default; }
+.tri__fb { margin-top: .9rem; display: grid; gap: .5rem; }
+.tri__bilan { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; padding: 1rem 1.25rem; background: var(--ehg-brume); border-radius: var(--ehg-radius-lg); font-family: var(--ehg-font-titre); animation: carte-entre .35s ease both; }
+.tri__bilan .grand { font-size: 2rem; line-height: 1; }
+.tri__bilan--ok { background: var(--ehg-ok-pale); }
+.cite { display: block; margin-top: .5rem; padding: .5rem .8rem; border-left: 3px solid var(--ehg-or); background: rgba(255,255,255,.55); font-family: var(--ehg-font-serif); font-style: italic; color: var(--ehg-noir); font-size: .95em; line-height: 1.5; }
+.cite__p { display: inline-block; margin-left: .5em; font-family: var(--ehg-font-titre); font-style: normal; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ehg-or-fonce); white-space: nowrap; }
+.badge--pop { animation: pop .5s ease; }
+@keyframes carte-entre { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes secoue { 0%, 100% { transform: none; } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
+@keyframes sort-droite { to { transform: translateX(130%) rotate(12deg); opacity: 0; } }
+@keyframes sort-gauche { to { transform: translateX(-130%) rotate(-12deg); opacity: 0; } }
+/* défi éclair */
+.sprint__chrono { display: grid; grid-template-columns: 3.2rem 1fr; align-items: center; gap: .75rem; margin: .25rem 0 1rem; }
+.sprint__temps { font-size: 1.8rem; line-height: 1; text-align: right; }
+.sprint__barre { margin: 0; }
+.sprint__barre span { transition: width 1s linear; }
+.sprint__chrono--fin .sprint__temps { color: var(--ehg-erreur); animation: pop 1s ease infinite; }
+.sprint__chrono--fin .sprint__barre span { background: var(--ehg-erreur); }
+/* tableau à compléter (chaîne, boucle) */
+.tch__banques { display: grid; grid-template-columns: repeat(var(--nb, 2), minmax(0, 1fr)); gap: .75rem; margin: .5rem 0 1rem; }
+.tch__banques .banque { margin: 0; }
+.tch { display: grid; gap: .5rem; }
+.tch__ligne { display: grid; grid-template-columns: minmax(7rem, 1.2fr) repeat(2, minmax(0, 2fr)); gap: .5rem; align-items: center; }
+.tch__label { font-family: var(--ehg-font-titre); font-size: .98rem; line-height: 1.3; padding: .5rem .75rem; background: var(--ehg-brume); border-radius: var(--ehg-radius-lg); min-height: 3rem; display: flex; align-items: center; }
+.tch__ligne .dz { min-height: 3rem; }
+.tch__ligne .dz .etiq { width: 100%; }
+.tch--boucle { grid-template-columns: 1fr auto 1fr; grid-template-areas: 'q3 f34 q4' 'f23 . f41' 'q2 f12 q1'; gap: .6rem .75rem; }
+.tch--boucle .tch__ligne { grid-template-columns: 2.2rem 1fr; grid-template-rows: auto auto; background: var(--ehg-brume); border-radius: var(--ehg-radius-lg); padding: .5rem; gap: .4rem; }
+.tch--boucle .tch__label { grid-row: 1 / span 2; background: none; font-family: var(--ehg-font-serif); font-size: 1.5rem; color: var(--ehg-or); padding: 0; justify-content: center; min-height: 0; }
+.tch--boucle .dz { background: var(--ehg-blanc); }
+.dz.refus { border-color: var(--ehg-erreur); animation: secoue .35s ease; }
+@media (max-width: 48rem) {
+  .tuiles--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .modes { grid-template-columns: 1fr; }
+  .tri__choix { grid-template-columns: 1fr; }
+  .tri__choix.deux { grid-template-columns: 1fr 1fr; }
+  .tri__texte { font-size: 1.08rem; }
+  .tch__banques { grid-template-columns: 1fr; }
+  .tch__ligne { grid-template-columns: 1fr; gap: .3rem; }
+  .tch__label { min-height: 0; }
+  .tch--boucle { grid-template-columns: 1fr auto 1fr; }
+  .tch--boucle .tch__ligne { grid-template-columns: 1.6rem 1fr; }
+}
+.choix-notions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem 1.5rem; }
+.choix-notions .partie { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-top: .75rem; padding-bottom: .3rem; border-bottom: 2px solid var(--ehg-noir); font-family: var(--ehg-font-titre); font-size: .76rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-graphite); }
+.choix-notions .partie:first-child { margin-top: 0; }
+.notion-btn { display: grid; grid-template-columns: 2.2rem 1fr auto; align-items: center; gap: .6rem; text-align: left; font: inherit; letter-spacing: inherit; color: var(--ehg-noir); background: var(--ehg-blanc); border: 1px solid var(--ehg-perle); border-radius: var(--ehg-radius-lg); padding: .6rem .8rem; cursor: pointer; transition: border-color .15s; }
+.notion-btn:hover { border-color: var(--ehg-bleu); background: var(--ehg-bleu-pale); }
+.notion-btn .id { font-family: var(--ehg-font-serif); color: var(--ehg-or); font-size: 1.05rem; }
+.notion-btn .nom { font-family: var(--ehg-font-titre); font-size: .95rem; line-height: 1.25; }
+.notion-btn .nb { font-family: var(--ehg-font-titre); font-size: .72rem; color: var(--ehg-acier); white-space: nowrap; }
+.serie__entete { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: .25rem; }
+.serie__entete h3 { margin: 0; }
+.score { font-family: var(--ehg-font-titre); font-size: .9rem; color: var(--ehg-graphite); white-space: nowrap; }
+.score .chiffre { font-size: 1.3rem; }
+.exo { background: var(--ehg-blanc); border: var(--ehg-filet); border-radius: var(--ehg-radius-lg); padding: 1.5rem; box-shadow: var(--ehg-ombre); }
+.exo__meta { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; align-items: center; margin-bottom: .75rem; }
+.exo__type { font-family: var(--ehg-font-titre); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-acier); }
+.exo__q { font-family: var(--ehg-font-titre); font-size: 1.15rem; line-height: 1.35; margin: 0 0 1rem; }
+.exo__consigne { font-size: .92em; color: var(--ehg-graphite); margin: -.5rem 0 1rem; }
+.exo__actions { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: 1.25rem; }
+.exo__fb { margin-top: 1rem; }
+.situation { font-size: 1.05em; line-height: 1.55; padding: 1rem 1.25rem; border-left: 3px solid var(--ehg-or); background: var(--ehg-brume); border-radius: 0 var(--ehg-radius-lg) var(--ehg-radius-lg) 0; margin: 0 0 1rem; }
+.situation .src { display: block; font-family: var(--ehg-font-titre); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-acier); margin-top: .5rem; }
+.exo figure { margin: 0 0 1rem; max-width: 34rem; }
+/* choix (qcm, multi) */
+.choix { display: grid; gap: .5rem; margin: .25rem 0 .5rem; }
+.choix button { display: grid; grid-template-columns: 1.7rem 1fr; align-items: start; gap: .6rem; text-align: left; font: inherit; letter-spacing: inherit; line-height: 1.4; color: var(--ehg-noir); padding: .65rem .85rem; border-radius: var(--ehg-radius-lg); border: 1px solid var(--ehg-perle); background: var(--ehg-blanc); cursor: pointer; transition: background .12s, border-color .12s; }
+.choix button:hover { border-color: var(--ehg-bleu); background: var(--ehg-bleu-pale); }
+.choix button .case { width: 1.25rem; height: 1.25rem; margin-top: .1rem; border: 2px solid var(--ehg-acier); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .75rem; color: #fff; }
+.choix.multi button .case { border-radius: 4px; }
+.choix button[aria-pressed="true"] { border-color: var(--ehg-bleu); background: var(--ehg-bleu-pale); }
+.choix button[aria-pressed="true"] .case { background: var(--ehg-bleu); border-color: var(--ehg-bleu); }
+.choix button.juste { border-color: var(--ehg-ok); background: var(--ehg-ok-pale); }
+.choix button.juste .case { background: var(--ehg-ok); border-color: var(--ehg-ok); }
+.choix button.faux { border-color: var(--ehg-erreur); background: var(--ehg-erreur-pale); }
+.choix button.faux .case { background: var(--ehg-erreur); border-color: var(--ehg-erreur); }
+.choix button.attendu { border-color: var(--ehg-ok); border-style: dashed; }
+.choix button[disabled] { cursor: default; }
+/* vrai / faux */
+.vf { display: grid; gap: .6rem; }
+.vf__ligne { display: grid; grid-template-columns: 1fr auto; gap: .75rem; align-items: center; padding: .65rem .85rem; border: 1px solid var(--ehg-perle); border-radius: var(--ehg-radius-lg); background: var(--ehg-blanc); }
+.vf__ligne.juste { border-color: var(--ehg-ok); background: var(--ehg-ok-pale); } .vf__ligne.faux { border-color: var(--ehg-erreur); background: var(--ehg-erreur-pale); }
+.vf__btns { display: flex; gap: .35rem; }
+.vf__btns button { font-family: var(--ehg-font-titre); font-size: .78rem; letter-spacing: .06em; padding: .45rem .75rem; border-radius: var(--ehg-radius); border: 1px solid var(--ehg-perle); background: var(--ehg-blanc); cursor: pointer; min-width: 3.4rem; }
+.vf__btns button:hover { border-color: var(--ehg-bleu); }
+.vf__btns button[aria-pressed="true"] { background: var(--ehg-bleu); color: #fff; border-color: var(--ehg-bleu); }
+.vf__btns button[disabled] { cursor: default; }
+.vf__expl { grid-column: 1 / -1; font-size: .9em; color: var(--ehg-graphite); border-top: 1px solid rgba(20,20,20,.08); padding-top: .4rem; }
+/* étiquettes et zones de dépôt (association, classement, texte à trous) */
+.etiq { display: inline-flex; align-items: center; gap: .4rem; font-family: var(--ehg-font-titre); font-size: .92rem; line-height: 1.3; padding: .5rem .8rem; border-radius: var(--ehg-radius); border: 1px solid var(--ehg-bleu); background: var(--ehg-blanc); color: var(--ehg-noir); cursor: grab; user-select: none; -webkit-user-select: none; touch-action: none; max-width: 100%; text-align: left; box-shadow: 0 1px 2px rgba(20,20,20,.08); }
+.etiq::before { content: '⋮⋮'; color: var(--ehg-bleu); opacity: .55; font-size: .9em; letter-spacing: -.15em; }
+.etiq:hover { background: var(--ehg-bleu-pale); }
+.etiq.sel { background: var(--ehg-bleu); color: #fff; border-color: var(--ehg-bleu); box-shadow: 0 0 0 3px rgba(31,78,121,.25); }
+.etiq.sel::before { color: #fff; }
+.etiq.fantome { position: fixed; z-index: 90; pointer-events: none; opacity: .9; transform: rotate(-1.5deg); box-shadow: 0 8px 20px rgba(20,20,20,.25); border-color: var(--vif); }
+.etiq.juste { border-color: var(--ehg-ok); background: var(--ehg-ok-pale); cursor: default; }
+.etiq.faux { border-color: var(--ehg-erreur); background: var(--ehg-erreur-pale); cursor: default; }
+.etiq.faux .corr { font-size: .82em; color: var(--ehg-erreur); font-style: italic; }
+.etiq[aria-disabled="true"] { cursor: default; }
+.dz { min-height: 3rem; border: 2px dashed rgba(31,78,121,.45); border-radius: var(--ehg-radius-lg); padding: .5rem; display: flex; flex-wrap: wrap; gap: .45rem; align-content: flex-start; transition: background .12s, border-color .12s; }
+.dz.survol, .dz.cible { border-color: var(--ehg-bleu); background: var(--ehg-bleu-pale); border-style: solid; }
+.dz.pleine { border-style: solid; border-color: var(--ehg-perle); }
+.banque { margin: .5rem 0 1rem; background: var(--ehg-brume); border-color: var(--ehg-perle); }
+.banque.cible { border-color: var(--ehg-bleu); }
+.banque:empty::after { content: 'Toutes les étiquettes sont placées.'; font-size: .85em; color: var(--ehg-acier); font-family: var(--ehg-font-titre); }
+.dz__titre { width: 100%; font-family: var(--ehg-font-titre); font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ehg-graphite); margin: -.1rem 0 .15rem; }
+.assoc { display: grid; gap: .5rem; }
+.assoc__ligne { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .75rem; align-items: center; }
+.assoc__gauche { font-family: var(--ehg-font-titre); font-size: .98rem; line-height: 1.3; padding: .5rem .75rem; background: var(--ehg-brume); border-radius: var(--ehg-radius-lg); min-height: 3rem; display: flex; align-items: center; }
+.assoc__ligne .dz { min-height: 3rem; }
+.assoc__ligne .dz .etiq { width: 100%; }
+.classer { display: grid; grid-template-columns: repeat(var(--nb, 3), minmax(0, 1fr)); gap: .75rem; }
+.classer .dz { min-height: 6rem; }
+.classer .dz__titre { font-size: .85rem; text-transform: none; letter-spacing: .02em; font-weight: 500; color: var(--ehg-noir); }
+.classer.deux { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 48rem) { .classer, .classer.deux { grid-template-columns: 1fr; } .classer .dz { min-height: 4rem; } .assoc__ligne { grid-template-columns: 1fr; gap: .3rem; } .assoc__gauche { min-height: 0; } }
+.trous { line-height: 2.3; font-size: 1.05em; }
+.trous .dz { display: inline-flex; vertical-align: middle; min-height: 2.2rem; min-width: 7.5rem; padding: .15rem .3rem; margin: 0 .15rem; align-items: center; }
+.trous .dz .etiq { padding: .25rem .6rem; font-size: .9rem; }
+.trous .dz .etiq::before { display: none; }
+/* remise en ordre */
+.ordre { list-style: none; padding: 0; margin: 0 0 .5rem; display: grid; gap: .5rem; counter-reset: pos; }
+.ordre li { display: grid; grid-template-columns: 2rem 1fr auto; align-items: center; gap: .6rem; padding: .55rem .75rem; border: 1px solid var(--ehg-bleu); border-radius: var(--ehg-radius-lg); background: var(--ehg-blanc); font-family: var(--ehg-font-titre); font-size: .98rem; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; counter-increment: pos; }
+.ordre li::before { content: counter(pos); font-family: var(--ehg-font-serif); color: var(--ehg-or); font-size: 1.15rem; text-align: center; }
+.ordre li.deplace { opacity: .35; }
+.ordre li.juste { border-color: var(--ehg-ok); background: var(--ehg-ok-pale); cursor: default; }
+.ordre li.faux { border-color: var(--ehg-erreur); background: var(--ehg-erreur-pale); cursor: default; }
+.ordre li .corr { font-size: .82em; color: var(--ehg-erreur); font-style: italic; margin-left: .4em; }
+.ordre__btns { display: flex; gap: .25rem; }
+.ordre__btns button { width: 2.2rem; height: 2.2rem; border-radius: var(--ehg-radius); border: 1px solid var(--ehg-perle); background: var(--ehg-blanc); cursor: pointer; font-size: .9rem; color: var(--ehg-graphite); touch-action: manipulation; }
+.ordre__btns button:hover { border-color: var(--ehg-bleu); color: var(--ehg-bleu); background: var(--ehg-bleu-pale); }
+.ordre__btns button[disabled] { opacity: .3; cursor: default; }
+.ordre.fige li { cursor: default; }
+/* bilan de série */
+.bilan { text-align: left; }
+.bilan .grand { font-family: var(--ehg-font-serif); font-size: 2.6rem; color: var(--ehg-or); line-height: 1; }
+.bilan__notions { display: grid; gap: .35rem; margin: 1rem 0; }
+.bilan__notions div { display: grid; grid-template-columns: 2.2rem 1fr auto; gap: .6rem; align-items: center; padding: .35rem 0; border-bottom: var(--ehg-filet); font-family: var(--ehg-font-titre); font-size: .92rem; }
+.bilan__notions .id { font-family: var(--ehg-font-serif); color: var(--ehg-or); }
+.bilan__notions .res { font-size: .8rem; letter-spacing: .04em; }
+/* erreurs */
+.err-groupe { margin-bottom: 1.5rem; }
+.err-groupe h3 { display: flex; align-items: center; gap: .6rem; margin-top: 0; }
+.err-groupe h3 .id { font-family: var(--ehg-font-serif); color: var(--ehg-or); }
+.err-liste { list-style: none; margin: 0 0 .75rem; padding: 0; display: grid; gap: .4rem; }
+.err-liste li { display: grid; grid-template-columns: 1fr auto; gap: .75rem; align-items: center; padding: .55rem .8rem; background: var(--ehg-brume); border-radius: var(--ehg-radius-lg); font-size: .95em; }
+.err-liste li .n { font-family: var(--ehg-font-titre); font-size: .72rem; color: var(--ehg-acier); white-space: nowrap; }
+/* modales */
+.modale { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.modale__fond { position: absolute; inset: 0; background: rgba(20,20,20,.55); }
+.modale__boite { position: relative; background: var(--ehg-blanc); border-radius: var(--ehg-radius-lg); box-shadow: 0 12px 40px rgba(20,20,20,.35); width: min(34rem, 100%); max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem); overflow: auto; display: flex; flex-direction: column; }
+.modale__entete { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; padding: 1.25rem 1.5rem 1rem; border-bottom: var(--ehg-filet); }
+.modale__fermer { flex: 0 0 auto; min-width: 2.4rem; justify-content: center; }
+.modale__corps { padding: 1.25rem 1.5rem 1.5rem; }
+.modale__actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.25rem; }
+.qr-zone { width: min(20rem, 100%); margin: 0 auto; }
+.qr-zone svg { display: block; width: 100%; height: auto; }
+.qr-url { font-family: var(--ehg-font-titre); font-size: .9rem; text-align: center; word-break: break-all; margin: .75rem 0 .5rem; color: var(--ehg-graphite); }
+.qr-options { margin-top: .75rem; }
+.qr-options summary { cursor: pointer; font-family: var(--ehg-font-titre); font-size: .85rem; color: var(--ehg-graphite); }
+.champ__label { display: block; font-family: var(--ehg-font-titre); font-size: .85rem; font-weight: 500; margin-bottom: .3rem; margin-top: .75rem; }
+.input { width: 100%; font: inherit; font-size: 16px; color: var(--ehg-noir); background: var(--ehg-blanc); border: 1px solid var(--ehg-acier); border-radius: var(--ehg-radius); padding: .6rem .75rem; letter-spacing: inherit; }
+.input:focus { border-color: var(--ehg-noir); outline: 2px solid var(--ehg-or); outline-offset: 1px; }
+body.modale-ouverte { overflow: hidden; }
+.modale--plein .modale__boite { width: 100%; height: 100%; max-height: none; border-radius: 0; }
+.modale--plein .modale__corps { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.modale--plein .qr-zone { width: min(80vh, 80vw, 90%); }
+.modale--plein .qr-url { font-size: 1.25rem; }
+.modale--plein .qr-options { display: none; }
+.btn__ico { display: inline-flex; align-items: center; font-weight: 500; text-transform: none; }
+.toast { position: fixed; left: 50%; bottom: 5.5rem; transform: translateX(-50%); z-index: 95; background: var(--ehg-noir); color: #fff; padding: .6rem 1rem; border-radius: 999px; font-family: var(--ehg-font-titre); font-size: .85rem; box-shadow: 0 6px 18px rgba(20,20,20,.3); }
+
+/* ---------- 8. Smartphone ---------- */
+@media (max-width: 48rem) {
+  .page { padding-inline: 1rem; }
+  .onglets { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 20; background: var(--ehg-blanc); margin: 0; padding: 0 .25rem env(safe-area-inset-bottom, 0px); border-top: var(--ehg-filet); border-bottom: 0; box-shadow: 0 -2px 10px rgba(20,20,20,.08); gap: 0; justify-content: space-around; overflow: visible; }
+  .onglets button { flex: 1 1 0; flex-direction: column; gap: .2rem; text-align: center; padding: .55rem 0 .6rem; margin: 0; border-bottom: 0; border-top: 3px solid transparent; font-size: .62rem; letter-spacing: .04em; min-height: 58px; }
+  .onglets button .ico { width: 22px; height: 22px; }
+  .onglets button[aria-selected="true"] { border-top-color: var(--ehg-or); border-bottom: 0; }
+  .onglets button .pastille { position: absolute; margin-left: 2.2rem; margin-top: -.2rem; }
+  body.onglets-bas { padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)); }
+  .entete__droite { gap: .4rem; }
+  .entete__droite > span { display: none; }
+  .entete__droite .btn { font-size: .68rem; padding: .5rem .6rem; min-height: 40px; }
+  .logotype { white-space: nowrap; font-size: 1.05rem; }
+  .entete { gap: .75rem; }
+  .titre { padding: 1.25rem 0 .5rem; }
+  h1 { font-size: 1.55rem; } h2 { font-size: 1.3rem; margin-top: 1.75rem; } h3 { font-size: 1.12rem; }
+  .carte, .exo { padding: 1rem; }
+  .entrees { grid-template-columns: 1fr 1fr; gap: .6rem; }
+  .entree { padding: .9rem; }
+  .entree span { display: none; }
+  .tuiles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; } .tuile { padding: .6rem .7rem; } .tuile .val { font-size: 1.5rem; }
+  .maitrise__ligne { grid-template-columns: 2rem 1fr 5rem; }
+  .choix-notions { grid-template-columns: 1fr; }
+  .som { display: flex; gap: .5rem; overflow-x: auto; min-width: 0; max-width: 100%; padding-bottom: .5rem; margin-bottom: 1rem; -webkit-overflow-scrolling: touch; }
+  .som__partie { display: flex; gap: .4rem; margin: 0; }
+  .som__partie > span { display: none; }
+  .som a { white-space: nowrap; border: 1px solid var(--ehg-perle); border-radius: 999px; padding: .35rem .7rem; border-left-width: 1px; }
+  .som a.actif { border-color: var(--ehg-or); background: var(--ehg-or-pale); }
+  .btn { padding: .6rem .9rem; min-height: 42px; }
+  .btn--large { width: 100%; min-height: 48px; }
+  .exo__actions .btn { flex: 1 1 auto; }
+  .choix button { padding: .6rem .7rem; min-height: 44px; }
+  .etiq { min-height: 40px; font-size: .9rem; }
+  .vf__ligne { grid-template-columns: 1fr; }
+  .vf__btns button { flex: 1; min-height: 40px; }
+  .tableau th, .tableau td { padding: .45rem .5rem; font-size: .9em; }
+  .defile { margin-inline: -1rem; padding-inline: 1rem; }
+  .defile .tableau--large { min-width: 40rem; }
+  .defile--large::before { content: 'Tableau large : faire défiler \2192'; display: block; font-family: var(--ehg-font-titre); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ehg-acier); margin-bottom: .35rem; }
+  .modale { padding: 0; align-items: stretch; }
+  .modale__boite { width: 100%; max-height: none; border-radius: 0; }
+  .modale__corps { padding: 1rem; } .modale__entete { padding: 1rem; }
+  .diagramme .lib { font-size: 27px; } .diagramme .etiquette { font-size: 28px; } .diagramme .etiquette-2 { font-size: 22px; }
+  .pied { flex-direction: column; gap: .35rem; }
+  .toast { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+}
+@media (max-width: 30rem) {
+  .entete__droite .btn .btn__txt { display: none; }
+  .entete__droite .btn { padding: .5rem .65rem; }
+  .diagramme .titre-axe { display: none; }
+}
+@media print {
+  @page { size: A4; margin: 18mm 16mm; }
+  body { font-size: 10.5pt; }
+  .onglets, .btn, .entete__droite, .fiche__actions { display: none !important; }
+  section[role="tabpanel"] { display: block !important; }
+  .carte, .exo { box-shadow: none; break-inside: avoid; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+</style>
+
+</head>
+<body>
+<header class="page entete">
+  <a class="logotype" href="#exercices" data-va="entrainer">École d'Horlo<span class="g">g</span>erie Genève</a>
+  <div class="entete__droite">
+    <span>CPH_HOP_01 · Lignes de production</span>
+    <button class="btn btn--secondaire btn--petit" id="btn-confort" type="button" aria-pressed="false" title="Texte plus grand et plus aéré (dyslexie, dysorthographie)"><span class="btn__ico" aria-hidden="true">Aa</span><span class="btn__txt">Confort de lecture</span></button>
+    <button class="btn btn--petit" id="btn-qr" type="button" aria-haspopup="dialog" aria-controls="modale-qr" title="Afficher un QR code pour ouvrir l'application sur un téléphone"><svg class="btn__ico" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M1 1h6v6H1zM2.5 2.5v3h3v-3zM9 1h6v6H9zm1.5 1.5v3h3v-3zM1 9h6v6H1zm1.5 1.5v3h3v-3zM9 9h2v2H9zm2 2h2v2h-2zm2-2h2v2h-2zm-4 4h2v2H9zm4 0h2v2h-2z"/></svg><span class="btn__txt">QR code</span></button>
+  </div>
+</header>
+
+<main class="page">
+  <div class="titre">
+    <span class="surtitre">Séquence 1 · Voix du client et production traditionnelle · Révision des pages 1 à 40</span>
+    <h1>Du client au bon produit</h1>
+    <p class="lead">Relire le cours, répondre aux questions des parties A, B et C, puis revoir ses erreurs.</p>
+  </div>
+
+  <nav class="onglets" role="tablist" aria-label="Écrans de l'application">
+    <button role="tab" id="tab-cours" aria-controls="panel-cours" aria-selected="false" data-tab="cours"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 18a2.5 2.5 0 0 1 2.5-2.5H20"/><path d="M8 7h8M8 10.5h6"/></svg>Théorie</button>
+    <button role="tab" id="tab-entrainer" aria-controls="panel-entrainer" aria-selected="true" data-tab="entrainer"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>Exercices</button>
+    <button role="tab" id="tab-erreurs" aria-controls="panel-erreurs" aria-selected="false" data-tab="erreurs"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14.3-4.9"/><path d="M19 3v5h-5"/><path d="M20 12a8 8 0 0 1-14.3 4.9"/><path d="M5 21v-5h5"/></svg>Mes erreurs<span class="pastille" id="pastille-erreurs" hidden>0</span></button>
+  </nav>
+
+  <!-- ================================================================ -->
+  <!-- THÉORIE : lecteur du support de cours (PDF)                        -->
+  <!-- ================================================================ -->
+  <section id="panel-cours" role="tabpanel" aria-labelledby="tab-cours" hidden>
+    <div class="pdf__entete">
+      <div>
+        <h2 style="margin:0">Théorie</h2>
+        <p class="note" style="margin:.25rem 0 0" id="pdf-sous-titre">Support de cours CPH_HOP_01, pages 1 à 40.</p>
+      </div>
+      <div class="pdf__outils" id="pdf-outils" hidden>
+        <label class="pdf__page" for="pdf-page">Page <input class="input" type="number" id="pdf-page" min="1" max="999" inputmode="numeric" value="1"></label>
+        <button type="button" class="btn btn--secondaire btn--petit" id="pdf-aller">Afficher</button>
+        <a class="btn btn--bleu btn--petit" id="pdf-ouvrir" href="#" target="_blank" rel="noopener">Ouvrir le PDF</a>
+      </div>
+    </div>
+    <div class="pdf__cadre" id="pdf-cadre">
+      <div class="pdf__vide" id="pdf-vide">
+        <svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 6h22l12 12v38a2 2 0 0 1-2 2H16a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M38 6v12h12"/><path d="M22 32h20M22 40h20M22 48h12"/></svg>
+        <h3>Emplacement du support de cours</h3>
+        <p>Le PDF du cours s'affichera ici. Pour le relier, renseignez son adresse dans la constante <code>PDF_COURS</code>, au début du script de ce fichier.</p>
+        <details class="pdf__essai">
+          <summary>Essayer une adresse maintenant</summary>
+          <label class="champ__label" for="pdf-url">Adresse (URL) du PDF</label>
+          <input class="input" type="url" id="pdf-url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://…/cours.pdf">
+          <p class="note" style="margin:.5rem 0">Lien direct vers un fichier .pdf, ou lien de partage Google Drive (il est converti automatiquement en lien d'aperçu). L'essai n'est pas enregistré dans le fichier.</p>
+          <button type="button" class="btn btn--bleu btn--petit" id="pdf-essayer">Afficher ce PDF</button>
+        </details>
+      </div>
+      <iframe id="pdf-frame" title="Support de cours (PDF)" hidden></iframe>
+    </div>
+    <p class="note" id="pdf-note-mobile">Sur téléphone, certains navigateurs n'affichent que la première page d'un PDF intégré : utilisez « Ouvrir le PDF ».</p>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- EXERCICES : questions à choix multiple par partie                  -->
+  <!-- ================================================================ -->
+  <section id="panel-entrainer" role="tabpanel" aria-labelledby="tab-entrainer">
+    <div id="ent-choix">
+      <h2 style="margin-top:0">Exercices</h2>
+      <ol class="mode-emploi" aria-label="Mode d'emploi">
+        <li><strong>Choisissez une partie</strong> du cours : A, B ou C, ou les trois à la suite.</li>
+        <li><strong>Lisez la question</strong>, touchez une réponse, puis « Valider ». Une seule réponse est juste.</li>
+        <li><strong>Lisez la correction</strong> : la phrase exacte du cours, entre guillemets, avec sa page. Puis « Question suivante ».</li>
+      </ol>
+      <div class="series" id="parties"></div>
+
+      <div class="grille grille--2 progression" style="align-items:start">
+        <div class="carte carte--brume">
+          <h3 style="margin-top:0">Ma progression</h3>
+          <div class="tuiles">
+            <div class="tuile"><span class="lab">Questions faites</span><span class="val" id="prog-faites">0</span></div>
+            <div class="tuile"><span class="lab">Réussies</span><span class="val" id="prog-justes">—</span></div>
+            <div class="tuile"><span class="lab">À revoir</span><span class="val" id="prog-err">0</span></div>
+          </div>
+          <p class="note" style="margin:.5rem 0 0">Enregistré sur cet appareil, dans ce navigateur. Une question compte selon la dernière réponse donnée.</p>
+        </div>
+        <div class="carte carte--brume">
+          <h3 style="margin-top:0">Réinitialiser</h3>
+          <div class="reinit">
+            <div class="reinit__ligne"><span>Les résultats<small>Scores, réponses enregistrées et liste des erreurs.</small></span><button type="button" class="btn btn--secondaire btn--petit" data-reinit="resultats">Réinitialiser les résultats</button></div>
+            <div class="reinit__ligne"><span>Toutes les données<small>Retour à l'état initial, y compris le confort de lecture.</small></span><button type="button" class="btn btn--secondaire btn--petit" data-reinit="tout">Tout effacer</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="quiz" hidden></div>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- MES ERREURS                                                        -->
+  <!-- ================================================================ -->
+  <section id="panel-erreurs" role="tabpanel" aria-labelledby="tab-erreurs" hidden>
+    <h2 style="margin-top:0">Mes erreurs</h2>
+    <p class="texte">Les questions dont la dernière réponse était fausse, regroupées par partie, avec la page du cours à relire.</p>
+    <div id="err-contenu"></div>
+  </section>
+</main>
+
+<footer class="page pied">
+  <span>École d'Horlogerie de Genève · CPH_HOP_01 Lignes de production · Séquence 1, pages 1 à 40 · N. Derobert</span>
+  <span>Document élaboré avec l'assistance d'outils d'intelligence artificielle.</span>
+</footer>
+
+<!-- Modale : QR code vers cette page -->
+<div class="modale" id="modale-qr" role="dialog" aria-modal="true" aria-labelledby="modale-qr-titre" hidden>
+  <div class="modale__fond" data-fermer></div>
+  <div class="modale__boite">
+    <div class="modale__entete">
+      <div><span class="surtitre">Ouvrir sur un téléphone</span><h3 id="modale-qr-titre" style="margin:0">Du client au bon produit · EHG</h3></div>
+      <button type="button" class="btn btn--secondaire btn--petit modale__fermer" data-fermer aria-label="Fermer">✕</button>
+    </div>
+    <div class="modale__corps">
+      <div class="qr-zone" id="qr-zone" aria-live="polite"></div>
+      <p class="qr-lien"><a id="qr-url" href="#" target="_blank" rel="noopener"></a></p>
+      <p class="note" id="qr-note" hidden></p>
+      <details class="qr-options">
+        <summary>Modifier l'adresse encodée</summary>
+        <label class="champ__label" for="qr-input">Adresse (URL) à encoder</label>
+        <input class="input" type="url" id="qr-input" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://…">
+        <p class="note" style="margin:.5rem 0 0">Le QR code se met à jour pendant la saisie. L’adresse proposée par défaut est celle du site en ligne de cette page (constante ADRESSE_EN_LIGNE dans le fichier) ; utile si l’application est hébergée ailleurs.</p>
+        <p style="margin:.5rem 0 0"><button type="button" class="btn btn--secondaire btn--petit" id="qr-defaut">Revenir à l’adresse en ligne</button></p>
+      </details>
+      <div class="modale__actions">
+        <button type="button" class="btn btn--secondaire" id="qr-agrandir" aria-pressed="false">Agrandir pour projeter</button>
+        <button type="button" class="btn btn--secondaire" id="qr-copier">Copier l'adresse</button>
+        <button type="button" class="btn" data-fermer>Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modale : confirmation -->
+<div class="modale" id="modale-confirm" role="dialog" aria-modal="true" aria-labelledby="modale-confirm-titre" hidden>
+  <div class="modale__fond" data-fermer></div>
+  <div class="modale__boite">
+    <div class="modale__entete">
+      <div><h3 id="modale-confirm-titre" style="margin:0">Confirmer</h3></div>
+      <button type="button" class="btn btn--secondaire btn--petit modale__fermer" data-fermer aria-label="Fermer">✕</button>
+    </div>
+    <div class="modale__corps">
+      <p id="modale-confirm-texte"></p>
+      <div class="modale__actions"><button type="button" class="btn btn--or" id="modale-confirm-ok">Confirmer</button><button type="button" class="btn btn--secondaire" data-fermer>Annuler</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+'use strict';
+/* ======================================================================
+   1. Questions à choix multiple — parties A, B et C du cours (pages 9 à 40)
+   Chaque question : une seule bonne réponse (rep = indice dans options).
+   cite : [phrase exacte du support, page, repère facultatif]
+   ====================================================================== */
+const PARTIES = [
+  { id: 'A', titre: 'L’expression des besoins', pages: '9 à 26' },
+  { id: 'B', titre: 'L’identification des personas', pages: '27 à 34' },
+  { id: 'C', titre: 'Définir le bon produit', pages: '35 à 40' },
+];
+const QUESTIONS = [
+  /* ---------------- Partie A ---------------- */
+  { p: 'A', q: 'Selon le cours, que peut devenir un client satisfait ?',
+    options: ['Un ambassadeur de la marque', 'Un persona', 'Un fournisseur de la manufacture', 'Un responsable marketing'], rep: 0,
+    cite: ['Un client satisfait peut devenir un ambassadeur : il recommande la marque et contribue à une bonne réputation.', '15'] },
+  { p: 'A', q: 'Comment se fait généralement l’écoute client ?',
+    options: ['Par l’analyse des seules ventes de la boutique', 'Par des interviews en direct et/ou des enquêtes clients', 'Par l’observation des produits concurrents', 'Par des essais en laboratoire'], rep: 1,
+    cite: ['L’écoute client se fait généralement par des interviews en direct et/ou des enquêtes clients.', '17'] },
+  { p: 'A', q: 'Quelle est la définition du besoin ?',
+    options: ['Un besoin ou une attente formulé, premier maillon opposable', 'Le niveau que le client suppose obtenir sans l’avoir demandé', 'Ce que l’utilisateur cherche à obtenir, exprimé sans nommer aucune solution', 'Une caractéristique chiffrée associée à un moyen de contrôle'], rep: 2,
+    cite: ['Ce que l\'utilisateur cherche à obtenir, exprimé sans nommer aucune solution.', '19', 'Besoin · définition à retenir'] },
+  { p: 'A', q: 'Un client dit : « Je m’attends à ce que ma montre supporte la natation. » De quoi s’agit-il ?',
+    options: ['D’un besoin', 'D’une attente', 'D’une exigence', 'D’une spécification'], rep: 1,
+    cite: ['Le niveau que le client suppose obtenir sans l\'avoir demandé. C\'est l\'étalon de sa satisfaction.', '19', 'Attente · définition à retenir'] },
+  { p: 'A', q: 'Sous quelles formes une exigence peut-elle se présenter ?',
+    options: ['Écrite, orale ou chiffrée', 'Obligatoire, proportionnelle ou attractive', 'Explicite, implicite ou obligatoire', 'Attendue, voulue ou perçue'], rep: 2,
+    cite: ['Un besoin ou une attente formulé. Premier maillon opposable : explicite, implicite ou obligatoire.', '19', 'Exigence · définition à retenir'] },
+  { p: 'A', q: 'Le client dit : « Elle doit tenir tout le week-end. » Quelle caractéristique critique et quelle exigence chiffrée le cours retient-il ?',
+    options: ['Écart de marche · −4 / +6 s par jour', 'Réserve de marche · ≥ 60 heures', 'Étanchéité · 3 bar', 'Délai de livraison · ≤ 10 jours ouvrés'], rep: 1,
+    cite: ['« Elle doit tenir tout le week-end. » — Réserve de marche — ≥ 60 heures', '20', 'Tableau « De la voix du client à l’exigence mesurable »'] },
+  { p: 'A', q: 'Pourquoi un besoin qui n’est pas chiffré n’est-il pas « produisible » ?',
+    options: ['Parce que le client ne l’a pas encore payé', 'Parce qu’on ne saura ni le fabriquer de façon stable, ni prouver qu’il est atteint', 'Parce que le marketing ne l’a pas validé', 'Parce qu’il ne figure pas dans le catalogue'], rep: 1,
+    cite: ['Tant qu’un besoin n’est pas chiffré et associé à un moyen de contrôle, il n’est pas produisible : on ne saura ni le fabriquer de façon stable, ni prouver qu’il est atteint.', '20', 'Le principe'] },
+  { p: 'A', q: 'Dans le modèle de Kano, dans quelle catégorie le cours place-t-il la réserve de marche (en heures) ?',
+    options: ['Obligatoire', 'Proportionnel', 'Attractif', 'Aucune : elle n’a pas d’effet sur la satisfaction'], rep: 1,
+    cite: ['Le client sait ce qu’il veut et le demande. Plus la caractéristique est bien réalisée, plus il est content ; moins elle l’est, plus il est déçu. C’est sur ces points qu’il compare les marques.', '23', 'Proportionnel « Plus, c’est mieux. »'] },
+  { p: 'A', q: 'Une montre livrée réglée, propre, sans rayure ni trace de doigt : dans quelle catégorie de Kano le cours la place-t-il ?',
+    options: ['Obligatoire', 'Proportionnel', 'Attractif', 'Elle dépend du prix de la montre'], rep: 0,
+    cite: ['Le client n’y pense même pas : il la considère comme acquise et ne la demande pas. Si elle est là, il ne dit rien (« normal »). Si elle manque, il est très mécontent et le fait savoir.', '23', 'Obligatoire « Ça va de soi. »'] },
+  { p: 'A', q: 'Que devient, avec le temps, une caractéristique attractive ?',
+    options: ['Elle disparaît du modèle', 'Elle devient une habitude, puis une évidence : il faut la renouveler', 'Elle devient une exigence chiffrée', 'Elle reste toujours une bonne surprise'], rep: 1,
+    cite: ['Avec le temps, la surprise devient une habitude, puis une évidence (Kano, 2001) : il faut la renouveler.', '23', 'Attractif « La bonne surprise. »'] },
+  { p: 'A', q: 'Dans la boucle qualité, comment s’appelle « ce que l’entreprise a conçu » ?',
+    options: ['La qualité attendue', 'La qualité voulue', 'La qualité réalisée', 'La qualité perçue'], rep: 1,
+    cite: ['2 - Qualité voulue — Ce que l’entreprise a conçu', '24', 'Boucle qualité'] },
+  { p: 'A', q: 'Selon la boucle qualité, que représente tout décalage entre ce que le client perçoit et ce qu’il attend ?',
+    options: ['Une amélioration de la qualité réalisée', 'Une insatisfaction ou un surcoût pour l’entreprise', 'Une nouvelle exigence obligatoire', 'Un nouveau persona à définir'], rep: 1,
+    cite: ['Tout décalage entre ce que le client perçoit et ce qu’il attend est une insatisfaction ou un surcoût pour l’entreprise.', '24'] },
+
+  /* ---------------- Partie B ---------------- */
+  { p: 'B', q: 'Dans l’entreprise, qui comprend les besoins de tous les clients et les regroupe en personas ?',
+    options: ['Les vendeurs de la boutique, seuls', 'Le marketing', 'La manufacture', 'Le service après-vente'], rep: 1,
+    cite: ['C’est le rôle du marketing : comprendre les besoins des clients à partir de ce que la boutique observe et de ce que les clients expriment.', '28'] },
+  { p: 'B', q: 'Qu’est-ce qu’un persona ?',
+    options: ['Un client réel, choisi parmi les meilleurs clients de la boutique', 'Un modèle de montre destiné à un groupe de clients', 'Un personnage fictif représentant un groupe de clients partageant des caractéristiques similaires', 'Un vendeur spécialisé dans un type de clientèle'], rep: 2,
+    cite: ['Les personas sont des personnages fictifs représentant des groupes de clients partageant des caractéristiques similaires.', '29'] },
+  { p: 'B', q: 'Des clients découvrent la montre sur le même réseau social avant de venir en boutique. Quelle caractéristique partagent-ils ?',
+    options: ['Des objectifs communs', 'Un parcours d’achat similaire', 'Le même profil personnel', 'Le même besoin'], rep: 1,
+    cite: ['Parcours d\'achat similaires (découverte de la montre sur le même réseau social avant de venir en boutique)', '29'] },
+  { p: 'B', q: 'Lequel de ces éléments fait partie des « mêmes profils personnels » d’un persona ?',
+    options: ['L’âge', 'L’achat pour un mariage', 'La découverte de la montre sur un réseau social', 'Le type de montre recommandé'], rep: 0,
+    cite: ['Mêmes profils personnels : âge, catégories sociales, motivations', '29'] },
+  { p: 'B', q: 'Selon le cours, à quoi l’outil des personas aide-t-il en premier ?',
+    options: ['À fabriquer une montre spécifique pour chaque client', 'À proposer des produits répondant aux besoins d’un ensemble de clients', 'À fixer le prix de revient des montres', 'À remplacer le contrôle final'], rep: 1,
+    cite: ['Proposer des produits répondant aux besoins d’un ensemble de clients, plutôt que d’avoir un produit spécifique par client.', '30'] },
+  { p: 'B', q: 'Une marque diffuse ses messages sur les réseaux sociaux pour un public jeune et dans des magazines spécialisés pour un public plus âgé. Quelle utilité des personas est illustrée ?',
+    options: ['Adapter les stratégies de publicité par catégorie de clients', 'Définir la quantité à produire', 'Traduire un besoin en exigence chiffrée', 'Adapter les moyens de production'], rep: 0,
+    cite: ['Par exemple, des messages publicitaires pour un public jeune seront diffusés sur les réseaux sociaux alors qu’un public plus âgé sera également ciblé dans des magazines spécialisés.', '30'] },
+  { p: 'B', q: 'Dans la fiche du persona Julien, « S’offrir une pièce durable, transmissible à ses enfants » figure dans quelle rubrique ?',
+    options: ['Identité', 'Motivations', 'Besoins', 'Revenus annuels'], rep: 1,
+    cite: ['Motivation 2 : S’offrir une pièce durable, transmissible à ses enfants.', '31', 'Exemple de persona'] },
+  { p: 'B', q: 'Du persona à la montre : que fait-on à la deuxième étape ?',
+    options: ['On décrit les besoins du persona', 'On traduit les besoins en caractéristiques de la montre', 'On choisit le modèle dans le catalogue', 'On calcule la quantité à produire'], rep: 1,
+    cite: ['Traduction des besoins en caractéristiques. Ce que la montre doit offrir pour y répondre : type, fonctions, matériaux, étanchéité, lisibilité, niveau de prix.', '33', '2. Les caractéristiques de la montre'] },
+  { p: 'B', q: 'Quelle affirmation est juste ?',
+    options: ['Un persona désigne directement la montre à fabriquer', 'Un persona décrit des besoins ; il ne désigne pas une montre', 'Un persona correspond toujours à un modèle existant', 'Un persona fixe la quantité à produire'], rep: 1,
+    cite: ['À retenir. Un persona ne désigne pas une montre : il décrit des besoins.', '33'] },
+  { p: 'B', q: 'Camille, 25 ans, étudiante / jeune pro, cherche une élégance abordable et de la polyvalence. Quel type de montre le tableau du cours recommande-t-il ?',
+    options: ['Montre chronographe', 'Montre automatique de luxe', 'Montre minimaliste', 'Montre GMT ou digitale'], rep: 2,
+    cite: ['Camille — 25 ans — Étudiant(e)/Jeune pro — Élégance abordable, polyvalence — Montre minimaliste', '34', 'Tableau « Lien entre persona et montre »'] },
+
+  /* ---------------- Partie C ---------------- */
+  { p: 'C', q: 'Que transmet la boutique à la manufacture ?',
+    options: ['Les plans de définition des montres', 'Les modèles demandés et les quantités par mois', 'Le prix de revient de chaque modèle', 'La liste des personas'], rep: 1,
+    cite: ['La boutique transmet les modèles demandés et les quantités par mois', '36'] },
+  { p: 'C', q: 'Pour livrer « dans la bonne quantité », que doit fournir le système de production ?',
+    options: ['La flexibilité qualitative', 'La flexibilité quantitative', 'La réactivité', 'La productivité'], rep: 1,
+    cite: ['dans la bonne quantité → Flexibilité quantitative', '36', 'Le système de production doit fournir'] },
+  { p: 'C', q: 'Pour produire « au moindre coût », que doit fournir le système de production ?',
+    options: ['La réactivité', 'La flexibilité qualitative', 'La productivité', 'La flexibilité quantitative'], rep: 2,
+    cite: ['au moindre coût → Productivité', '36', 'Le système de production doit fournir'] },
+  { p: 'C', q: 'Où la question « comment produire, au moindre coût » est-elle traitée dans le module ?',
+    options: ['Dans la partie C', 'Dans la partie D', 'Dans les séquences 2 à 4', 'Elle n’est pas traitée'], rep: 2,
+    cite: ['Comment produire, au moindre coût : question réservée aux séquences 2 à 4', '35'] },
+  { p: 'C', q: 'Quelle est la définition de la flexibilité qualitative ?',
+    options: ['L’aptitude à produire de plus grandes quantités en peu de temps', 'L’aptitude d’un système de production à fabriquer des produits différents sans perte excessive de temps ni de coût', 'L’aptitude à livrer le client au bon moment', 'L’aptitude à produire au moindre coût'], rep: 1,
+    cite: ['Flexibilité qualitative : aptitude d\'un système de production à fabriquer des produits différents — modèles existants, variantes, nouveaux modèles — sans perte excessive de temps ni de coût.', '38', 'Définition'] },
+  { p: 'C', q: 'La manufacture n’a jamais fabriqué le modèle C. Que doit-elle adapter pour le fournir ?',
+    options: ['Ses personas et sa publicité', 'Ses compétences, ses moyens et son organisation', 'Uniquement son prix de vente', 'Uniquement ses quantités par mois'], rep: 1,
+    cite: ['Si elle veut fabriquer et fournir, elle doit adapter ses compétences, ses moyens et son organisation : c\'est ce qu\'on appelle la flexibilité qualitative.', '38'] },
+  { p: 'C', q: 'Le modèle B est proposé avec un cadran vert et un bracelet en cuir brun. De quel type de nouveauté s’agit-il ?',
+    options: ['Une animation', 'Une nouvelle construction', 'Un nouveau mouvement', 'Une flexibilité quantitative'], rep: 0,
+    cite: ['Animations — Nature des modifications : Changement de couleur ou matière uniquement', '39', 'Tableau « Animation ou nouvelle construction : comparaison »'] },
+  { p: 'C', q: 'Une nouvelle construction, comme un nouveau mouvement inédit, se caractérise par…',
+    options: ['une complexité faible et un temps de développement court', 'une innovation majeure, une complexité élevée et un temps de développement long', 'un simple changement de couleur ou de matière', 'un coût d’investissement réduit'], rep: 1,
+    cite: ['Nouvelles constructions — Type d\'innovation : Innovation majeure · Complexité : Élevée · Temps de développement : Long', '39', 'Tableau « Animation ou nouvelle construction : comparaison »'] },
+  { p: 'C', q: 'Pour une nouvelle construction, « engager de nouvelles personnes ou former les collaborateurs » relève de quel levier ?',
+    options: ['Le produit', 'Les ressources humaines', 'Les moyens de production', 'L’organisation'], rep: 1,
+    cite: ['Les ressources humaines — Nouvelle construction : Engager de nouvelles personnes ou former les collaborateurs.', '40', 'Tableau des quatre leviers'] },
+  { p: 'C', q: 'Pour une nouvelle construction, « sous-traiter ou acheter ce que l’on ne sait pas faire » relève de quel levier ?',
+    options: ['Le produit', 'Les ressources humaines', 'Les moyens de production', 'L’organisation'], rep: 3,
+    cite: ['L\'organisation — Nouvelle construction : Sous-traiter ou acheter ce que l\'on ne sait pas faire ; adapter l\'implantation.', '40', 'Tableau des quatre leviers'] },
+];
+// identifiant lisible : A1, A2… B1… C1…
+{ const n = {}; QUESTIONS.forEach(q => { n[q.p] = (n[q.p] || 0) + 1; q.id = q.p + n[q.p]; }); }
+const questionParId = id => QUESTIONS.find(q => q.id === id);
+const partieParId = id => PARTIES.find(p => p.id === id);
+
+/* ======================================================================
+   2. Réglages
+   ====================================================================== */
+/* Adresse du site en ligne de cette page : utilisée par le QR code.
+   À remplacer par l'adresse d'hébergement de l'école si le fichier est déposé ailleurs. */
+const ADRESSE_EN_LIGNE = 'https://nicolas-derobert.github.io/ligne-de-production/seq1-partie-a-c';
+/* Adresse du support de cours au format PDF, affiché dans l'onglet Théorie.
+   Lien direct vers un fichier .pdf (site de l'école, plateforme de cours…) ou lien de partage Google Drive.
+   Laisser vide ('') pour afficher l'emplacement réservé. */
+const PDF_COURS = 'https://nicolas-derobert.github.io/ligne-de-production/seq1-partie-a-c-cours.pdf';
+
+/* ======================================================================
+   3. Utilitaires
+   ====================================================================== */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+function h(tag, attrs = {}, children = []) {
+  const e = document.createElement(tag);
+  for (const k in attrs) {
+    if (k === 'class') e.className = attrs[k];
+    else if (k === 'html') e.innerHTML = attrs[k];
+    else if (k === 'text') e.textContent = attrs[k];
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]);
+    else if (attrs[k] !== null && attrs[k] !== undefined && attrs[k] !== false) e.setAttribute(k, attrs[k] === true ? '' : attrs[k]);
+  }
+  (Array.isArray(children) ? children : [children]).forEach(c => { if (c === null || c === undefined || c === false) return; e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+  return e;
+}
+function melange(arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const echap = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const reduitMouvement = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+let toastT = null;
+function toast(msg) {
+  let t = $('#toast'); if (!t) { t = h('div', { class: 'toast', id: 'toast', role: 'status' }); document.body.appendChild(t); }
+  t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2200);
+}
+const premierePage = p => parseInt(String(p).split(/[-–]/)[0], 10);
+
+/* ======================================================================
+   4. État enregistré sur l'appareil
+   res : dernière réponse à chaque question (1 juste, 0 fausse)
+   series : scores des séries terminées, par partie
+   ====================================================================== */
+const CLE = 'ehg_cph_hop_01_qcm_v5';
+const ETAT_VIDE = () => ({ res: {}, series: { A: [], B: [], C: [], T: [] } });
+let ETAT = ETAT_VIDE();
+function charger() { try { const s = localStorage.getItem(CLE); if (s) { const o = JSON.parse(s); if (o && o.res && o.series) ETAT = Object.assign(ETAT_VIDE(), o); } } catch (e) { /* stockage indisponible */ } }
+function sauver() { try { localStorage.setItem(CLE, JSON.stringify(ETAT)); } catch (e) { /* idem */ } }
+const erreurs = () => QUESTIONS.filter(q => ETAT.res[q.id] === 0);
+function majPastille() { const n = erreurs().length; const p = $('#pastille-erreurs'); p.textContent = n; p.hidden = n === 0; }
+
+/* ======================================================================
+   5. Navigation : onglets, confort de lecture, modales
+   ====================================================================== */
+const ONGLETS = ['cours', 'entrainer', 'erreurs'];
+const ALIAS = { theorie: 'cours', exercices: 'entrainer', accueil: 'entrainer', tester: 'entrainer' };
+const HASH = { cours: 'theorie', entrainer: 'exercices', erreurs: 'erreurs' };
+function activerOnglet(nom, opts = {}) {
+  nom = ALIAS[nom] || nom; if (!ONGLETS.includes(nom)) nom = 'entrainer';
+  $$('.onglets [role="tab"]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === nom ? 'true' : 'false'));
+  $$('section[role="tabpanel"]').forEach(s => { s.hidden = s.id !== 'panel-' + nom; });
+  if (nom === 'cours') pdfInit();
+  if (nom === 'entrainer' && !quizEnCours()) rendreParties();
+  if (nom === 'erreurs') rendreErreurs();
+  try { if (!opts.sansHash && location.hash !== '#' + HASH[nom]) history.replaceState(null, '', '#' + HASH[nom]); } catch (e) { /* aperçu isolé */ }
+  if (!opts.sansScroll) { try { window.scrollTo({ top: 0 }); } catch (e) { /* idem */ } }
+}
+$$('.onglets [role="tab"]').forEach(b => b.addEventListener('click', () => activerOnglet(b.dataset.tab)));
+$$('.onglets [role="tab"]').forEach((b, i, arr) => b.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const j = (i + (e.key === 'ArrowRight' ? 1 : -1) + arr.length) % arr.length; arr[j].focus(); activerOnglet(arr[j].dataset.tab); }
+}));
+$$('[data-va]').forEach(b => b.addEventListener('click', ev => { ev.preventDefault(); activerOnglet(b.dataset.va); }));
+$('#btn-confort').addEventListener('click', e => {
+  const on = !document.body.classList.contains('confort');
+  document.body.classList.toggle('confort', on);
+  e.currentTarget.setAttribute('aria-pressed', on ? 'true' : 'false');
+  try { localStorage.setItem(CLE + '_confort', on ? '1' : '0'); } catch (err) {}
+});
+try { if (localStorage.getItem(CLE + '_confort') === '1') { document.body.classList.add('confort'); $('#btn-confort').setAttribute('aria-pressed', 'true'); } } catch (e) {}
+const majOngletsBas = () => { try { const n = $('.onglets'); document.body.classList.toggle('onglets-bas', getComputedStyle(n).position === 'fixed'); } catch (e) {} };
+majOngletsBas(); window.addEventListener('resize', majOngletsBas);
+
+function ouvrirModale(m) {
+  m._retourFocus = document.activeElement;
+  m.hidden = false; document.body.classList.add('modale-ouverte');
+  const f = m.querySelector('[data-focus-initial]') || m.querySelector('.modale__fermer'); if (f) f.focus();
+}
+function fermerModale(m) {
+  m.hidden = true;
+  if (!document.querySelector('.modale:not([hidden])')) document.body.classList.remove('modale-ouverte');
+  if (typeof m._onClose === 'function') m._onClose();
+  if (m._retourFocus && m._retourFocus.focus) m._retourFocus.focus();
+}
+$$('.modale').forEach(m => {
+  m.querySelectorAll('[data-fermer]').forEach(b => b.addEventListener('click', () => fermerModale(m)));
+  m.addEventListener('keydown', ev => {
+    if (ev.key !== 'Tab') return;
+    const f = Array.from(m.querySelectorAll('button, input, summary, [tabindex="0"]')).filter(e => !e.disabled && e.offsetParent !== null);
+    if (!f.length) return;
+    const i = f.indexOf(document.activeElement);
+    if (ev.shiftKey && i <= 0) { ev.preventDefault(); f[f.length - 1].focus(); }
+    else if (!ev.shiftKey && i === f.length - 1) { ev.preventDefault(); f[0].focus(); }
+  });
+});
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { const m = document.querySelector('.modale:not([hidden])'); if (m) fermerModale(m); } });
+function confirmer(titre, texte, onOk) {
+  const m = $('#modale-confirm'); $('#modale-confirm-titre').textContent = titre; $('#modale-confirm-texte').textContent = texte;
+  const ok = $('#modale-confirm-ok'); const clone = ok.cloneNode(true); ok.parentNode.replaceChild(clone, ok);
+  clone.addEventListener('click', () => { fermerModale(m); onOk(); });
+  ouvrirModale(m);
+}
+
+
+/* ======================================================================
+   7. Théorie : lecteur du support de cours (PDF)
+   ====================================================================== */
+let pdfAdresse = PDF_COURS;
+function pdfNormaliser(u) {
+  u = (u || '').trim(); if (!u) return '';
+  const m = u.match(/drive\.google\.com\/file\/d\/([^/?#]+)/) || u.match(/drive\.google\.com\/open\?id=([^&#]+)/);
+  return m ? 'https://drive.google.com/file/d/' + m[1] + '/preview' : u;
+}
+function pdfAfficher(page) {
+  const adr = pdfNormaliser(pdfAdresse); const f = $('#pdf-frame');
+  $('#pdf-vide').hidden = !!adr; f.hidden = !adr; $('#pdf-outils').hidden = !adr;
+  if (!adr) return;
+  const drive = /drive\.google\.com/.test(adr);
+  const src = adr.replace(/#.*$/, '') + (page && !drive ? '#page=' + page : '');
+  if (f.getAttribute('src') !== src) { f.setAttribute('src', 'about:blank'); setTimeout(() => f.setAttribute('src', src), 30); }
+  $('#pdf-ouvrir').href = src;
+  if (page) $('#pdf-page').value = page;
+  $('#pdf-page').closest('.pdf__page').hidden = drive; $('#pdf-aller').hidden = drive;
+}
+let pdfPret = false;
+function pdfInit() { if (pdfPret) return; pdfPret = true; pdfAfficher(); }
+$('#pdf-aller').addEventListener('click', () => { const n = Math.max(1, parseInt($('#pdf-page').value, 10) || 1); pdfAfficher(n); });
+$('#pdf-page').addEventListener('keydown', ev => { if (ev.key === 'Enter') $('#pdf-aller').click(); });
+$('#pdf-essayer').addEventListener('click', () => { const u = $('#pdf-url').value.trim(); if (!u) { $('#pdf-url').focus(); return; } pdfAdresse = u; pdfAfficher(); });
+// « Lire la page X du cours » : ouvre le PDF à cette page
+function ouvrirPageCours(page) { activerOnglet('cours'); pdfAfficher(page || undefined); }
+
+/* ======================================================================
+   8. Exercices : choix de la partie, progression, réinitialisation
+   ====================================================================== */
+const SERIES = [
+  ...PARTIES.map(p => ({ id: p.id, titre: 'Partie ' + p.id + ' · ' + p.titre, sous: 'Pages ' + p.pages, questions: () => QUESTIONS.filter(q => q.p === p.id) })),
+  { id: 'T', titre: 'Les trois parties', sous: 'Pages 9 à 40, dans l’ordre du cours', questions: () => QUESTIONS.slice() },
+];
+function meilleur(id) { const l = ETAT.series[id] || []; return l.length ? Math.max(...l) : null; }
+function rendreParties() {
+  const w = $('#parties'); w.innerHTML = '';
+  SERIES.forEach(s => {
+    const n = s.questions().length, best = meilleur(s.id), nb = (ETAT.series[s.id] || []).length;
+    w.appendChild(h('div', { class: 'serie' + (s.id === 'T' ? ' serie--toutes' : '') }, [
+      h('span', { class: 'serie__lettre', text: s.id === 'T' ? 'A·B·C' : s.id }),
+      h('div', { class: 'serie__corps' }, [
+        h('h3', { class: 'serie__titre', text: s.titre }),
+        h('p', { class: 'serie__sous', text: s.sous + ' · ' + n + ' questions' }),
+        h('p', { class: 'serie__score', html: best === null ? 'Pas encore faite' : `Meilleur score : <strong class="chiffre">${best}</strong> / ${n}` + (nb > 1 ? ` <span class="note">· ${nb} essais</span>` : '') }),
+      ]),
+      h('button', { type: 'button', class: 'btn btn--bleu', text: best === null ? 'Commencer' : 'Recommencer', onclick: () => lancerQuiz(s.questions(), s.titre, s.id) }),
+    ]));
+  });
+  const err = erreurs().length, faites = Object.keys(ETAT.res).length, justes = Object.values(ETAT.res).filter(v => v === 1).length;
+  $('#prog-faites').textContent = faites + ' / ' + QUESTIONS.length;
+  $('#prog-justes').textContent = faites ? justes : '—';
+  $('#prog-err').textContent = err;
+}
+function reinitialiser(portee) {
+  if (portee === 'erreurs') { Object.keys(ETAT.res).forEach(k => { if (ETAT.res[k] === 0) delete ETAT.res[k]; }); }
+  else { ETAT = ETAT_VIDE(); if (portee === 'tout') { try { localStorage.removeItem(CLE + '_confort'); } catch (e) {} document.body.classList.remove('confort'); $('#btn-confort').setAttribute('aria-pressed', 'false'); } }
+  sauver(); majPastille(); rendreParties(); rendreErreurs();
+}
+const REINIT_TXT = {
+  resultats: ['Réinitialiser les résultats', 'Les scores, les réponses enregistrées et la liste des erreurs seront effacés sur cet appareil.', 'Résultats réinitialisés'],
+  erreurs: ['Vider les erreurs', 'La liste « Mes erreurs » sera vidée. Les meilleurs scores sont conservés.', 'Erreurs vidées'],
+  tout: ['Tout effacer', 'Scores, réponses, erreurs et réglage du confort de lecture seront effacés sur cet appareil : retour à l’état initial.', 'Données effacées'],
+};
+$$('[data-reinit]').forEach(b => b.addEventListener('click', () => { const t = REINIT_TXT[b.dataset.reinit]; confirmer(t[0], t[1], () => { reinitialiser(b.dataset.reinit); toast(t[2]); }); }));
+
+/* ======================================================================
+   9. Le questionnaire : une question à la fois, correction avec la citation du cours
+   ====================================================================== */
+let QUIZ = null;
+const quizEnCours = () => !!QUIZ;
+const LETTRES = ['A', 'B', 'C', 'D', 'E'];
+function lancerQuiz(questions, titre, serieId) {
+  if (!questions.length) return;
+  activerOnglet('entrainer', { sansScroll: true });
+  QUIZ = { questions, titre, serieId, i: 0, score: 0, res: [], choix: null, valide: false };
+  $('#ent-choix').hidden = true; $('#quiz').hidden = false;
+  afficherQuestion();
+  try { window.scrollTo({ top: 0 }); } catch (e) {}
+}
+function quitterQuiz() { QUIZ = null; $('#quiz').hidden = true; $('#quiz').innerHTML = ''; $('#ent-choix').hidden = false; rendreParties(); try { window.scrollTo({ top: 0 }); } catch (e) {} }
+function piste() {
+  const n = QUIZ.questions.length;
+  return h('ol', { class: 'piste', 'aria-label': 'Avancement' }, QUIZ.questions.map((q, k) => {
+    const etat = k < QUIZ.res.length ? (QUIZ.res[k] ? 'juste' : 'faux') : (k === QUIZ.i ? 'courant' : '');
+    return h('li', { class: 'piste__pt ' + etat, title: 'Question ' + (k + 1) + (etat === 'juste' ? ' : juste' : etat === 'faux' ? ' : fausse' : ''), text: String(k + 1) });
+  }));
+}
+function enteteQuiz() {
+  return h('div', { class: 'quiz__barre' }, [
+    h('button', { type: 'button', class: 'btn btn--discret btn--petit', text: '← Quitter', onclick: () => { if (QUIZ.res.length && QUIZ.i < QUIZ.questions.length) confirmer('Quitter la série', 'Les réponses déjà données restent enregistrées ; le score de la série ne sera pas compté.', quitterQuiz); else quitterQuiz(); } }),
+    h('span', { class: 'quiz__titre', text: QUIZ.titre }),
+    h('span', { class: 'quiz__score', html: `Score <strong class="chiffre">${QUIZ.score}</strong>` }),
+  ]);
+}
+function afficherQuestion() {
+  const box = $('#quiz'); box.innerHTML = '';
+  const q = QUIZ.questions[QUIZ.i], n = QUIZ.questions.length;
+  QUIZ.choix = null; QUIZ.valide = false;
+  const ordre = melange(q.options.map((t, k) => k));
+  box.append(enteteQuiz(), piste());
+  const carte = h('article', { class: 'question', 'aria-live': 'polite' });
+  carte.append(
+    h('p', { class: 'question__num' }, [h('span', { text: 'Question ' }), h('strong', { class: 'chiffre', text: String(QUIZ.i + 1) }), h('span', { text: ' sur ' + n })]),
+    h('h3', { class: 'question__texte', text: q.q }),
+    h('p', { class: 'question__consigne', text: 'Une seule bonne réponse. Touchez une réponse, puis « Valider ».' }),
+  );
+  const liste = h('div', { class: 'reponses', role: 'radiogroup', 'aria-label': 'Réponses' });
+  ordre.forEach((k, pos) => liste.appendChild(h('button', { type: 'button', class: 'reponse', role: 'radio', 'aria-checked': 'false', 'data-k': k, onclick: () => choisir(k) }, [h('span', { class: 'reponse__lettre', text: LETTRES[pos] }), h('span', { class: 'reponse__texte', text: q.options[k] })])));
+  const actions = h('div', { class: 'question__actions' });
+  const btnValider = h('button', { type: 'button', class: 'btn btn--bleu btn--large', id: 'btn-valider', text: 'Valider', disabled: true, onclick: valider });
+  actions.appendChild(btnValider);
+  const fb = h('div', { class: 'correction', id: 'correction', hidden: true });
+  carte.append(liste, fb, actions);
+  box.appendChild(carte);
+  function choisir(k) {
+    if (QUIZ.valide) return;
+    QUIZ.choix = k;
+    liste.querySelectorAll('.reponse').forEach(b => b.setAttribute('aria-checked', +b.dataset.k === k ? 'true' : 'false'));
+    btnValider.disabled = false;
+  }
+  QUIZ._choisir = pos => { const b = liste.querySelectorAll('.reponse')[pos]; if (b) choisir(+b.dataset.k); };
+  function valider() {
+    if (QUIZ.choix === null || QUIZ.valide) return;
+    QUIZ.valide = true;
+    const ok = QUIZ.choix === q.rep;
+    QUIZ.res.push(ok ? 1 : 0); if (ok) QUIZ.score++;
+    ETAT.res[q.id] = ok ? 1 : 0; sauver(); majPastille();
+    liste.querySelectorAll('.reponse').forEach(b => { const k = +b.dataset.k; b.disabled = true; if (k === q.rep) b.classList.add('juste'); else if (k === QUIZ.choix) b.classList.add('faux'); else b.classList.add('eteinte'); });
+    box.querySelector('.quiz__barre').replaceWith(enteteQuiz()); box.querySelector('.piste').replaceWith(piste());
+    actions.innerHTML = '';
+    const pageCours = premierePage(q.cite[1]);
+    fb.hidden = false; fb.className = 'correction ' + (ok ? 'correction--ok' : 'correction--faux');
+    fb.append(
+      h('p', { class: 'correction__verdict', html: ok ? '<span aria-hidden="true">✓</span> Bonne réponse.' : `<span aria-hidden="true">✗</span> Ce n’est pas la bonne réponse. La bonne réponse est : <strong>${echap(q.options[q.rep])}</strong>.` }),
+      h('figure', { class: 'citation' }, [
+        h('figcaption', { class: 'citation__source', text: 'Ce que dit le cours · page ' + q.cite[1] + (q.cite[2] ? ' · ' + q.cite[2] : '') }),
+        h('blockquote', { class: 'citation__texte', text: '« ' + q.cite[0] + ' »' }),
+      ]),
+    );
+    const dernier = QUIZ.i + 1 >= n;
+    actions.append(
+      h('button', { type: 'button', class: 'btn btn--bleu btn--large', id: 'btn-suivant', text: dernier ? 'Voir mon résultat' : 'Question suivante →', onclick: () => { QUIZ.i++; if (QUIZ.i >= n) afficherResultat(); else afficherQuestion(); try { $('#quiz').scrollIntoView({ block: 'start' }); } catch (e) {} } }),
+      h('button', { type: 'button', class: 'btn btn--secondaire btn--large', text: 'Lire la page ' + pageCours + ' du cours', onclick: () => ouvrirPageCours(pageCours) }),
+    );
+    try { fb.scrollIntoView({ behavior: reduitMouvement() ? 'auto' : 'smooth', block: 'nearest' }); } catch (e) {}
+    const s = $('#btn-suivant'); if (s) s.focus({ preventScroll: true });
+  }
+  QUIZ._valider = valider;
+}
+function afficherResultat() {
+  const box = $('#quiz'); box.innerHTML = '';
+  const n = QUIZ.questions.length, s = QUIZ.score, pct = s / n;
+  if (QUIZ.serieId) { const l = ETAT.series[QUIZ.serieId] = ETAT.series[QUIZ.serieId] || []; l.push(s); if (l.length > 20) l.shift(); sauver(); }
+  const msg = pct === 1 ? 'Sans faute : bravo.' : pct >= 0.8 ? 'Très bien. Relisez la citation des questions manquées.' : pct >= 0.6 ? 'Bien. Refaites les questions manquées.' : 'À retravailler : relisez les pages du cours indiquées, puis refaites les questions manquées.';
+  const manquees = QUIZ.questions.filter((q, k) => !QUIZ.res[k]);
+  const recap = h('ol', { class: 'recap' }, QUIZ.questions.map((q, k) => h('li', { class: QUIZ.res[k] ? 'juste' : 'faux' }, [
+    h('span', { class: 'recap__num', text: String(k + 1) }), h('span', { class: 'recap__etat', 'aria-label': QUIZ.res[k] ? 'juste' : 'fausse', text: QUIZ.res[k] ? '✓' : '✗' }),
+    h('span', { class: 'recap__q', text: q.q }), h('span', { class: 'recap__p note', text: 'p. ' + q.cite[1] }),
+  ])));
+  const titre = QUIZ.titre, serieId = QUIZ.serieId, questions = QUIZ.questions;
+  box.append(h('div', { class: 'resultat' }, [
+    h('p', { class: 'surtitre', text: 'Résultat · ' + titre }),
+    h('p', { class: 'resultat__score', html: `<strong class="chiffre">${s}</strong> / ${n}` }),
+    h('p', { class: 'resultat__msg', text: msg }),
+    h('div', { class: 'question__actions' }, [
+      manquees.length ? h('button', { type: 'button', class: 'btn btn--bleu btn--large', text: 'Refaire les ' + manquees.length + ' question' + (manquees.length > 1 ? 's' : '') + ' manquée' + (manquees.length > 1 ? 's' : ''), onclick: () => lancerQuiz(manquees, 'Questions manquées · ' + titre, null) }) : null,
+      h('button', { type: 'button', class: 'btn ' + (manquees.length ? 'btn--secondaire' : 'btn--bleu') + ' btn--large', text: 'Recommencer', onclick: () => lancerQuiz(questions, titre, serieId) }),
+      h('button', { type: 'button', class: 'btn btn--secondaire btn--large', text: 'Choisir une autre partie', onclick: quitterQuiz }),
+    ]),
+    h('h4', { text: 'Détail des réponses' }), recap,
+  ]));
+  QUIZ.fini = true;
+}
+// clavier : 1 à 4 ou A à D pour choisir, Entrée pour valider puis passer à la suite
+document.addEventListener('keydown', ev => {
+  if (!QUIZ || QUIZ.fini || $('#panel-entrainer').hidden || document.querySelector('.modale:not([hidden])')) return;
+  if (ev.target && /INPUT|TEXTAREA/.test(ev.target.tagName)) return;
+  const k = ev.key.toUpperCase(); const pos = '1234'.indexOf(k) >= 0 ? '1234'.indexOf(k) : 'ABCD'.indexOf(k);
+  if (pos >= 0 && !QUIZ.valide && k.length === 1) { QUIZ._choisir(pos); ev.preventDefault(); }
+  else if (ev.key === 'Enter' && ev.target.tagName !== 'BUTTON') { if (!QUIZ.valide) QUIZ._valider(); else { const s = $('#btn-suivant'); if (s) s.click(); } ev.preventDefault(); }
+});
+
+/* ======================================================================
+   10. Mes erreurs
+   ====================================================================== */
+function rendreErreurs() {
+  const w = $('#err-contenu'); w.innerHTML = '';
+  const err = erreurs();
+  if (!err.length) { w.appendChild(h('div', { class: 'encadre encadre--ok' }, [h('div', { class: 'encadre__icone', text: '✓' }), h('div', { html: '<strong>Aucune erreur en attente.</strong> Les questions manquées dans l’onglet Exercices apparaîtront ici ; une question refaite juste disparaît de la liste.' })])); return; }
+  w.appendChild(h('div', { class: 'question__actions', style: 'margin:0 0 1.5rem' }, [
+    h('button', { type: 'button', class: 'btn btn--bleu btn--large', text: 'Refaire mes ' + err.length + ' erreur' + (err.length > 1 ? 's' : ''), onclick: () => lancerQuiz(err, 'Mes erreurs', null) }),
+    h('button', { type: 'button', class: 'btn btn--discret btn--petit', text: 'Vider la liste', onclick: () => confirmer(REINIT_TXT.erreurs[0], REINIT_TXT.erreurs[1], () => { reinitialiser('erreurs'); toast(REINIT_TXT.erreurs[2]); }) }),
+  ]));
+  PARTIES.forEach(p => {
+    const l = err.filter(q => q.p === p.id); if (!l.length) return;
+    w.appendChild(h('div', { class: 'err-groupe' }, [
+      h('h3', {}, [h('span', { class: 'id', text: p.id }), 'Partie ' + p.id + ' · ' + p.titre, h('span', { class: 'badge badge--erreur', text: String(l.length) })]),
+      h('ul', { class: 'err-liste' }, l.map(q => h('li', {}, [h('span', { text: q.q }), h('span', { class: 'n', text: 'p. ' + q.cite[1] })]))),
+      h('button', { type: 'button', class: 'btn btn--secondaire btn--petit', text: 'Refaire les erreurs de la partie ' + p.id, onclick: () => lancerQuiz(l, 'Mes erreurs · partie ' + p.id, null) }),
+    ]));
+  });
+}
+
+/* ======================================================================
+   11. Démarrage
+   ====================================================================== */
+charger(); majPastille();
+function depuisAdresse() {
+  try { const hash = location.hash.replace('#', ''); activerOnglet(ALIAS[hash] || (ONGLETS.includes(hash) ? hash : 'entrainer'), { sansHash: true, sansScroll: true }); }
+  catch (e) { activerOnglet('entrainer', { sansHash: true }); }
+}
+depuisAdresse();
+window.addEventListener('hashchange', depuisAdresse);
+
+/* ======================================================================
+   15. QR code vers cette page — encodeur autonome (mode octet, versions
+   1 à 40, niveau de correction M), conforme à ISO/IEC 18004. Aucune dépendance.
+   ====================================================================== */
+const QR = (() => {
+  const EC_M = [
+    [10, 1, 16, 0, 0], [16, 1, 28, 0, 0], [26, 1, 44, 0, 0], [18, 2, 32, 0, 0], [24, 2, 43, 0, 0],
+    [16, 4, 27, 0, 0], [18, 4, 31, 0, 0], [22, 2, 38, 2, 39], [22, 3, 36, 2, 37], [26, 4, 43, 1, 44],
+    [30, 1, 50, 4, 51], [22, 6, 36, 2, 37], [22, 8, 37, 1, 38], [24, 4, 40, 5, 41], [24, 5, 41, 5, 42],
+    [28, 7, 45, 3, 46], [28, 10, 46, 1, 47], [26, 9, 43, 4, 44], [26, 3, 44, 11, 45], [26, 3, 41, 13, 42],
+    [26, 17, 42, 0, 0], [28, 17, 46, 0, 0], [28, 4, 47, 14, 48], [28, 6, 45, 14, 46], [28, 8, 47, 13, 48],
+    [28, 19, 46, 4, 47], [28, 22, 45, 3, 46], [28, 3, 45, 23, 46], [28, 21, 45, 7, 46], [28, 19, 47, 10, 48],
+    [28, 2, 46, 29, 47], [28, 10, 46, 23, 47], [28, 14, 46, 21, 47], [28, 14, 46, 23, 47], [28, 12, 47, 26, 48],
+    [28, 6, 47, 34, 48], [28, 29, 46, 14, 47], [28, 13, 46, 32, 47], [28, 40, 47, 7, 48], [28, 18, 47, 31, 48],
+  ];
+  const ALIGN = [[], [], [6, 18], [6, 22], [6, 26], [6, 30], [6, 34], [6, 22, 38], [6, 24, 42], [6, 26, 46], [6, 28, 50],
+    [6, 30, 54], [6, 32, 58], [6, 34, 62], [6, 26, 46, 66], [6, 26, 48, 70], [6, 26, 50, 74], [6, 30, 54, 78], [6, 30, 56, 82], [6, 30, 58, 86], [6, 34, 62, 90],
+    [6, 28, 50, 72, 94], [6, 26, 50, 74, 98], [6, 30, 54, 78, 102], [6, 28, 54, 80, 106], [6, 32, 58, 84, 110], [6, 30, 58, 86, 114], [6, 34, 62, 90, 118], [6, 26, 50, 74, 98, 122], [6, 30, 54, 78, 102, 126], [6, 26, 52, 78, 104, 130],
+    [6, 30, 56, 82, 108, 134], [6, 34, 60, 86, 112, 138], [6, 30, 58, 86, 114, 142], [6, 34, 62, 90, 118, 146], [6, 30, 54, 78, 102, 126, 150], [6, 24, 50, 76, 102, 128, 154], [6, 28, 54, 80, 106, 132, 158], [6, 32, 58, 84, 110, 136, 162], [6, 26, 54, 82, 110, 138, 166], [6, 30, 58, 86, 114, 142, 170]];
+  const EXP = new Array(512), LOG = new Array(256);
+  { let x = 1; for (let i = 0; i < 255; i++) { EXP[i] = x; LOG[x] = i; x <<= 1; if (x & 0x100) x ^= 0x11d; } for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255]; }
+  const mul = (a, b) => (a && b) ? EXP[LOG[a] + LOG[b]] : 0;
+  function genPoly(n) { let g = [1]; for (let i = 0; i < n; i++) { const ng = new Array(g.length + 1).fill(0); for (let j = 0; j < g.length; j++) { ng[j] ^= g[j]; ng[j + 1] ^= mul(g[j], EXP[i]); } g = ng; } return g; }
+  function rs(data, n) { const g = genPoly(n); const r = new Array(n).fill(0); for (const d of data) { const f = d ^ r[0]; r.shift(); r.push(0); if (f) for (let j = 0; j < n; j++) r[j] ^= mul(g[j + 1], f); } return r; }
+  const utf8 = s => { const out = []; for (const ch of unescape(encodeURIComponent(s))) out.push(ch.charCodeAt(0)); return out; };
+  function encode(text) {
+    const bytes = utf8(text);
+    let v = 1;
+    for (; v <= 40; v++) { const e = EC_M[v - 1]; const cap = e[1] * e[2] + e[3] * e[4]; const lenBits = v < 10 ? 8 : 16; if (4 + lenBits + 8 * bytes.length <= 8 * cap) break; }
+    if (v > 40) throw new Error('Texte trop long pour un QR code');
+    const e = EC_M[v - 1], totalData = e[1] * e[2] + e[3] * e[4];
+    const bits = []; const put = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >> i) & 1); };
+    put(4, 4); put(bytes.length, v < 10 ? 8 : 16); bytes.forEach(b => put(b, 8));
+    for (let i = 0; i < 4 && bits.length < totalData * 8; i++) bits.push(0);
+    while (bits.length % 8) bits.push(0);
+    const data = []; for (let i = 0; i < bits.length; i += 8) { let b = 0; for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j]; data.push(b); }
+    for (let p = 0; data.length < totalData; p++) data.push(p % 2 ? 0x11 : 0xec);
+    const blocks = [], ecs = []; let pos = 0;
+    for (let g = 0; g < 2; g++) { const nb = g ? e[3] : e[1], sz = g ? e[4] : e[2]; for (let b = 0; b < nb; b++) { const d = data.slice(pos, pos + sz); pos += sz; blocks.push(d); ecs.push(rs(d, e[0])); } }
+    const out = []; const maxD = Math.max(...blocks.map(b => b.length));
+    for (let i = 0; i < maxD; i++) blocks.forEach(b => { if (i < b.length) out.push(b[i]); });
+    for (let i = 0; i < e[0]; i++) ecs.forEach(b => out.push(b[i]));
+    const N = 17 + 4 * v; const M = Array.from({ length: N }, () => new Array(N).fill(null));
+    const set = (r, c, val) => { M[r][c] = val ? 1 : 0; };
+    const finder = (r, c) => { for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) { const rr = r + i, cc = c + j; if (rr < 0 || cc < 0 || rr >= N || cc >= N) continue; const on = (i >= 0 && i <= 6 && (j === 0 || j === 6)) || (j >= 0 && j <= 6 && (i === 0 || i === 6)) || (i >= 2 && i <= 4 && j >= 2 && j <= 4); set(rr, cc, on); } };
+    finder(0, 0); finder(0, N - 7); finder(N - 7, 0);
+    const al = ALIGN[v]; al.forEach(r => al.forEach(c => { if (M[r][c] !== null) return; for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) set(r + i, c + j, Math.max(Math.abs(i), Math.abs(j)) !== 1); }));
+    for (let i = 8; i < N - 8; i++) { if (M[6][i] === null) set(6, i, i % 2 === 0); if (M[i][6] === null) set(i, 6, i % 2 === 0); }
+    set(N - 8, 8, 1);
+    const fmtPos = []; for (let i = 0; i < 8; i++) { fmtPos.push([8, i < 6 ? i : i + 1]); fmtPos.push([i < 6 ? i : i + 1, 8]); } fmtPos.push([8, 8]);
+    for (let i = 0; i < 8; i++) { fmtPos.push([N - 1 - i, 8]); fmtPos.push([8, N - 8 + i]); }
+    fmtPos.forEach(([r, c]) => { if (M[r][c] === null) M[r][c] = 0; });
+    if (v >= 7) for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) { M[i][N - 11 + j] = 0; M[N - 11 + j][i] = 0; }
+    const reserved = M.map(row => row.map(x => x !== null));
+    let bi = 0; const allBits = []; out.forEach(b => { for (let i = 7; i >= 0; i--) allBits.push((b >> i) & 1); });
+    for (let c = N - 1; c > 0; c -= 2) { if (c === 6) c--; for (let k = 0; k < N; k++) { const r = ((c + 1) & 2) ? k : N - 1 - k; for (let d = 0; d < 2; d++) { const cc = c - d; if (M[r][cc] === null) { M[r][cc] = bi < allBits.length ? allBits[bi] : 0; bi++; } } } }
+    const MASKS = [(r, c) => (r + c) % 2 === 0, (r, c) => r % 2 === 0, (r, c) => c % 3 === 0, (r, c) => (r + c) % 3 === 0, (r, c) => (Math.floor(r / 2) + Math.floor(c / 3)) % 2 === 0, (r, c) => (r * c) % 2 + (r * c) % 3 === 0, (r, c) => ((r * c) % 2 + (r * c) % 3) % 2 === 0, (r, c) => ((r + c) % 2 + (r * c) % 3) % 2 === 0];
+    const formatBits = mask => { const v5 = (0 << 3) | mask; let d = v5 << 10; const g = 0x537; for (let i = 14; i >= 10; i--) if (d & (1 << i)) d ^= g << (i - 10); return ((v5 << 10) | d) ^ 0x5412; };
+    const versionBits = () => { let d = v << 12; const g = 0x1f25; for (let i = 17; i >= 12; i--) if (d & (1 << i)) d ^= g << (i - 12); return (v << 12) | d; };
+    const applyFormat = (G, mask) => {
+      const f = formatBits(mask); const bit = i => (f >> (14 - i)) & 1;
+      for (let i = 0; i < 6; i++) G[8][i] = bit(i); G[8][7] = bit(6); G[8][8] = bit(7); G[7][8] = bit(8); for (let i = 9; i < 15; i++) G[14 - i][8] = bit(i);
+      for (let i = 0; i < 7; i++) G[N - 1 - i][8] = bit(i); for (let i = 7; i < 15; i++) G[8][N - 15 + i] = bit(i); G[N - 8][8] = 1;
+      if (v >= 7) { const vb = versionBits(); for (let i = 0; i < 18; i++) { const b = (vb >> i) & 1; G[Math.floor(i / 3)][N - 11 + (i % 3)] = b; G[N - 11 + (i % 3)][Math.floor(i / 3)] = b; } }
+    };
+    const penalty = G => {
+      let p = 0;
+      for (let pass = 0; pass < 2; pass++) for (let i = 0; i < N; i++) { let run = 1; for (let j = 1; j < N; j++) { const a = pass ? G[j][i] : G[i][j], b = pass ? G[j - 1][i] : G[i][j - 1]; if (a === b) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+      for (let i = 0; i < N - 1; i++) for (let j = 0; j < N - 1; j++) { const s = G[i][j] + G[i][j + 1] + G[i + 1][j] + G[i + 1][j + 1]; if (s === 0 || s === 4) p += 3; }
+      const pat1 = [1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0], pat2 = [0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1];
+      for (let pass = 0; pass < 2; pass++) for (let i = 0; i < N; i++) for (let j = 0; j <= N - 11; j++) { let m1 = true, m2 = true; for (let k = 0; k < 11; k++) { const val = pass ? G[j + k][i] : G[i][j + k]; if (val !== pat1[k]) m1 = false; if (val !== pat2[k]) m2 = false; } if (m1) p += 40; if (m2) p += 40; }
+      let dark = 0; G.forEach(row => row.forEach(x => { dark += x; })); const ratio = Math.abs(dark * 100 / (N * N) - 50); p += Math.floor(ratio / 5) * 10;
+      return p;
+    };
+    let best = null, bestP = Infinity;
+    for (let m = 0; m < 8; m++) {
+      const G = M.map((row, r) => row.map((x, c) => reserved[r][c] ? x : (MASKS[m](r, c) ? x ^ 1 : x)));
+      applyFormat(G, m);
+      const p = penalty(G); if (p < bestP) { bestP = p; best = G; }
+    }
+    return best;
+  }
+  function svg(text, opts = {}) {
+    const G = encode(text), N = G.length, q = opts.quiet === undefined ? 4 : opts.quiet, S = N + 2 * q;
+    let d = '';
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (G[r][c]) d += `M${c + q},${r + q}h1v1h-1z`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S} ${S}" shape-rendering="crispEdges" role="img" aria-label="${opts.label || 'QR code'}"><rect width="${S}" height="${S}" fill="#fff"/><path d="${d}" fill="${opts.color || '#141414'}"/></svg>`;
+  }
+  return { encode, svg };
+})();
+{
+  const modale = $('#modale-qr'), zone = $('#qr-zone'), urlEl = $('#qr-url'), note = $('#qr-note'), input = $('#qr-input'), btnQr = $('#btn-qr');
+  const adresseCourante = () => { try { return location.href.replace(/#.*$/, ''); } catch (e) { return ''; } };
+  // adresse par défaut : le site en ligne de la page ; à défaut, l'adresse courante si elle est utilisable
+  const adresseDefaut = () => { if (ADRESSE_EN_LIGNE) return ADRESSE_EN_LIGNE; const c = adresseCourante(); return /^https?:/i.test(c) ? c : ''; };
+  function dessiner(texte) {
+    const t = (texte || '').trim();
+    zone.innerHTML = '';
+    if (!t) { zone.appendChild(h('p', { class: 'note', text: 'Saisissez une adresse à encoder.' })); urlEl.textContent = ''; urlEl.removeAttribute('href'); return; }
+    try { zone.innerHTML = QR.svg(t, { label: 'QR code : ' + t }); }
+    catch (e) { zone.appendChild(h('p', { class: 'note', text: 'Adresse trop longue pour un QR code.' })); }
+    urlEl.textContent = t; urlEl.setAttribute('href', t);
+    const local = /^file:/i.test(t) || /^about:|^blob:|^data:/i.test(t);
+    note.hidden = !local;
+    if (local) { note.textContent = 'Cette adresse est celle d’un fichier local : ce QR code n’est pas utilisable par un téléphone. Utilisez l’adresse du site en ligne, ou hébergez le fichier (site de l’école, plateforme de cours…) et saisissez son adresse.'; $('.qr-options').open = true; }
+  }
+  function ouvrir() { if (!input.value) input.value = adresseDefaut(); dessiner(input.value); btnQr.setAttribute('aria-expanded', 'true'); ouvrirModale(modale); }
+  $('#qr-defaut').addEventListener('click', () => { input.value = adresseDefaut(); dessiner(input.value); });
+  modale._onClose = () => { modale.classList.remove('modale--plein'); $('#qr-agrandir').setAttribute('aria-pressed', 'false'); $('#qr-agrandir').textContent = 'Agrandir pour projeter'; btnQr.setAttribute('aria-expanded', 'false'); };
+  btnQr.addEventListener('click', ouvrir);
+  input.addEventListener('input', () => dessiner(input.value));
+  $('#qr-agrandir').addEventListener('click', e => { const on = !modale.classList.contains('modale--plein'); modale.classList.toggle('modale--plein', on); e.currentTarget.setAttribute('aria-pressed', on ? 'true' : 'false'); e.currentTarget.textContent = on ? 'Taille normale' : 'Agrandir pour projeter'; });
+  $('#qr-copier').addEventListener('click', async e => {
+    const b = e.currentTarget, t = (input.value || adresseCourante()).trim();
+    try { await navigator.clipboard.writeText(t); b.textContent = 'Adresse copiée ✓'; }
+    catch (err) { try { input.select(); document.execCommand('copy'); b.textContent = 'Adresse copiée ✓'; } catch (e2) { b.textContent = 'Copie impossible'; } }
+    setTimeout(() => { b.textContent = 'Copier l’adresse'; }, 1800);
+  });
+}
+
+})();
+</script>
+</body>
+</html>
