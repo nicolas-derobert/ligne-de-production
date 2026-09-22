@@ -11,7 +11,7 @@
   ============================================================================
   Le diagramme de Kano — Voix du client · École d'Horlogerie de Genève
   Module CPH_HOP_01 · Application pédagogique autonome (un seul fichier)
-  Trois onglets : Théorie · Simulation · Exercices
+  Quatre onglets : Théorie · Exemples · Simulation · Exercices
   Charte graphique EHG : Century Gothic (titres, graisse régulière), Calibri
   (texte), Cambria (chiffres, or #AA8802), or unique, gris neutres, filets fins.
   Aucune dépendance externe obligatoire : le fichier fonctionne hors ligne
@@ -73,12 +73,25 @@ ul.liste { padding-left: 1.2rem; } ul.liste li { margin-bottom: .35rem; } ul.lis
 .logotype .g { color: var(--ehg-or); }
 .entete__droite { display: flex; align-items: center; gap: 1rem; font-family: var(--ehg-font-titre); font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ehg-acier); }
 .titre { padding: 2.25rem 0 1rem; }
-.onglets { display: flex; gap: 2rem; border-bottom: var(--ehg-filet); margin-bottom: 2rem; overflow-x: auto; }
-.onglets button { font-family: var(--ehg-font-titre); font-size: .9rem; letter-spacing: .08em; text-transform: uppercase; background: none; border: 0;
-  border-bottom: 2px solid transparent; padding: .8rem 0; margin-bottom: -1px; color: var(--ehg-acier); cursor: pointer; white-space: nowrap; }
-.onglets button:hover { color: var(--ehg-noir); }
-.onglets button[aria-selected="true"] { color: var(--ehg-noir); border-bottom-color: var(--ehg-or); }
-.onglets button .n { font-family: var(--ehg-font-serif); color: var(--ehg-or); margin-right: .4em; letter-spacing: 0; text-transform: none; }
+/* couleur propre à chaque onglet — valeurs de la charte EHG (ehg.css) :
+   Théorie = graphite · Exemples = bordeaux · Simulation = vert · Exercices = or (or foncé pour le texte et l'état actif) */
+body { --accent: #3A3A3A; --accent-trait: #3A3A3A; --accent-pale: #EAEAEA; }
+body[data-onglet="exemples"] { --accent: #9B2C2C; --accent-trait: #9B2C2C; --accent-pale: #F5E4E4; }
+body[data-onglet="simulation"] { --accent: #2E6B4B; --accent-trait: #2E6B4B; --accent-pale: #E4EFE8; }
+body[data-onglet="exercices"] { --accent: #7D6400; --accent-trait: #AA8802; --accent-pale: #F4EDD6; }
+.onglets { display: flex; gap: .5rem; border-bottom: 3px solid var(--accent); margin-bottom: 2rem; overflow-x: auto; transition: border-color .2s; }
+.onglets button { --c: #3A3A3A; --c-trait: #3A3A3A; --c-pale: #EAEAEA;
+  font-family: var(--ehg-font-titre); font-size: .9rem; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; cursor: pointer;
+  background: var(--c-pale); color: var(--c); border: 0; border-top: 4px solid var(--c-trait); border-radius: 6px 6px 0 0;
+  padding: .75rem 1.4rem .7rem; transition: background .15s, color .15s; }
+.onglets button[data-tab="exemples"] { --c: #9B2C2C; --c-trait: #9B2C2C; --c-pale: #F5E4E4; }
+.onglets button[data-tab="simulation"] { --c: #2E6B4B; --c-trait: #2E6B4B; --c-pale: #E4EFE8; }
+.onglets button[data-tab="exercices"] { --c: #7D6400; --c-trait: #AA8802; --c-pale: #F4EDD6; }
+.onglets button:hover { box-shadow: inset 0 -2px 0 var(--c-trait); }
+.onglets button[aria-selected="true"] { background: var(--c); color: #fff; box-shadow: none; }
+.onglets button .n { font-family: var(--ehg-font-serif); color: inherit; margin-right: .45em; letter-spacing: 0; text-transform: none; font-size: 1.1em; }
+/* repère de couleur de l'onglet au-dessus de chaque grand titre */
+section[role="tabpanel"] h2::before { content: ''; display: block; width: 2.75rem; height: 4px; border-radius: 2px; background: var(--accent-trait); margin-bottom: .6rem; }
 .pied { border-top: var(--ehg-filet); padding: 1.5rem 0; margin-top: 4rem; display: flex; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; font-size: .85rem; color: var(--ehg-acier); }
 
 /* ---------- 4. Composants ---------- */
@@ -97,6 +110,14 @@ ul.liste { padding-left: 1.2rem; } ul.liste li { margin-bottom: .35rem; } ul.lis
 .carte h3, .carte h4 { margin-top: 0; }
 .carte--brume { background: var(--ehg-brume); border-color: transparent; box-shadow: none; }
 .carte--or { background: var(--ehg-or-pale); border-color: transparent; box-shadow: none; }
+.carte--retenir { border-top: 4px solid var(--ehg-or); }
+/* définitions : texte de la définition mis en valeur, guillemets or */
+.def { font-weight: 600; color: var(--ehg-noir); quotes: "« " " »"; }
+q.def::before, q.def::after { color: var(--ehg-or); font-weight: 400; }
+.def--travail { font-style: normal; }
+.grille--3 > .carte--brume { border-top: 3px solid var(--accent-trait); }
+@media (max-width: 56rem) { .grand-ecran { display: none; } }
+.carte--retenir li::marker { color: var(--ehg-or-fonce); }
 .encadre { display: flex; gap: 1rem; align-items: flex-start; padding: 1rem 1.5rem; border-radius: var(--ehg-radius-lg); background: var(--ehg-perle); margin-bottom: 1.5rem; }
 .encadre > :last-child { margin-bottom: 0; }
 .encadre__icone { flex: 0 0 1.5rem; font-family: var(--ehg-font-serif); font-size: 1.4rem; line-height: 1.2; color: var(--ehg-graphite); }
@@ -123,7 +144,7 @@ ul.liste { padding-left: 1.2rem; } ul.liste li { margin-bottom: .35rem; } ul.lis
 .etapes > li::before { content: counter(etape); position: absolute; left: 0; top: -.1em; font-family: var(--ehg-font-serif); font-size: 1.9rem; line-height: 1; color: var(--ehg-or); }
 .etapes > li > strong:first-child { display: block; font-family: var(--ehg-font-titre); font-weight: 500; font-size: 1.05em; margin-bottom: .2rem; }
 .progress { height: 6px; background: var(--ehg-perle); border-radius: 999px; overflow: hidden; margin: .5rem 0 1rem; }
-.progress > span { display: block; height: 100%; background: var(--ehg-or); border-radius: 999px; transition: width .25s; }
+.progress > span { display: block; height: 100%; background: var(--accent-trait); border-radius: 999px; transition: width .25s; }
 
 /* catégories : pastilles et boutons de choix */
 .cat-B { color: var(--kano-B); } .cat-P { color: var(--kano-P); } .cat-A { color: var(--kano-A); } .cat-I { color: var(--kano-I); } .cat-R { color: var(--kano-R); }
@@ -178,7 +199,7 @@ ul.liste { padding-left: 1.2rem; } ul.liste li { margin-bottom: .35rem; } ul.lis
 /* simulation */
 .sim-modes { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
 .sim-modes button { font-family: var(--ehg-font-titre); font-size: .85rem; letter-spacing: .04em; padding: .6rem 1.1rem; border-radius: 999px; border: 1px solid var(--ehg-perle); background: var(--ehg-blanc); cursor: pointer; }
-.sim-modes button[aria-pressed="true"] { background: var(--ehg-noir); color: #fff; border-color: var(--ehg-noir); }
+.sim-modes button[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
 .lecture { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
 .lecture div { padding: .9rem 1rem; border-radius: var(--ehg-radius-lg); background: var(--ehg-brume); }
 .lecture .lab { display: block; font-family: var(--ehg-font-titre); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-acier); margin-bottom: .25rem; }
@@ -210,6 +231,9 @@ ul.liste { padding-left: 1.2rem; } ul.liste li { margin-bottom: .35rem; } ul.lis
 .tuile .lab { display: block; font-family: var(--ehg-font-titre); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-acier); }
 .tuile .val { font-family: var(--ehg-font-serif); font-size: 2rem; color: var(--ehg-or); line-height: 1.1; }
 .tuile.a .val { color: var(--ehg-graphite); }
+.delta { font-family: var(--ehg-font-titre); font-weight: 500; font-size: 1rem; padding: .15rem .5rem; border-radius: 999px; vertical-align: .4rem; }
+.delta--hausse { color: var(--ehg-ok); background: var(--ehg-ok-pale); } .delta--baisse { color: var(--ehg-erreur); background: var(--ehg-erreur-pale); }
+.delta:empty { display: none; }
 .diagramme .num { font-size: 18px; font-weight: 500; fill: #3A3A3A; }
 .diagramme circle { transition: cx .45s ease, cy .45s ease; }
 .diagramme .drag circle { transition: none; } /* le point glissé suit le doigt sans retard */
@@ -219,10 +243,27 @@ ul.liste { padding-left: 1.2rem; } ul.liste li { margin-bottom: .35rem; } ul.lis
 /* point que l'on positionne : couleur vive, réservée à cet usage */
 .diagramme .point-libre .point, .diagramme .drag .point { fill: #F26B1D; stroke: #F26B1D; }
 .diagramme .point-libre .halo, .diagramme .drag .halo { fill: #fff; }
+.diagramme .point-libre, .diagramme .trace, .diagramme .guide { pointer-events: none; } /* le point ne masque jamais les poignées */
 .choix.toggles button[aria-pressed="false"] { opacity: .45; }
-.exemple--sim { display: grid; grid-template-columns: 7rem 1fr; gap: 1rem; align-items: start; margin-top: .5rem; }
-.exemple--sim .exemple__picto { width: 7rem; }
-@media (max-width: 40rem) { .exemple--sim { grid-template-columns: 1fr; } }
+.exemple--sim { display: flex; flex-direction: column; gap: .75rem; margin-top: .5rem; }
+.exemple__entete { display: grid; grid-template-columns: 5.5rem 1fr; gap: .9rem; align-items: start; }
+.exemple__picto { width: 5.5rem; }
+.infos { display: grid; grid-template-columns: max-content 1fr; gap: .25rem .6rem; margin: 0; align-items: baseline; }
+.infos dt, .info-lab, .bulle__lab { font-family: var(--ehg-font-titre); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ehg-acier); }
+.infos dd { margin: 0; font-family: var(--ehg-font-titre); font-size: .98rem; }
+.infos dd .cat-titre { font-size: .98rem; }
+.info-ligne { display: block; line-height: 1.45; }
+.info-lab { margin-right: .4rem; }
+.info-ligne strong { font-family: var(--ehg-font-titre); font-weight: 500; }
+.info-ligne--parole { display: flex; gap: .5rem; align-items: flex-start; margin-top: .2rem; }
+.info-ligne--parole .picto-client { flex: 0 0 28px; margin-top: .1rem; }
+.pourquoi { border-radius: var(--ehg-radius-lg); padding: .8rem 1rem; }
+.pourquoi__q { font-family: var(--ehg-font-titre); font-size: 1.02rem; margin: 0 0 .35rem; }
+.pourquoi__q strong { font-weight: 600; }
+.pourquoi__r { margin: 0; line-height: 1.55; }
+.pastille-v { display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; color: #fff; font-family: var(--ehg-font-titre); font-weight: 500; font-size: .85rem; flex: 0 0 1.6rem; }
+.diagramme .pt-version__num { font-family: var(--ehg-font-titre); font-size: 19px; font-weight: 600; pointer-events: none; }
+.bulle .bulle__lab { color: #BDBDBD; font-size: .62rem; margin-right: .2rem; }
 
 /* situations (exercices) et faces (simulation, exercice 2) */
 .situation { font-size: 1.08em; line-height: 1.55; padding: 1rem 1.25rem; border-left: 3px solid var(--ehg-or); background: var(--ehg-brume); border-radius: 0 var(--ehg-radius-lg) var(--ehg-radius-lg) 0; margin: 0 0 1rem; }
@@ -233,17 +274,59 @@ ul.liste { padding-left: 1.2rem; } ul.liste li { margin-bottom: .35rem; } ul.lis
 .face-btn:hover { border-color: var(--ehg-noir); background: var(--ehg-brume); }
 .face-btn.actif { border-color: var(--ehg-or); background: var(--ehg-or-pale); }
 .face-btn__titre { font-family: var(--ehg-font-titre); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ehg-acier); }
+.face-btn__titre.deg-plein, .deg-plein { color: var(--ehg-ok); }
+.face-btn__titre.deg-abs, .deg-abs { color: var(--ehg-erreur); }
+.deg-part { color: var(--ehg-or-fonce); }
+.sat-pos { color: var(--ehg-ok); } .sat-neg { color: var(--ehg-erreur); } .sat-neu { color: var(--ehg-graphite); }
 .face-btn__niveau { font-size: .95em; }
 .btn--large { padding: .8rem 1.4rem; font-size: .85rem; }
 .sim-modes .n { font-family: var(--ehg-font-serif); color: var(--ehg-or); margin-right: .15em; }
-.sim-modes button[aria-pressed="true"] .n { color: var(--ehg-or-clair); }
+.sim-modes button[aria-pressed="true"] .n { color: #fff; }
 .avant-apres { margin-top: 1.5rem; }
 .carte--or-bord { border-color: var(--ehg-or); }
 .avant-apres .tuile { margin-top: .5rem; }
 .tableau tr.modif td { background: var(--ehg-or-pale); }
 
 /* simulation : exemples à gauche, diagramme (avec bascules et lecture) à droite */
-.grille--sim { grid-template-columns: minmax(0, 7fr) minmax(0, 13fr); align-items: start; }
+.grille--sim { grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); align-items: start; gap: 1.25rem; }
+.sim-gauche__grille { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 1rem; align-items: start; }
+@media (max-width: 64rem) { .sim-gauche__grille { grid-template-columns: 1fr; } }
+/* liste numérotée des exemples */
+.liste-exemples { display: grid; gap: .45rem; }
+.ex-btn { display: grid; grid-template-columns: 2rem 1fr auto; align-items: center; gap: .6rem; width: 100%; text-align: left; font: inherit; letter-spacing: inherit;
+  padding: .55rem .7rem; border-radius: var(--ehg-radius); border: 1px solid var(--ehg-perle); border-left: 4px solid var(--cat, var(--ehg-acier)); background: var(--ehg-blanc); color: var(--ehg-noir); cursor: pointer; transition: background .12s, border-color .12s; }
+.ex-btn:hover { background: var(--ehg-brume); }
+.ex-btn.actif { background: var(--cat-pale, var(--ehg-perle)); border-color: var(--cat, var(--ehg-graphite)); box-shadow: 0 0 0 1px var(--cat, var(--ehg-graphite)) inset; }
+.ex-num { font-family: var(--ehg-font-serif); font-size: 1.6rem; line-height: 1; color: var(--ehg-or); text-align: center; }
+.ex-btn--libre .ex-num { color: var(--ehg-acier); font-size: 1.3rem; }
+.ex-txt { display: grid; font-family: var(--ehg-font-titre); font-size: .92rem; line-height: 1.25; }
+.ex-lab { font-size: .64rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ehg-acier); }
+.ex-btn .lettre { display: inline-block; width: 1.6em; height: 1.6em; line-height: 1.6em; text-align: center; border-radius: 50%; font-family: var(--ehg-font-serif); font-size: .85em; color: #fff; }
+/* diagramme réduit, agrandi au survol / au clic */
+@media (min-width: 56.01rem) {
+  .grille--sim .diag-colle { position: sticky; top: 1rem; z-index: 5; }
+  .grille--sim .diag-colle.grand { z-index: 40; }
+}
+.carte--sim { background: var(--ehg-blanc); }
+.carte--sim.reduit { padding: .6rem; cursor: zoom-in; }
+.carte--sim.reduit .diagramme .lib, .carte--sim.reduit .diagramme .lib-petit, .carte--sim.reduit .diagramme .titre-axe, .carte--sim.reduit .diagramme .etiquette { display: none; }
+.carte--sim.reduit .diagramme .point-libre .point { r: 26px; }
+.carte--sim.reduit .diagramme .point-libre .halo { r: 32px; }
+.carte--sim.reduit .toggles--carte .nom, .carte--sim.reduit .carte-sim__entete .surtitre, .carte--sim.reduit .lecture-ligne .lab, .carte--sim.reduit .lecture-ligne__aide { display: none; }
+.carte--sim.reduit .toggles--carte button { padding: .15rem .2rem; }
+.carte--sim.reduit .toggles--carte button .lettre { margin-right: 0; }
+.carte--sim.reduit .lecture-ligne { gap: .3rem .6rem; }
+.carte--sim.reduit .lecture-ligne__ico svg { width: 26px; height: 26px; }
+.carte--sim.reduit .lecture-ligne strong { font-size: .78rem; }
+.carte--sim.grand { position: absolute; top: 0; right: 0; z-index: 40; box-shadow: 0 18px 50px rgba(20,20,20,.28); border-color: var(--accent-trait); transform-origin: top right; animation: diagZoom .32s ease both; }
+.carte--sim.retour { animation: diagRetour .25s ease both; }
+@keyframes diagZoom { from { transform: scale(var(--k0, .45)); } to { transform: none; } }
+@keyframes diagRetour { from { opacity: .35; } to { opacity: 1; } }
+.carte-sim__entete .btn-loupe { margin-left: auto; }
+.btn-loupe { display: inline-flex; align-items: center; gap: .35rem; font-family: var(--ehg-font-titre); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; padding: .3rem .55rem; border-radius: var(--ehg-radius); border: 1px solid var(--accent-trait); background: var(--ehg-blanc); color: var(--accent); cursor: pointer; }
+.btn-loupe:hover, .btn-loupe[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.carte--sim.reduit .btn-loupe__txt { display: none; }
+@media (max-width: 56rem) { .btn-loupe { display: none; } }
 @media (max-width: 56rem) { .grille--sim { grid-template-columns: 1fr; } .grille--sim .diag-colle { order: -1; } }
 .carte-sim__entete { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; margin-bottom: .5rem; }
 .toggles--carte { margin: 0; gap: .35rem; }
@@ -257,8 +340,6 @@ ul.liste { padding-left: 1.2rem; } ul.liste li { margin-bottom: .35rem; } ul.lis
 .lecture-ligne__aide { margin-left: auto; font-size: .78em; }
 .diagramme .trace .halo { fill: none; }
 .diagramme .trace .point { stroke: none; }
-.sim-gauche .exemple--sim { grid-template-columns: 5.5rem 1fr; }
-.sim-gauche .exemple--sim .exemple__picto { width: 5.5rem; }
 
 /* simulation : poignées (curseurs) sur les axes du diagramme */
 .curseurs .bande { fill: transparent; pointer-events: all; cursor: pointer; }
@@ -337,8 +418,24 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
   .page { padding: 0 1rem; }
   /* barre d'onglets fixée en bas de l'écran, à portée du pouce */
   .onglets { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 20; background: var(--ehg-blanc); margin: 0; padding: 0 .5rem env(safe-area-inset-bottom, 0); border-top: var(--ehg-filet); border-bottom: 0; box-shadow: 0 -2px 10px rgba(20,20,20,.08); gap: 0; justify-content: space-around; overflow: visible; }
-  .onglets button { flex: 1 1 0; text-align: center; padding: .85rem 0; margin: 0; border-bottom: 0; border-top: 3px solid transparent; font-size: .78rem; letter-spacing: .06em; min-height: 56px; }
-  .onglets button[aria-selected="true"] { border-top-color: var(--ehg-or); border-bottom: 0; }
+  .onglets button { flex: 1 1 0; text-align: center; padding: .85rem 0; margin: 0; border-radius: 0; border-top: 4px solid var(--c-trait); background: var(--ehg-blanc); color: var(--c); font-size: .78rem; letter-spacing: .06em; min-height: 56px; }
+  .onglets button[aria-selected="true"] { background: var(--c); color: #fff; }
+  .onglets button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .05rem; font-size: .66rem; letter-spacing: .03em; padding: .45rem 0 .5rem; }
+  .onglets button .n { margin: 0; font-size: 1.05rem; line-height: 1; }
+  .liste-exemples { grid-template-columns: 1fr 1fr; gap: .4rem; }
+  .ex-btn { grid-template-columns: 1.5rem 1fr; gap: .45rem; padding: .45rem .5rem; }
+  .ex-btn .lettre { display: none; }
+  .ex-num { font-size: 1.3rem; }
+  .ex-txt { font-size: .84rem; }
+  .ex-btn--libre { grid-column: 1 / -1; }
+  .carte--sim .toggles--carte .nom, .carte-sim__entete .surtitre { display: none; }
+  .carte--sim .toggles--carte { flex-wrap: nowrap; gap: .3rem; }
+  .carte--sim .choix.cats button { min-height: 32px; padding: .2rem .45rem; }
+  .carte--sim .choix.cats button .lettre { margin-right: 0; }
+  .lecture-ligne .lab { display: none; }
+  /* modèles A / B : points numérotés plus grands sur téléphone */
+  .diagramme .pt-version__disque { r: 24px; } .diagramme .pt-version__halo { r: 28px; } .diagramme .pt-version__anneau, .diagramme .pt-version__pulse { r: 31px; }
+  .diagramme .pt-version__num { font-size: 28px; }
   body.onglets-bas { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0)); }
   body.onglets-bas .pied { margin-bottom: .5rem; }
   .entete__droite { gap: .4rem; }
@@ -358,8 +455,8 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
   .titre { padding: 1.25rem 0 .5rem; }
   h1 { font-size: 1.6rem; } h2 { font-size: 1.35rem; margin-top: 1.75rem; } h3 { font-size: 1.15rem; }
   .carte { padding: 1rem; }
-  .exemple--sim { grid-template-columns: 1fr; }
-  .exemple--sim .exemple__picto { width: 6rem; }
+  .exemple__entete { grid-template-columns: 4rem 1fr; gap: .6rem; }
+  .exemple__picto { width: 4rem; }
   /* cibles tactiles : au moins 44 px de haut, boutons de mode et de validation pleine largeur */
   .sim-modes { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
   .sim-modes button { font-size: .8rem; padding: .7rem .6rem; min-height: 44px; }
@@ -401,6 +498,8 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
 /* smartphone en portrait : le diagramme reste visible pendant qu'on manipule les commandes situées dessous */
 @media (max-width: 48rem) and (orientation: portrait) {
   .diag-colle { position: sticky; top: var(--onglets-h, 3rem); z-index: 10; }
+  #sim-svg .diagramme { width: min(100%, 38vh); margin: 0 auto; }
+  #sim-exemple-detail, #sim-exemples { scroll-margin-top: calc(var(--diag-h, 300px) + .75rem); }
   .diag-colle .carte, .carte.diag-colle { padding: .4rem; box-shadow: 0 6px 14px rgba(20,20,20,.12); }
   .grille--diag { gap: 1rem; }
 }
@@ -427,14 +526,14 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
 
 <main class="page">
   <div class="titre">
-    <span class="surtitre">Module CPH_HOP_01 · Voix du client · Application pédagogique</span>
     <h1>Le diagramme de Kano</h1>
   </div>
 
   <nav class="onglets" role="tablist" aria-label="Sections de l'application">
     <button role="tab" id="tab-theorie" aria-controls="panel-theorie" aria-selected="true" data-tab="theorie"><span class="n">1</span>Théorie</button>
-    <button role="tab" id="tab-simulation" aria-controls="panel-simulation" aria-selected="false" data-tab="simulation"><span class="n">2</span>Simulation</button>
-    <button role="tab" id="tab-exercices" aria-controls="panel-exercices" aria-selected="false" data-tab="exercices"><span class="n">3</span>Exercices</button>
+    <button role="tab" id="tab-exemples" aria-controls="panel-exemples" aria-selected="false" data-tab="exemples"><span class="n">2</span>Exemples</button>
+    <button role="tab" id="tab-simulation" aria-controls="panel-simulation" aria-selected="false" data-tab="simulation"><span class="n">3</span>Simulation</button>
+    <button role="tab" id="tab-exercices" aria-controls="panel-exercices" aria-selected="false" data-tab="exercices"><span class="n">4</span>Exercices</button>
   </nav>
 
   <!-- ================================================================ -->
@@ -449,17 +548,17 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
     <div class="grille grille--3">
       <div class="carte carte--brume">
         <h4><span class="chiffre">1</span> &nbsp;Besoin</h4>
-        <p>« Nécessité ou désir éprouvé par un utilisateur. » Il peut être exprimé ou implicite, latent ou potentiel. <span class="note">Exemple : savoir l'heure pendant une activité aquatique.</span></p>
+        <p><q class="def">Nécessité ou désir éprouvé par un utilisateur.</q> Il peut être exprimé ou implicite, latent ou potentiel. <span class="note">Exemple : savoir l'heure pendant une activité aquatique.</span></p>
         <p class="note" style="margin-bottom:0">Source : NF X 50-150, <em>Analyse de la valeur, analyse fonctionnelle — Vocabulaire</em> (AFNOR, 1990 ; annulée, reprise par NF EN 1325).</p>
       </div>
       <div class="carte carte--brume">
         <h4><span class="chiffre">2</span> &nbsp;Attente</h4>
-        <p>Ce que le client s'attend à obtenir pour satisfaire son besoin, à partir de son expérience et de ce qu'il a vu ailleurs ; elle peut être exprimée ou rester implicite. <span class="note">Exemple : une montre présentée comme adaptée à la natation supportera cet usage sans dommage.</span></p>
+        <p><span class="def def--travail">Ce que le client s'attend à obtenir pour satisfaire son besoin</span>, à partir de son expérience et de ce qu'il a vu ailleurs ; elle peut être exprimée ou rester implicite. <span class="note">Exemple : une montre présentée comme adaptée à la natation supportera cet usage sans dommage.</span></p>
         <p class="note" style="margin-bottom:0">Source : définition de travail du cours, sans définition normative. ISO 9000:2015 (§ 3.9.2, note 1) décrit des attentes pouvant n'être ni formulées ni connues du client avant la livraison.</p>
       </div>
       <div class="carte carte--brume">
         <h4><span class="chiffre">3</span> &nbsp;Exigence</h4>
-        <p>« Besoin ou attente formulé, généralement implicite ou obligatoire. » C'est ce que le produit ou le service doit respecter — à traduire ensuite en critères vérifiables. <span class="note">Exemple : la montre conserve son étanchéité dans les conditions d'utilisation prévues.</span></p>
+        <p><q class="def">Besoin ou attente formulé, généralement implicite ou obligatoire.</q> C'est ce que le produit ou le service doit respecter — à traduire ensuite en critères vérifiables. <span class="note">Exemple : la montre conserve son étanchéité dans les conditions d'utilisation prévues.</span></p>
         <p class="note" style="margin-bottom:0">Source : ISO 9000:2015, <em>Systèmes de management de la qualité — Principes essentiels et vocabulaire</em>, § 3.6.4.</p>
       </div>
     </div>
@@ -522,8 +621,8 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
     </table>
     <p class="note">Simplification pédagogique de la table d'évaluation de Kano (Sauerwein et al., 1996), qui prévoit cinq réponses possibles à chaque question et repère aussi les réponses contradictoires.</p>
 
-    <div class="carte carte--brume texte" style="margin-top:2rem">
-      <h3>Ce qu'il faut retenir</h3>
+    <div class="carte carte--or carte--retenir texte" style="margin-top:2rem">
+      <h3><span class="chiffre">★</span> Ce qu'il faut retenir</h3>
       <ul class="liste" style="margin-bottom:0">
         <li><strong>Deux axes.</strong> Horizontal : le degré de réalisation d'une fonction. Vertical : la satisfaction du client.</li>
         <li><strong>Un point = une observation.</strong> Ce que vit ce client, maintenant.</li>
@@ -546,29 +645,27 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
       <li>Toutes les situations et tous les clients cités dans cette application sont fictifs, rédigés pour la formation. Les courbes sont des représentations qualitatives : elles illustrent une tendance, pas une mesure.</li>
     </ul>
   </section>
-
   <!-- ================================================================ -->
-  <!-- 2. SIMULATION                                                     -->
+  <!-- 2. EXEMPLES (explorer le diagramme)                               -->
   <!-- ================================================================ -->
-  <section id="panel-simulation" role="tabpanel" aria-labelledby="tab-simulation" hidden>
-    <h2 style="margin-top:0">Simulation</h2>
-    <p class="texte">Deux manières de manipuler le diagramme : placer un point — à partir d'un exemple horloger ou librement — et observer sa position par rapport aux courbes affichées ; puis comparer deux versions d'un même modèle de montre. Survolez ou touchez une face d'un exemple pour voir le point se déplacer le long de sa courbe.</p>
-    <div class="sim-modes" role="group" aria-label="Mode de simulation">
-      <button type="button" data-mode="courbes" aria-pressed="true">Explorer le diagramme</button>
-      <button type="button" data-mode="modele" aria-pressed="false">Nouvelle version d'un modèle de montre</button>
-    </div>
+  <section id="panel-exemples" role="tabpanel" aria-labelledby="tab-exemples" hidden>
+    <h2 style="margin-top:0">Exemples</h2>
+    <p class="texte">Cinq exemples horlogers, un par catégorie, ou un point libre. Choisissez un exemple, puis survolez ou touchez l'une de ses deux faces pour voir le point se déplacer le long de sa courbe. Les poignées dorées sur les axes déplacent le point librement<span class="grand-ecran"> ; survolez ou touchez le diagramme pour l'agrandir</span>.</p>
 
     <!-- Mode A : explorer le diagramme -->
     <div id="sim-courbes" class="grille grille--sim">
       <div class="sim-gauche">
         <h4 style="margin-top:0">Un exemple horloger, ou un point libre</h4>
-        <div class="choix" id="sim-exemples" role="group" aria-label="Exemple"></div>
-        <div id="sim-exemple-detail"></div>
+        <div class="sim-gauche__grille">
+          <div class="liste-exemples" id="sim-exemples" role="group" aria-label="Exemples horlogers"></div>
+          <div id="sim-exemple-detail"></div>
+        </div>
       </div>
       <div class="diag-colle">
         <div class="carte carte--sim">
           <div class="carte-sim__entete">
             <span class="surtitre" style="margin:0">Courbes affichées</span>
+            <button type="button" class="btn-loupe" id="sim-agrandir" aria-pressed="false" title="Agrandir le diagramme (survol ou clic)"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12.6 12.6 18 18M6 8.5h5M8.5 6v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="btn-loupe__txt">Agrandir</span></button>
             <div class="choix cats toggles toggles--carte" id="sim-toggles" role="group" aria-label="Courbes affichées"></div>
           </div>
           <div id="sim-svg" class="zone-drag" aria-label="Diagramme de Kano avec deux poignées : degré de réalisation sur l'axe horizontal, satisfaction sur l'axe vertical"></div>
@@ -581,8 +678,15 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
       </div>
     </div>
 
-    <!-- Mode B : nouvelle version d'un modèle de montre -->
-    <div id="sim-modele" hidden>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- 3. SIMULATION (nouvelle version d'un modèle de montre)            -->
+  <!-- ================================================================ -->
+  <section id="panel-simulation" role="tabpanel" aria-labelledby="tab-simulation" hidden>
+    <h2 style="margin-top:0">Simulation</h2>
+    <h3 style="margin-top:0">Nouvelle version d'un modèle de montre</h3>
+    <div id="sim-modele">
       <div class="encadre encadre--or">
         <div class="encadre__icone">→</div>
         <div>
@@ -612,12 +716,12 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
           <div class="tuile"><span class="lab">Indice de satisfaction</span><span class="val" id="m-idx-b">—</span> <span class="delta" id="m-idx-delta"></span></div>
         </div>
       </div>
-      <p class="note">Indice de satisfaction : indicateur pédagogique — position moyenne des six caractéristiques sur l'axe de satisfaction, ramenée de 0 à 100. Il illustre l'effet des décisions ; ce n'est pas une mesure du modèle de Kano. Les numéros renvoient au tableau ; sur le modèle B, les caractéristiques modifiées sont cerclées d'or et portent une info-bulle.</p>
+      <p class="note">Indice de satisfaction : indicateur pédagogique — position moyenne des six caractéristiques sur l'axe de satisfaction, ramenée de 0 à 100. Il illustre l'effet des décisions ; ce n'est pas une mesure du modèle de Kano. Chaque caractéristique garde sa couleur et son numéro (voir le tableau) : ton clair sur le modèle A, ton soutenu sur le modèle B ; les caractéristiques modifiées sont cerclées en pointillé. Survolez ou touchez un point pour afficher son info-bulle.</p>
     </div>
   </section>
 
   <!-- ================================================================ -->
-  <!-- 3. EXERCICES                                                      -->
+  <!-- 4. EXERCICES                                                      -->
   <!-- ================================================================ -->
   <section id="panel-exercices" role="tabpanel" aria-labelledby="tab-exercices" hidden>
     <h2 style="margin-top:0">Exercices</h2>
@@ -652,7 +756,7 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
 </main>
 
 <footer class="page pied">
-  <span>École d'Horlogerie de Genève · CPH_HOP_01 · Voix du client · N. Derobert</span>
+  <span>École d'Horlogerie de Genève · Module CPH_HOP_01 · Voix du client · Application pédagogique · N. Derobert</span>
   <span>Document élaboré avec l'assistance d'outils d'intelligence artificielle.</span>
 </footer>
 
@@ -756,6 +860,8 @@ const DEG = [
 ];
 const satParCle = k => SAT.find(s => s.k === k);
 const degParCle = k => DEG.find(d => d.k === k);
+// couleur d'un niveau de satisfaction (charte EHG : vert = positif, bordeaux = négatif, graphite = neutre)
+const classeSat = k => 'sat sat-' + (k === 'E' || k === 'S' ? 'pos' : k === 'N' ? 'neu' : 'neg');
 function satDepuisY(y) { return y > 0.62 ? 'E' : y > 0.2 ? 'S' : y > -0.2 ? 'N' : y > -0.62 ? 'D' : 'T'; }
 function degDepuisX(x) { return x < -0.33 ? 'abs' : x > 0.33 ? 'plein' : 'part'; }
 
@@ -995,11 +1101,13 @@ function encadre(type, html) {
 function activerOnglet(nom) {
   $$('.onglets [role="tab"]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === nom ? 'true' : 'false'));
   $$('section[role="tabpanel"]').forEach(s => { s.hidden = s.id !== 'panel-' + nom; });
+  document.body.dataset.onglet = nom;
   // L'adresse garde l'onglet ouvert (#theorie, #simulation, #exercices) quand le navigateur l'autorise ;
   // dans un aperçu isolé (iframe « sandbox », origine nulle) l'historique est verrouillé : on ignore simplement.
   try { if (location.hash !== '#' + nom) history.replaceState(null, '', '#' + nom); } catch (e) { /* aperçu isolé : sans conséquence */ }
   try { window.scrollTo({ top: 0 }); } catch (e) { /* idem */ }
 }
+document.body.dataset.onglet = 'theorie';
 $$('.onglets [role="tab"]').forEach(b => b.addEventListener('click', () => activerOnglet(b.dataset.tab)));
 $$('.onglets [role="tab"]').forEach((b, i, arr) => b.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const j = (i + (e.key === 'ArrowRight' ? 1 : -1) + arr.length) % arr.length; arr[j].focus(); activerOnglet(arr[j].dataset.tab); }
@@ -1168,22 +1276,29 @@ renderScene($('#svg-ambigu-b'), { axes: { ticksX: true, ticksXText: false, ticks
 /* ======================================================================
    4 bis. Théorie — cinq exemples horlogers (pictogrammes + mini-courbes)
    ====================================================================== */
+// adjectif de chaque catégorie, pour la question « Pourquoi s’agit-il d’une caractéristique … ? »
+const ADJ_CAT = { B: 'basique (obligatoire)', P: 'proportionnelle', A: 'attractive', I: 'indifférente', R: 'inverse' };
 const EXEMPLES = [
   { cat: 'B', carac: 'Étanche aux éclaboussures', picto: 'eau', xR: 0.8, xA: -0.8,
     satR: 'N', pres: 'Étanche aux éclaboussures ? Je n’y pense même pas, c’est normal.',
-    satA: 'T', abs: 'Quelques gouttes de pluie et déjà de la buée sous le verre ! Je réclame, et je doute de la marque.' },
+    satA: 'T', abs: 'Quelques gouttes de pluie et déjà de la buée sous le verre ! Je réclame, et je doute de la marque.',
+    pourquoi: 'Quand la montre résiste aux éclaboussures, le client n’y pense même pas : il reste neutre. Quand elle prend l’eau, il est très insatisfait et réclame. La présence de la fonction ne rapporte aucune satisfaction, mais son absence provoque un fort mécontentement : la fonction est attendue d’office.' },
   { cat: 'P', carac: 'Réserve de marche', picto: 'reserve', xR: 0.5, xA: -0.5,
     satR: 'S', pres: '70 heures de réserve : posée le vendredi soir, elle tourne encore le lundi. Je suis content.',
-    satA: 'D', abs: '30 heures seulement : elle s’arrête chaque lundi matin, c’est décevant.' },
+    satA: 'D', abs: '30 heures seulement : elle s’arrête chaque lundi matin, c’est décevant.',
+    pourquoi: 'Avec 70 heures de réserve, le client est satisfait ; avec 30 heures, il est déçu. Sa satisfaction suit le niveau de la fonction, dans les deux sens : plus la réserve est longue, plus il est content ; plus elle est courte, plus il est mécontent.' },
   { cat: 'A', carac: 'Carte manuscrite de l’horloger dans l’écrin', picto: 'carte', xR: 0.85, xA: -0.8,
     satR: 'E', pres: 'Une carte écrite à la main par l’horloger, dans l’écrin ! Ça m’a touché, je l’ai montrée à tout le monde.',
-    satA: 'N', abs: 'Une carte ? Je n’y aurais même pas pensé.' },
+    satA: 'N', abs: 'Une carte ? Je n’y aurais même pas pensé.',
+    pourquoi: 'Le client n’attendait pas de carte : sans elle, il ne remarque rien et reste neutre. Avec elle, il est surpris et enchanté. L’absence ne coûte rien, la présence enchante.' },
   { cat: 'I', carac: 'Numéro de série gravé sur le fond', picto: 'serie', xR: 0.8, xA: -0.8,
     satR: 'N', pres: 'Un numéro gravé sur le fond ? Je ne retourne jamais ma montre, je ne le vois pas.',
-    satA: 'N', abs: 'S’il n’y était pas, je ne m’en apercevrais pas davantage.' },
+    satA: 'N', abs: 'S’il n’y était pas, je ne m’en apercevrais pas davantage.',
+    pourquoi: 'Avec ou sans numéro gravé, ce client reste neutre : il ne retourne jamais sa montre. Ni la présence ni l’absence ne changent sa satisfaction. Attention : c’est vrai pour ce client ; un collectionneur pourrait réagir autrement.' },
   { cat: 'R', carac: 'Grand guichet de date, pour un amateur de cadrans épurés', picto: 'date', xR: 0.8, xA: -0.8,
     satR: 'D', pres: 'Ce grand guichet gâche le cadran, ça m’agace.',
-    satA: 'S', abs: 'Un cadran épuré, sans guichet : exactement ce que je cherche.' },
+    satA: 'S', abs: 'Un cadran épuré, sans guichet : exactement ce que je cherche.',
+    pourquoi: 'Pour cet amateur de cadrans épurés, la présence du guichet l’agace, alors que son absence le satisfait. Il préfère que la fonction soit absente. Attention : c’est vrai pour ce client ; un autre pourrait apprécier ce guichet.' },
 ];
 // pictogrammes : traits graphite, un accent or (charte EHG)
 function picto(kind) {
@@ -1234,10 +1349,6 @@ const marqueur = plein => { const sv = el('svg', { viewBox: '0 0 20 20', width: 
 /* ======================================================================
    5. Simulation
    ====================================================================== */
-$$('.sim-modes button[data-mode]').forEach(b => b.addEventListener('click', () => {
-  $$('.sim-modes button[data-mode]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
-  ['courbes', 'modele'].forEach(m => { $('#sim-' + m).hidden = m !== b.dataset.mode; });
-}));
 
 // --- Mode A : explorer le diagramme --------------------------------------
 const FLASH = '#F26B1D'; // couleur vive, réservée au point que l'on positionne
@@ -1274,18 +1385,18 @@ function iconeSatisfaction(container, y) {
 
 // boutons de catégories (bascules)
 ORDRE.forEach(k => {
-  const b = h('button', { type: 'button', 'data-cat': k, 'aria-pressed': 'true', class: 'actif' }, [h('span', { class: 'lettre lettre-' + k, text: k }), nomCat(k)]);
+  const b = h('button', { type: 'button', 'data-cat': k, 'aria-pressed': 'true', class: 'actif', title: nomCat(k), 'aria-label': nomCat(k) }, [h('span', { class: 'lettre lettre-' + k, text: k, 'aria-hidden': 'true' }), h('span', { class: 'nom', text: nomCat(k) })]);
   b.addEventListener('click', () => { if (S.visibles.has(k)) S.visibles.delete(k); else S.visibles.add(k); b.setAttribute('aria-pressed', S.visibles.has(k) ? 'true' : 'false'); b.classList.toggle('actif', S.visibles.has(k)); majSim(); });
   $('#sim-toggles').appendChild(b);
 });
 // exemples horlogers (déplacés depuis la théorie)
 const exBtns = [];
-const btnLibre = h('button', { type: 'button', text: 'Point libre', class: 'actif' });
+const btnLibre = h('button', { type: 'button', class: 'ex-btn ex-btn--libre actif' }, [h('span', { class: 'ex-num', text: '○' }), h('span', { class: 'ex-txt' }, [h('span', { class: 'ex-lab', text: 'Sans exemple' }), 'Point libre'])]);
 btnLibre.addEventListener('click', () => { animPt++; S.trace = []; S.retour = null; S.exemple = null; S.face = null; majExemple(); majSim(); });
 $('#sim-exemples').appendChild(btnLibre); exBtns.push(btnLibre);
 EXEMPLES.forEach((e, i) => {
-  const b = h('button', { type: 'button' }, [h('span', { class: 'lettre lettre-' + e.cat, text: e.cat }), e.carac.split(',')[0]]);
-  b.addEventListener('click', () => { S.exemple = i; S.visibles.add(e.cat); $$('#sim-toggles button').forEach(t => { const on = S.visibles.has(t.dataset.cat); t.setAttribute('aria-pressed', on ? 'true' : 'false'); t.classList.toggle('actif', on); }); S.face = 'R'; majExemple(); placerSur(e.cat, e.xR); });
+  const b = h('button', { type: 'button', class: 'ex-btn', style: '--cat:' + CAT[e.cat].col + ';--cat-pale:' + CAT[e.cat].pale }, [h('span', { class: 'ex-num', text: String(i + 1) }), h('span', { class: 'ex-txt' }, [h('span', { class: 'ex-lab', text: 'Exemple n° ' + (i + 1) }), e.carac.split(',')[0]]), h('span', { class: 'lettre lettre-' + e.cat, text: e.cat, title: nomCat(e.cat) })]);
+  b.addEventListener('click', () => { S.exemple = i; S.visibles.add(e.cat); $$('#sim-toggles button').forEach(t => { const on = S.visibles.has(t.dataset.cat); t.setAttribute('aria-pressed', on ? 'true' : 'false'); t.classList.toggle('actif', on); }); S.face = 'R'; majExemple(); placerSur(e.cat, e.xR); ficheVisible(); });
   $('#sim-exemples').appendChild(b); exBtns.push(b);
 });
 function majExemple() {
@@ -1296,8 +1407,9 @@ function majExemple() {
   const face = (plein, cle, texte) => {
     const cible = plein ? e.xR : e.xA, nom = plein ? 'R' : 'A';
     const b = h('button', { type: 'button', class: 'face-btn', 'data-face': nom }, [
-      h('span', { class: 'face-btn__titre' }, [marqueur(plein), plein ? 'Fonction réalisée' : 'Fonction absente ou peu réalisée']),
-      h('span', { class: 'face-btn__niveau' }, [pictoClient(30), h('span', {}, [h('strong', { text: 'Client ' + satParCle(cle).nom.toLowerCase() }), ' — « ' + texte + ' »'])]),
+      h('span', { class: 'info-ligne' }, [h('span', { class: 'info-lab', text: 'Degré de réalisation :' }), h('strong', { class: plein ? 'deg-plein' : 'deg-abs', text: (plein ? '✓ fonction réalisée' : '✗ fonction absente ou peu réalisée') })]),
+      h('span', { class: 'info-ligne' }, [h('span', { class: 'info-lab', text: 'Satisfaction :' }), h('strong', { class: classeSat(cle), text: 'client ' + satParCle(cle).nom.toLowerCase() })]),
+      h('span', { class: 'info-ligne info-ligne--parole' }, [pictoClient(28), h('span', {}, [h('span', { class: 'info-lab', text: 'Le client dit :' }), ' « ' + texte + ' »'])]),
     ]);
     // survol (souris) : aperçu du déplacement le long de la courbe ; on revient en arrière si l'on ressort sans cliquer
     b.addEventListener('pointerenter', ev => { if (ev.pointerType === 'touch' || S.face === nom) return; if (!S.retour) S.retour = { x: S.x, y: S.y, face: S.face }; animerVers(e.cat, cible, 1400); });
@@ -1305,15 +1417,34 @@ function majExemple() {
     b.addEventListener('click', () => { S.retour = null; S.face = nom; animerVers(e.cat, cible, 1400); });
     return b;
   };
-  d.appendChild(h('div', { class: 'exemple exemple--sim' }, [
-    h('div', { class: 'exemple__picto' }, picto(e.picto)),
-    h('div', {}, [
-      h('div', { class: 'cat-titre cat-' + e.cat, text: nomCat(e.cat) }),
-      h('div', { class: 'carac', text: e.carac }),
-      h('div', { class: 'faces' }, [face(true, e.satR, e.pres), face(false, e.satA, e.abs)]),
-      h('p', { class: 'note', style: 'margin:.5rem 0 0', text: 'Touchez une face pour placer le point sur la courbe ; les curseurs permettent ensuite de le déplacer.' }),
+  d.appendChild(h('div', { class: 'exemple exemple--sim', style: 'border-top:4px solid ' + CAT[e.cat].col }, [
+    h('div', { class: 'exemple__entete' }, [
+      h('div', { class: 'exemple__picto' }, picto(e.picto)),
+      h('div', {}, [
+        h('span', { class: 'surtitre', style: 'margin-bottom:.35rem', text: 'Exemple n° ' + (S.exemple + 1) }),
+        h('dl', { class: 'infos' }, [
+          h('dt', { text: 'Caractéristique :' }), h('dd', { class: 'carac', text: e.carac }),
+          h('dt', { text: 'Catégorie :' }), h('dd', {}, h('span', { class: 'cat-titre cat-' + e.cat, text: nomCat(e.cat) })),
+        ]),
+      ]),
     ]),
+    h('div', { class: 'pourquoi', style: 'background:' + CAT[e.cat].pale }, [
+      h('p', { class: 'pourquoi__q' }, ['Pourquoi s’agit-il d’une caractéristique ', h('strong', { class: 'cat-' + e.cat, text: ADJ_CAT[e.cat] + '\u00a0?' })]),
+      h('p', { class: 'pourquoi__r', text: e.pourquoi }),
+    ]),
+    h('div', { class: 'faces' }, [face(true, e.satR, e.pres), face(false, e.satA, e.abs)]),
+    h('p', { class: 'note', style: 'margin:0', text: 'Touchez ou survolez une face pour placer le point sur la courbe.' }),
   ]));
+}
+function ficheVisible() {
+  try { if (window.matchMedia('(max-width: 56rem)').matches) $('#sim-exemple-detail').scrollIntoView({ behavior: reduitMouvement() ? 'auto' : 'smooth', block: 'start' }); } catch (e) {}
+}
+// hauteur du diagramme collant (téléphone) : sert de marge de défilement pour que la fiche ne passe pas dessous
+{
+  const dc = $('#sim-courbes .diag-colle');
+  const majH = () => { try { document.documentElement.style.setProperty('--diag-h', dc.offsetHeight + 'px'); } catch (e) {} };
+  try { new ResizeObserver(majH).observe(dc); } catch (e) { window.addEventListener('resize', majH); }
+  majH();
 }
 function placerSur(cat, x) { animerVers(cat, x, 1400); }
 // déplacement animé du point : le long de la courbe `cat` (ou en ligne droite si cat est null), avec une trace des positions parcourues
@@ -1347,7 +1478,8 @@ function poignees(svg) {
   el('rect', { x: px(-0.95) - 24, y: CY - 40, width: px(0.95) - px(-0.95) + 48, height: 80, class: 'bande', 'data-curseur': 'x' }, g);
   el('rect', { x: CX - 40, y: py(0.95) - 24, width: 80, height: py(-0.95) - py(0.95) + 48, class: 'bande', 'data-curseur': 'y' }, g);
   // sur un petit écran (téléphone), poignées plus grandes pour le doigt
-  const petit = (svg.getBoundingClientRect().width || 600) < 520, R = petit ? 24 : 16, Z = petit ? 48 : 34, gr = petit ? 8 : 6;
+  let petit = false; try { petit = window.matchMedia('(pointer: coarse)').matches; } catch (e) {}
+  const R = petit ? 24 : 16, Z = petit ? 48 : 34, gr = petit ? 8 : 6;
   const poignee = (axe, X, Y, label, now, texte) => {
     const p = el('g', { class: 'poignee', 'data-curseur': axe, tabindex: 0, role: 'slider', 'aria-label': label, 'aria-valuemin': -100, 'aria-valuemax': 100, 'aria-valuenow': now, 'aria-valuetext': texte, 'aria-orientation': axe === 'x' ? 'horizontal' : 'vertical' }, g);
     el('circle', { cx: X, cy: Y, r: Z, class: 'poignee__zone' }, p);
@@ -1365,8 +1497,9 @@ function majSim() {
   const svg = renderScene($('#sim-svg'), { axes: { ticksX: true, ticksXText: false, ticksY: true }, curves, points: [...trace, { x: S.x, y: S.y, guides: true, r: 13, col: FLASH, cls: 'point-libre' }] });
   svg.querySelectorAll('.trace').forEach((g, i, a) => g.setAttribute('opacity', (0.25 + 0.55 * i / Math.max(1, a.length)).toFixed(2)));
   poignees(svg);
-  $('#sim-degre').textContent = degParCle(degDepuisX(S.x)).nom;
-  $('#sim-sat').textContent = satParCle(satDepuisY(S.y)).nom;
+  const kd = degDepuisX(S.x), ks = satDepuisY(S.y);
+  $('#sim-degre').textContent = degParCle(kd).nom; $('#sim-degre').className = 'deg-' + kd;
+  $('#sim-sat').textContent = satParCle(ks).nom; $('#sim-sat').className = classeSat(ks);
   iconeDegre($('#ico-deg'), S.x); iconeSatisfaction($('#ico-sat'), S.y);
   $$('#sim-exemple-detail .face-btn').forEach(b => b.classList.toggle('actif', b.dataset.face === S.face));
 }
@@ -1375,10 +1508,10 @@ function majSim() {
   const zone = $('#sim-svg'); let axe = null;
   const coord = ev => { const r = zone.querySelector('svg').getBoundingClientRect(); return { x: ((ev.clientX - r.left) / r.width * W - CX) / RX, y: (CY - (ev.clientY - r.top) / r.height * H) / RY }; };
   const appliquer = c => { animPt++; S.trace = []; S.retour = null; if (axe === 'x') S.x = clampSim(c.x); else S.y = clampSim(c.y); S.face = null; majSim(); };
-  zone.addEventListener('pointerdown', ev => { const t = ev.target.closest('[data-curseur]'); if (!t) return; axe = t.dataset.curseur; try { zone.setPointerCapture(ev.pointerId); } catch (e) {} ev.preventDefault(); appliquer(coord(ev)); });
+  zone.addEventListener('pointerdown', ev => { const t = ev.target.closest('[data-curseur]'); if (!t) return; axe = t.dataset.curseur; S.glisse = true; try { zone.setPointerCapture(ev.pointerId); } catch (e) {} ev.preventDefault(); appliquer(coord(ev)); });
   zone.addEventListener('pointermove', ev => { if (axe) appliquer(coord(ev)); });
-  zone.addEventListener('pointerup', () => { axe = null; });
-  zone.addEventListener('pointercancel', () => { axe = null; });
+  zone.addEventListener('pointerup', () => { axe = null; S.glisse = false; });
+  zone.addEventListener('pointercancel', () => { axe = null; S.glisse = false; });
   zone.addEventListener('keydown', ev => {
     const p = ev.target.closest && ev.target.closest('.poignee'); if (!p) return;
     const a = p.dataset.curseur, pas = ev.shiftKey ? 0.2 : 0.05; let d = 0;
@@ -1392,6 +1525,54 @@ function majSim() {
   });
 }
 majExemple(); majSim();
+
+// diagramme réduit (≈ 25 % de la largeur) qui s'agrandit au survol, au clic ou au toucher
+{
+  const carte = $('#sim-courbes .carte--sim'), col = carte.parentNode, btn = $('#sim-agrandir');
+  let epingle = false, survol = false, tm = null;
+  const possible = () => { try { return window.matchMedia('(min-width: 56.01rem)').matches; } catch (e) { return false; } };
+  // largeur agrandie : ≈ 2/3 de la zone de simulation, sans dépasser la hauteur de l'écran
+  const largeur = () => { const g = $('#sim-courbes').getBoundingClientRect().width, w = col.offsetWidth || 1; return Math.round(Math.max(w * 1.6, Math.min(g * 0.66, (window.innerHeight - 150) / 0.66))); };
+  // le diagramme agrandi reste entièrement visible : il remonte si nécessaire au-dessus de sa position
+  function positionner() {
+    const top = col.getBoundingClientRect().top, H = carte.offsetHeight;
+    const shift = Math.max(0, Math.min(top + H + 12 - window.innerHeight, top - 12));
+    carte.style.top = (-shift) + 'px'; carte.style.transformOrigin = '100% ' + shift + 'px';
+  }
+  let rafPos = 0;
+  window.addEventListener('scroll', () => { if (!carte.classList.contains('grand') || rafPos) return; rafPos = requestAnimationFrame(() => { rafPos = 0; positionner(); }); }, { passive: true });
+  function maj() {
+    const on = possible() && (epingle || survol), etait = carte.classList.contains('grand');
+    if (on) {
+      const W = largeur();
+      if (!etait) { col.style.height = carte.offsetHeight + 'px'; carte.style.setProperty('--k0', ((col.offsetWidth || W) / W).toFixed(3)); }
+      carte.style.width = W + 'px';
+    } else { carte.style.width = ''; col.style.height = ''; }
+    if (on) carte.classList.remove('retour');
+    carte.classList.toggle('grand', on); col.classList.toggle('grand', on);
+    carte.classList.toggle('reduit', possible() && !on);
+    if (on) positionner(); else { carte.style.top = ''; carte.style.transformOrigin = ''; }
+    if (etait && !on) { carte.classList.remove('retour'); void carte.offsetWidth; carte.classList.add('retour'); }
+    btn.setAttribute('aria-pressed', epingle ? 'true' : 'false');
+    btn.querySelector('.btn-loupe__txt').textContent = epingle ? 'Réduire' : on ? 'Garder agrandi' : 'Agrandir';
+    btn.title = epingle ? 'Réduire le diagramme' : 'Agrandir le diagramme (survol ou clic)';
+  }
+  carte.addEventListener('pointerenter', ev => { if (ev.pointerType !== 'mouse') return; clearTimeout(tm); survol = true; maj(); });
+  carte.addEventListener('pointerleave', ev => {
+    if (ev.pointerType !== 'mouse') return; clearTimeout(tm);
+    tm = setTimeout(function essai() { if (S.glisse) { tm = setTimeout(essai, 200); return; } survol = false; maj(); }, 300);
+  });
+  // toucher (ou clic sans survol) sur le diagramme réduit : on l'agrandit sans déplacer le point
+  carte.addEventListener('pointerdown', ev => {
+    if (!possible() || carte.classList.contains('grand') || ev.target.closest('#sim-agrandir, #sim-toggles')) return;
+    ev.stopPropagation(); ev.preventDefault(); epingle = true; maj();
+  }, true);
+  btn.addEventListener('click', ev => { ev.stopPropagation(); epingle = !epingle; if (!epingle) survol = false; maj(); });
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && (epingle || survol) && !document.querySelector('.modale:not([hidden])')) { epingle = false; survol = false; maj(); } });
+  carte.addEventListener('animationend', ev => { if (ev.animationName === 'diagRetour') carte.classList.remove('retour'); });
+  window.addEventListener('resize', maj);
+  maj();
+}
 
 // --- Mode B : nouvelle version d'un modèle de montre (mise en situation fictive) ---
 const VERSIONS = [
@@ -1440,33 +1621,51 @@ function avecBulle(elm, html) {
 }
 const bulleHtml = vs => vs.map(v => {
   const modif = v.a !== v.b;
-  return `<div class="bulle__item${modif ? ' bulle__item--modif' : ''}"><span class="bulle__num">${v.id}</span><div><strong>${v.nom}</strong><br><span class="cat-${v.cat}">${nomCat(v.cat)}</span> · modèle A : ${libNiv(v, 'a')}${modif ? ` → <strong>modèle B : ${libNiv(v, 'b')}</strong>` : ''}<br><span class="bulle__chg">${modif ? '★ ' : ''}${v.chg}</span></div></div>`;
+  return `<div class="bulle__item${modif ? ' bulle__item--modif' : ''}"><span class="pastille-v" style="background:${coulV(v)}">${v.id}</span><div><strong>${v.nom}</strong>`
+    + `<br><span class="bulle__lab">Catégorie :</span> <span class="cat-${v.cat}">${nomCat(v.cat)}</span>`
+    + `<br><span class="bulle__lab">Modèle A :</span> ${libNiv(v, 'a')}`
+    + `<br><span class="bulle__lab">Modèle B :</span> ${modif ? '<strong>' + libNiv(v, 'b') + '</strong>' : libNiv(v, 'b')}`
+    + `<br><span class="bulle__lab">${modif ? 'Amélioration :' : 'Évolution :'}</span> <span class="bulle__chg">${modif ? '★ ' : ''}${v.chg}</span></div></div>`;
 }).join('');
 
 // --- diagrammes A et B ---------------------------------------------------------
-// Dessine les points d'une version ; pour B, ils partent des positions A et sont animés ensuite (revelerB)
+// Une couleur par caractéristique (numéro affiché dans chaque point : la couleur n'est jamais le seul repère).
+// Modèle A : ton clair ; modèle B : ton soutenu. Palette vérifiée (écart perçu ≥ 15 entre toutes les paires en vision normale).
+const COUL_VERSIONS = ['#A8302E', '#2E7D46', '#B08600', '#5E4BB0', '#D0508F', '#3A3A3A'];
+const hexRgb = x => [1, 3, 5].map(i => parseInt(x.slice(i, i + 2), 16));
+const melangeHex = (a, b, k) => { const A = hexRgb(a), B = hexRgb(b); return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * k).toString(16).padStart(2, '0')).join(''); };
+const coulV = v => COUL_VERSIONS[(v.id - 1) % COUL_VERSIONS.length];
+const teinteA = v => melangeHex(coulV(v), '#ffffff', 0.58);   // ton clair (modèle A)
+const encreA = v => melangeHex(coulV(v), '#000000', 0.22);    // numéro lisible sur le ton clair
+// Dessine les points d'une version ; pour B, ils partent des positions A (ton clair) et sont animés ensuite (revelerB)
 function diagrammeVersion(container, cle) {
   const svg = renderScene(container, { axes: { ticksX: true, ticksXText: false, ticksY: true, ticksYText: false }, curves: ORDRE.map(k => ({ cat: k, faded: true })) });
   const g = el('g', { class: 'pts-version' }, svg);
   const src = cle === 'b' ? 'a' : cle; // B : positions de départ = A
+  // points confondus : on les écarte légèrement pour que chaque couleur reste visible
   const grp = {};
   VERSIONS.forEach(v => { const k = cleGroupe(v, cle); (grp[k] = grp[k] || []).push(v); });
+  const pos = (v, c) => { const P = posNiv(v, c), gr = grp[cleGroupe(v, c)] || [v]; if (c !== cle || gr.length < 2) return P; const i = gr.indexOf(v); return { X: P.X + (i - (gr.length - 1) / 2) * 50, Y: P.Y }; };
   const items = VERSIONS.map(v => {
-    const de = posNiv(v, src), vers = posNiv(v, cle), modif = cle === 'b' && v.a !== v.b;
+    const de = cle === 'b' ? posNiv(v, src) : pos(v, cle), vers = pos(v, cle), modif = cle === 'b' && v.a !== v.b;
+    const col = coulV(v);
     const pg = el('g', { class: 'pt-version' + (modif ? ' pt-version--modif' : ''), tabindex: 0, role: 'button', 'aria-label': `${v.id} · ${v.nom} · ${v.chg}` }, g);
-    el('circle', { cx: de.X, cy: de.Y, r: 16, fill: '#fff' }, pg);
-    const ring = el('circle', { cx: de.X, cy: de.Y, r: 19, class: 'pt-version__anneau', fill: 'none', stroke: '#AA8802', 'stroke-width': 3, 'stroke-dasharray': '5 4', opacity: 0 }, pg);
-    el('circle', { cx: de.X, cy: de.Y, r: 11, fill: '#AA8802', stroke: '#AA8802', 'stroke-width': 3 }, pg);
-    const pulse = modif ? el('circle', { cx: de.X, cy: de.Y, r: 19, class: 'pt-version__pulse', fill: 'none', stroke: '#AA8802', 'stroke-width': 3, opacity: 0 }, pg) : null;
-    avecBulle(pg, bulleHtml(grp[cleGroupe(v, cle)]));
-    return { v, pg, ring, pulse, de, vers, modif };
+    el('circle', { cx: de.X, cy: de.Y, r: 19, fill: '#fff', class: 'pt-version__halo' }, pg);
+    const ring = el('circle', { cx: de.X, cy: de.Y, r: 22, class: 'pt-version__anneau', fill: 'none', stroke: col, 'stroke-width': 3, 'stroke-dasharray': '5 4', opacity: 0 }, pg);
+    const disque = el('circle', { cx: de.X, cy: de.Y, r: 16, class: 'pt-version__disque', fill: teinteA(v), stroke: col, 'stroke-width': 2.5 }, pg);
+    const num = el('text', { x: de.X, y: de.Y, class: 'pt-version__num', 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: encreA(v) }, pg); num.textContent = v.id;
+    const pulse = modif ? el('circle', { cx: de.X, cy: de.Y, r: 22, class: 'pt-version__pulse', fill: 'none', stroke: col, 'stroke-width': 3, opacity: 0 }, pg) : null;
+    avecBulle(pg, bulleHtml([v]));
+    return { v, pg, ring, pulse, disque, num, de, vers, modif, cle };
   });
-  // libellés numérotés, à la position finale
-  const labels = Object.values(grp).map((vs, i) => {
-    const P = posNiv(vs[0], cle);
-    return txt(g, P.X, P.Y + (i % 2 ? 36 : -22), vs.map(q => q.id).join('·'), 'num', { 'text-anchor': 'middle' });
-  });
-  return { svg, items, labels };
+  items.forEach(it => teinter(it, 0));
+  return { svg, items, labels: [] };
+}
+// ton du point : 0 = clair (modèle A), 1 = soutenu (modèle B)
+function teinter(it, k) {
+  const t = it.cle === 'b' ? k : 0;
+  it.disque.setAttribute('fill', melangeHex(teinteA(it.v), coulV(it.v), t));
+  it.num.setAttribute('fill', melangeHex(encreA(it.v), '#ffffff', t));
 }
 const ease = t => 1 - Math.pow(1 - t, 3);
 function tween(dur, delay, onUpdate, onEnd) {
@@ -1477,6 +1676,7 @@ function tween(dur, delay, onUpdate, onEnd) {
 function placerItem(it, k) {
   const X = it.de.X + (it.vers.X - it.de.X) * k, Y = it.de.Y + (it.vers.Y - it.de.Y) * k;
   it.pg.querySelectorAll('circle').forEach(c => { c.setAttribute('cx', X); c.setAttribute('cy', Y); });
+  it.num.setAttribute('x', X); it.num.setAttribute('y', Y);
 }
 let animB = 0;
 function revelerB(anime) {
@@ -1484,18 +1684,19 @@ function revelerB(anime) {
   const D = diagrammeVersion($('#m-svg-b'), 'b');
   const ia = indice('a'), ib = indice('b');
   const fin = () => {
-    D.items.forEach(it => { placerItem(it, 1); if (it.modif) it.ring.setAttribute('opacity', 1); });
+    D.items.forEach(it => { placerItem(it, 1); teinter(it, 1); if (it.modif) it.ring.setAttribute('opacity', 1); });
     D.labels.forEach(l => l.setAttribute('opacity', 1));
-    $('#m-idx-b').textContent = ib; $('#m-idx-delta').textContent = (ib >= ia ? '+' : '') + (ib - ia);
+    $('#m-idx-b').textContent = ib; $('#m-idx-delta').textContent = (ib >= ia ? '▲ +' : '▼ ') + (ib - ia); $('#m-idx-delta').className = 'delta ' + (ib >= ia ? 'delta--hausse' : 'delta--baisse');
   };
   if (!anime || reduit()) { fin(); return; }
   D.labels.forEach(l => l.setAttribute('opacity', 0));
   $('#m-idx-b').textContent = ia; $('#m-idx-delta').textContent = '';
-  // les points modifiés se déplacent l'un après l'autre, dans l'ordre du tableau
+  // les points inchangés prennent leur ton soutenu ; les points modifiés se déplacent l'un après l'autre, dans l'ordre du tableau
+  D.items.filter(it => !it.modif).forEach(it => tween(600, 150, k => { if (seq === animB) { placerItem(it, k); teinter(it, k); } }));
   const mods = D.items.filter(it => it.modif);
   mods.forEach((it, i) => {
     const delay = 500 + i * 1700;
-    tween(1500, delay, k => { if (seq === animB) placerItem(it, k); }, () => {
+    tween(1500, delay, k => { if (seq === animB) { placerItem(it, k); teinter(it, k); } }, () => {
       if (seq !== animB) return;
       it.ring.setAttribute('opacity', 1);
       it.pulse.setAttribute('opacity', 1); it.pulse.classList.add('pulse-on');
@@ -1505,7 +1706,7 @@ function revelerB(anime) {
   const total = 500 + mods.length * 1700 + 300;
   tween(1500, Math.max(800, total - 1500), k => { if (seq === animB) $('#m-idx-b').textContent = Math.round(ia + (ib - ia) * k); }, () => {
     if (seq !== animB) return;
-    $('#m-idx-delta').textContent = (ib >= ia ? '+' : '') + (ib - ia);
+    $('#m-idx-delta').textContent = (ib >= ia ? '▲ +' : '▼ ') + (ib - ia); $('#m-idx-delta').className = 'delta ' + (ib >= ia ? 'delta--hausse' : 'delta--baisse');
     D.labels.forEach(l => l.setAttribute('opacity', 1));
   });
 }
@@ -1517,7 +1718,7 @@ function revelerB(anime) {
     const info = modif ? h('button', { type: 'button', class: 'info', 'aria-label': 'Détail de l’amélioration ' + v.id, text: 'i' }) : null;
     if (info) avecBulle(info, bulleHtml([v]));
     tb.appendChild(h('tr', { class: modif ? 'modif' : '' }, [
-      h('td', { class: 'chiffre', text: v.id }), h('td', { text: v.nom }), h('td', { class: 'cat cat-' + v.cat, text: nomCat(v.cat) }),
+      h('td', {}, h('span', { class: 'pastille-v', style: 'background:' + coulV(v), text: v.id, title: 'Couleur de la caractéristique ' + v.id })), h('td', { text: v.nom }), h('td', { class: 'cat cat-' + v.cat, text: nomCat(v.cat) }),
       h('td', {}, niv(v, 'a')), h('td', { class: 'col-b' }, niv(v, 'b')), h('td', { class: 'col-b ' + (modif ? 'cat-A' : 'note') }, [info, (modif ? ' ' : '') + v.chg]),
     ]));
   });
@@ -1780,7 +1981,7 @@ e1Depart(); e2Depart();
    ====================================================================== */
 try {
   const hash = location.hash.replace('#', '');
-  if (['theorie', 'simulation', 'exercices'].includes(hash)) activerOnglet(hash);
+  if (['theorie', 'exemples', 'simulation', 'exercices'].includes(hash)) activerOnglet(hash);
 } catch (e) { /* adresse inaccessible dans un aperçu isolé : on reste sur la théorie */ }
 
 /* ======================================================================
