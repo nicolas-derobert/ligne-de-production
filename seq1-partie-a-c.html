@@ -318,19 +318,33 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
 @media (max-width: 56rem) { .modes.modes--3 { grid-template-columns: 1fr; } }
 
 /* ---------- 7. Exercices : questionnaire ---------- */
-.mode-emploi { list-style: none; counter-reset: me; padding: 0; margin: 0 0 1.75rem; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
-.mode-emploi li { counter-increment: me; position: relative; background: var(--ehg-brume); border-radius: var(--ehg-radius-lg); padding: .9rem 1rem .9rem 3.2rem; font-size: .95em; line-height: 1.45; }
-.mode-emploi li::before { content: counter(me); position: absolute; left: 1rem; top: .75rem; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--ehg-bleu); color: #fff; font-family: var(--ehg-font-serif); display: flex; align-items: center; justify-content: center; }
-.mode-emploi strong { display: block; font-family: var(--ehg-font-titre); font-weight: 500; }
-.series { display: grid; gap: .75rem; }
-.serie { display: grid; grid-template-columns: 4rem 1fr auto; align-items: center; gap: 1rem; background: var(--ehg-blanc); border: var(--ehg-filet); border-radius: var(--ehg-radius-lg); padding: 1rem 1.25rem; box-shadow: var(--ehg-ombre); }
-.serie__lettre { font-family: var(--ehg-font-serif); font-size: 2.2rem; line-height: 1; color: var(--ehg-or); text-align: center; }
-.serie--toutes .serie__lettre { font-size: 1.1rem; }
-.serie--toutes { background: var(--ehg-bleu-pale); border-color: transparent; box-shadow: none; }
-.serie__titre { margin: 0; font-size: 1.15rem; }
-.serie__sous { margin: .15rem 0 0; color: var(--ehg-graphite); font-size: .92em; }
-.serie__score { margin: .2rem 0 0; font-size: .92em; }
-.serie__score .chiffre { font-size: 1.15rem; }
+/* Sous-onglets des parties (A, B, C, Tout, Erreurs) */
+.sous-onglets { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: .35rem; background: var(--ehg-bleu-pale); border-radius: 12px; padding: .35rem; margin: 0 0 1.25rem; }
+.sous-onglet { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .15rem; min-height: 4.2rem; min-width: 0; padding: .45rem .2rem; border: 0; border-radius: 9px; background: transparent; color: var(--ehg-bleu-fonce); font-family: var(--ehg-font-titre); cursor: pointer; text-align: center; transition: background .15s, color .15s, box-shadow .15s; }
+.sous-onglet:hover { background: var(--ehg-blanc); }
+.sous-onglet__lettre { font-family: var(--ehg-font-serif); font-size: 1.6rem; line-height: 1; color: var(--ehg-or); }
+.sous-onglet--tout .sous-onglet__lettre, .sous-onglet--rev .sous-onglet__lettre { font-size: 1.05rem; line-height: 1.6rem; letter-spacing: .02em; }
+.sous-onglet__lib { font-size: .78rem; letter-spacing: .05em; text-transform: uppercase; line-height: 1.15; overflow-wrap: anywhere; }
+.sous-onglet__etat { font-family: var(--ehg-font-texte); font-size: .74rem; line-height: 1.2; min-height: 1.2em; color: var(--ehg-graphite); letter-spacing: 0; white-space: nowrap; }
+.sous-onglet__etat.en-cours::before { content: ""; display: inline-block; width: .45rem; height: .45rem; border-radius: 50%; background: var(--ehg-or); margin-right: .3rem; vertical-align: .05em; }
+.sous-onglet[aria-selected="true"] { background: var(--ehg-bleu); color: #fff; box-shadow: 0 2px 8px rgba(22,58,90,.3); }
+.sous-onglet[aria-selected="true"] .sous-onglet__lettre { color: var(--ehg-or-clair); }
+.sous-onglet[aria-selected="true"] .sous-onglet__etat { color: rgba(255,255,255,.88); }
+.sous-onglet:focus-visible { outline: 2px solid var(--ehg-or); outline-offset: 2px; }
+/* Carte d'une partie (avant de commencer) */
+.partie { display: grid; grid-template-columns: 4rem 1fr; gap: .25rem 1rem; align-items: center; background: var(--ehg-blanc); border: var(--ehg-filet); border-radius: var(--ehg-radius-lg); padding: 1.25rem 1.5rem; box-shadow: var(--ehg-ombre); animation: carte-entre .25s ease both; }
+.partie__lettre { font-family: var(--ehg-font-serif); font-size: 2.8rem; line-height: 1; color: var(--ehg-or); text-align: center; }
+.partie--tout .partie__lettre { font-size: 1.2rem; }
+.partie__titre { margin: 0; font-size: 1.35rem; }
+.partie__sous { margin: .2rem 0 0; color: var(--ehg-graphite); font-size: .95em; }
+.partie__score { margin: .15rem 0 0; font-size: .95em; }
+.partie__score .chiffre { font-size: 1.2rem; }
+.partie__piste, .partie__actions { grid-column: 1 / -1; }
+.partie__piste { margin: 1rem 0 .25rem; }
+.partie__actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
+/* Pendant une question : on masque l'en-tête de présentation */
+body.en-quiz .titre { display: none; }
+body.en-quiz main.page { padding-top: 1.25rem; }
 .quiz__barre { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1rem; padding-bottom: .5rem; border-bottom: var(--ehg-filet); }
 .quiz__titre { font-family: var(--ehg-font-titre); font-size: 1rem; text-align: center; }
 .quiz__score { font-family: var(--ehg-font-titre); font-size: .85rem; color: var(--ehg-graphite); }
@@ -345,7 +359,6 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
 .question__num .chiffre { font-size: 1.6rem; }
 .question__num .badge { margin-left: auto; }
 .question__texte { margin: 0 0 .35rem; font-size: 1.3rem; line-height: 1.4; }
-.question__consigne { margin: 0 0 1rem; font-size: .9em; color: var(--ehg-acier); }
 .reponses { display: grid; gap: .55rem; }
 .reponse { display: grid; grid-template-columns: 2.2rem 1fr; align-items: center; gap: .75rem; text-align: left; font: inherit; letter-spacing: inherit; line-height: 1.4; color: var(--ehg-noir); background: var(--ehg-blanc); border: 1px solid var(--ehg-bleu); border-radius: var(--ehg-radius-lg); padding: .75rem .9rem; min-height: 3.2rem; cursor: pointer; transition: background .12s, border-color .12s; }
 .reponse:hover { background: var(--ehg-bleu-pale); }
@@ -378,11 +391,21 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
 .recap li.juste .recap__etat { color: var(--ehg-ok); } .recap li.faux .recap__etat { color: var(--ehg-erreur); font-weight: 600; }
 .err-groupe .err-liste li .chiffre { margin-right: .35rem; }
 @media (max-width: 48rem) {
-  .mode-emploi { grid-template-columns: 1fr; }
-  .serie { grid-template-columns: 3rem 1fr; }
-  .serie > .btn { grid-column: 1 / -1; width: 100%; }
-  .quiz__barre { grid-template-columns: auto auto; }
+  .sous-onglets { gap: .25rem; padding: .3rem; margin-bottom: 1rem; }
+  .sous-onglet { min-height: 4rem; padding: .4rem .1rem; }
+  .sous-onglet__lettre { font-size: 1.4rem; }
+  .sous-onglet__lib { font-size: .66rem; letter-spacing: .03em; }
+  .sous-onglet__etat { font-size: .68rem; }
+  .partie { grid-template-columns: 2.6rem 1fr; padding: 1rem; gap: .2rem .75rem; }
+  .partie__lettre { font-size: 2.2rem; }
+  .partie--tout .partie__lettre { font-size: .95rem; }
+  .partie__titre { font-size: 1.15rem; }
+  .partie__actions .btn { flex: 1 1 100%; }
+  body.en-quiz main.page { padding-top: .75rem; }
+  .quiz__barre { grid-template-columns: auto 1fr; gap: .5rem; }
+  .quiz__score { justify-self: end; }
   .quiz__titre { grid-column: 1 / -1; grid-row: 2; text-align: left; font-size: .92rem; }
+  .quiz__titre--serie { display: none; }
   .question { padding: 1rem; }
   .question__texte { font-size: 1.15rem; }
   .question__actions .btn { flex: 1 1 100%; }
@@ -607,12 +630,17 @@ body.modale-ouverte { overflow: hidden; }
 /* ---------- 8. Smartphone ---------- */
 @media (max-width: 48rem) {
   .page { padding-inline: 1rem; }
-  .onglets { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 20; background: var(--ehg-blanc); margin: 0; padding: 0 .25rem env(safe-area-inset-bottom, 0px); border-top: var(--ehg-filet); border-bottom: 0; box-shadow: 0 -2px 10px rgba(20,20,20,.08); gap: 0; justify-content: space-around; overflow: visible; }
-  .onglets button { flex: 1 1 0; flex-direction: column; gap: .2rem; text-align: center; padding: .55rem 0 .6rem; margin: 0; border-bottom: 0; border-top: 3px solid transparent; font-size: .62rem; letter-spacing: .04em; min-height: 58px; }
-  .onglets button .ico { width: 22px; height: 22px; }
-  .onglets button[aria-selected="true"] { border-top-color: var(--ehg-or); border-bottom: 0; }
-  .onglets button .pastille { position: absolute; margin-left: 2.2rem; margin-top: -.2rem; }
-  body.onglets-bas { padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)); }
+  .onglets { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 20; margin: 0; background: var(--ehg-bleu-fonce); border: 0; box-shadow: 0 -4px 18px rgba(22,58,90,.28); padding: .4rem .5rem calc(.4rem + env(safe-area-inset-bottom, 0px)); gap: .35rem; justify-content: space-around; overflow: visible; }
+  .onglets button { position: relative; flex: 1 1 0; flex-direction: column; gap: .25rem; text-align: center; padding: .3rem 0 .35rem; margin: 0; border: 0; border-radius: 12px; color: rgba(255,255,255,.86); font-size: .7rem; letter-spacing: .05em; min-height: 58px; }
+  .onglets button:hover, .onglets button:focus-visible { color: #fff; }
+  .onglets button .ico { width: 24px; height: 24px; padding: 4px 16px; box-sizing: content-box; border-radius: 999px; transition: background .15s, color .15s; }
+  .onglets button:active .ico { background: rgba(255,255,255,.18); }
+  .onglets button[aria-selected="true"] { color: #fff; font-weight: 600; border: 0; }
+  .onglets button[aria-selected="true"] .ico { background: var(--ehg-or); color: var(--ehg-noir); }
+  .onglets button:focus-visible { outline: 2px solid var(--ehg-or-clair); outline-offset: -2px; }
+  .onglets button .pastille { position: absolute; top: .1rem; left: calc(50% + 14px); margin: 0; box-shadow: 0 0 0 2px var(--ehg-bleu-fonce); }
+  body.onglets-bas { padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+  html:has(body.onglets-bas) { scroll-padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
   .entete__droite { gap: .4rem; }
   .entete__droite > span { display: none; }
   .entete__droite .btn { font-size: .68rem; padding: .5rem .6rem; min-height: 40px; }
@@ -726,14 +754,10 @@ body.modale-ouverte { overflow: hidden; }
   <!-- EXERCICES : questions à choix multiple par partie                  -->
   <!-- ================================================================ -->
   <section id="panel-entrainer" role="tabpanel" aria-labelledby="tab-entrainer">
+    <div class="sous-onglets" id="sous-onglets" role="tablist" aria-label="Parties du cours"></div>
+    <div id="partie-panneau" role="tabpanel">
     <div id="ent-choix">
-      <h2 style="margin-top:0">Exercices</h2>
-      <ol class="mode-emploi" aria-label="Mode d'emploi">
-        <li><strong>Choisissez une partie</strong> du cours : A, B ou C, ou les trois à la suite.</li>
-        <li><strong>Lisez la question</strong>, touchez une réponse, puis « Valider ». Une seule réponse est juste.</li>
-        <li><strong>Lisez la correction</strong> : la phrase exacte du cours, entre guillemets, avec sa page. Puis « Question suivante ».</li>
-      </ol>
-      <div class="series" id="parties"></div>
+      <div id="partie-intro"></div>
 
       <div class="grille grille--2 progression" style="align-items:start">
         <div class="carte carte--brume">
@@ -755,6 +779,7 @@ body.modale-ouverte { overflow: hidden; }
       </div>
     </div>
     <div id="quiz" hidden></div>
+    </div>
   </section>
 
   <!-- ================================================================ -->
@@ -998,7 +1023,8 @@ function activerOnglet(nom, opts = {}) {
   $$('.onglets [role="tab"]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === nom ? 'true' : 'false'));
   $$('section[role="tabpanel"]').forEach(s => { s.hidden = s.id !== 'panel-' + nom; });
   if (nom === 'cours') pdfInit();
-  if (nom === 'entrainer' && !quizEnCours()) rendreParties();
+  if (nom === 'entrainer') { if (QUIZ && $('#quiz').childElementCount) rendreSousOnglets(); else rendreExercices(); }
+  majEnQuiz();
   if (nom === 'erreurs') rendreErreurs();
   try { if (!opts.sansHash && location.hash !== '#' + HASH[nom]) history.replaceState(null, '', '#' + HASH[nom]); } catch (e) { /* aperçu isolé */ }
   if (!opts.sansScroll) { try { window.scrollTo({ top: 0 }); } catch (e) { /* idem */ } }
@@ -1078,27 +1104,83 @@ $('#pdf-essayer').addEventListener('click', () => { const u = $('#pdf-url').valu
 function ouvrirPageCours(page) { activerOnglet('cours'); pdfAfficher(page || undefined); }
 
 /* ======================================================================
-   8. Exercices : choix de la partie, progression, réinitialisation
+   8. Exercices : un sous-onglet par partie (A, B, C, Tout)
+   Chaque sous-onglet garde son questionnaire en cours : on peut passer
+   d'une partie à l'autre sans perdre sa place.
    ====================================================================== */
+const COURT = { A: 'Besoins', B: 'Personas', C: 'Bon produit' };
 const SERIES = [
-  ...PARTIES.map(p => ({ id: p.id, titre: 'Partie ' + p.id + ' · ' + p.titre, sous: 'Pages ' + p.pages, questions: () => QUESTIONS.filter(q => q.p === p.id) })),
-  { id: 'T', titre: 'Les trois parties', sous: 'Pages 9 à 40, dans l’ordre du cours', questions: () => QUESTIONS.slice() },
+  ...PARTIES.map(p => ({ id: p.id, lettre: p.id, court: COURT[p.id] || p.titre, titre: 'Partie ' + p.id + ' · ' + p.titre, sous: 'Pages ' + p.pages, questions: () => QUESTIONS.filter(q => q.p === p.id) })),
+  { id: 'T', lettre: 'A·B·C', court: 'Tout', titre: 'Les trois parties', sous: 'Pages 9 à 40, dans l’ordre du cours', questions: () => QUESTIONS.slice() },
 ];
+const REVISION = { id: 'X', lettre: '↺', court: 'Erreurs' };   // sous-onglet temporaire : révision des erreurs
+let CTX = 'A';           // sous-onglet affiché : A, B, C, T ou X
+let CTX_PARTIE = 'A';    // dernière partie choisie (retour après une révision des erreurs)
+const QUIZS = {};        // questionnaire en cours, par sous-onglet
+let QUIZ = null;         // questionnaire du sous-onglet affiché
+try { const c = localStorage.getItem(CLE + '_partie'); if (SERIES.some(s => s.id === c)) CTX = CTX_PARTIE = c; } catch (e) {}
+const quizEnCours = () => !!QUIZ;
 function meilleur(id) { const l = ETAT.series[id] || []; return l.length ? Math.max(...l) : null; }
-function rendreParties() {
-  const w = $('#parties'); w.innerHTML = '';
-  SERIES.forEach(s => {
-    const n = s.questions().length, best = meilleur(s.id), nb = (ETAT.series[s.id] || []).length;
-    w.appendChild(h('div', { class: 'serie' + (s.id === 'T' ? ' serie--toutes' : '') }, [
-      h('span', { class: 'serie__lettre', text: s.id === 'T' ? 'A·B·C' : s.id }),
-      h('div', { class: 'serie__corps' }, [
-        h('h3', { class: 'serie__titre', text: s.titre }),
-        h('p', { class: 'serie__sous', text: s.sous + ' · ' + n + ' questions' }),
-        h('p', { class: 'serie__score', html: best === null ? 'Pas encore faite' : `Meilleur score : <strong class="chiffre">${best}</strong> / ${n}` + (nb > 1 ? ` <span class="note">· ${nb} essais</span>` : '') }),
-      ]),
-      h('button', { type: 'button', class: 'btn btn--bleu', text: best === null ? 'Commencer' : 'Recommencer', onclick: () => lancerQuiz(s.questions(), s.titre, s.id) }),
+function majEnQuiz() { document.body.classList.toggle('en-quiz', !!QUIZ && !$('#panel-entrainer').hidden); }
+
+function rendreSousOnglets() {
+  const w = $('#sous-onglets'); w.innerHTML = '';
+  const liste = SERIES.concat(QUIZS.X || CTX === 'X' ? [REVISION] : []);
+  liste.forEach(s => {
+    const sel = s.id === CTX, q = QUIZS[s.id] || (sel ? QUIZ : null);
+    let etat = '', cls = '';
+    if (q && !q.fini) { etat = 'en cours'; cls = ' en-cours'; }
+    else if (s.id !== 'X') { const b = meilleur(s.id); etat = b === null ? '' : b + ' / ' + s.questions().length; }
+    w.appendChild(h('button', { type: 'button', role: 'tab', id: 'sous-' + s.id, class: 'sous-onglet' + (s.id === 'T' ? ' sous-onglet--tout' : '') + (s.id === 'X' ? ' sous-onglet--rev' : ''),
+      'aria-selected': sel ? 'true' : 'false', 'aria-controls': 'partie-panneau', tabindex: sel ? '0' : '-1', 'data-ctx': s.id,
+      title: s.id === 'X' ? 'Révision des erreurs' : s.titre, onclick: () => changerPartie(s.id) }, [
+      h('span', { class: 'sous-onglet__lettre', 'aria-hidden': 'true', text: s.lettre }),
+      h('span', { class: 'sous-onglet__lib', text: s.court }),
+      h('span', { class: 'sous-onglet__etat' + cls, text: etat }),
     ]));
   });
+  $('#partie-panneau').setAttribute('aria-labelledby', 'sous-' + CTX);
+}
+$('#sous-onglets').addEventListener('keydown', e => {
+  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+  const b = $$('#sous-onglets [role="tab"]'); const i = b.findIndex(x => x.dataset.ctx === CTX); if (i < 0) return;
+  const j = (i + (e.key === 'ArrowRight' ? 1 : -1) + b.length) % b.length; changerPartie(b[j].dataset.ctx); const n = $('#sous-' + b[j].dataset.ctx); if (n) n.focus(); e.preventDefault();
+});
+function memoriserPartie(id) { if (id === 'X') return; CTX_PARTIE = id; try { localStorage.setItem(CLE + '_partie', id); } catch (e) {} }
+function changerPartie(id) {
+  if (id === CTX) return;
+  if (QUIZ) QUIZS[CTX] = QUIZ;
+  CTX = id; memoriserPartie(id);
+  QUIZ = QUIZS[id] || null;
+  rendreExercices();
+}
+function rendreExercices() {
+  rendreSousOnglets();
+  if (QUIZ) { $('#ent-choix').hidden = true; $('#quiz').hidden = false; if (QUIZ.fini) afficherResultat(); else afficherQuestion(); }
+  else { $('#quiz').hidden = true; $('#quiz').innerHTML = ''; $('#ent-choix').hidden = false; rendreIntro(); }
+  majEnQuiz();
+}
+function rendreIntro() {
+  const s = SERIES.find(x => x.id === CTX) || SERIES[0];
+  const qs = s.questions(), n = qs.length, best = meilleur(s.id), nb = (ETAT.series[s.id] || []).length;
+  const errP = qs.filter(q => ETAT.res[q.id] === 0);
+  const w = $('#partie-intro'); w.innerHTML = '';
+  w.appendChild(h('div', { class: 'partie' + (s.id === 'T' ? ' partie--tout' : '') }, [
+    h('span', { class: 'partie__lettre', 'aria-hidden': 'true', text: s.lettre }),
+    h('div', { class: 'partie__corps' }, [
+      h('h2', { class: 'partie__titre', text: s.titre }),
+      h('p', { class: 'partie__sous', text: s.sous + ' · ' + n + ' questions' }),
+      h('p', { class: 'partie__score', html: best === null ? 'Pas encore faite' : `Meilleur score : <strong class="chiffre">${best}</strong> / ${n}` + (nb > 1 ? ` <span class="note">· ${nb} essais</span>` : '') }),
+    ]),
+    h('ol', { class: 'piste partie__piste', 'aria-label': 'État des questions' }, qs.map((q, k) => {
+      const r = ETAT.res[q.id];
+      return h('li', { class: 'piste__pt ' + (r === 1 ? 'juste' : r === 0 ? 'faux' : ''), title: 'Question ' + (k + 1) + (r === 1 ? ' : juste' : r === 0 ? ' : à revoir' : ' : pas encore faite'), text: String(k + 1) });
+    })),
+    h('div', { class: 'partie__actions' }, [
+      h('button', { type: 'button', class: 'btn btn--bleu btn--large', id: 'btn-commencer', text: best === null ? 'Commencer' : 'Recommencer', onclick: () => lancerQuiz(qs, s.titre, s.id) }),
+      errP.length ? h('button', { type: 'button', class: 'btn btn--secondaire btn--large', text: errP.length > 1 ? 'Refaire mes ' + errP.length + ' erreurs' : 'Refaire mon erreur', onclick: () => lancerQuiz(errP, 'Mes erreurs · ' + s.titre, null) }) : null,
+    ]),
+  ]));
   const err = erreurs().length, faites = Object.keys(ETAT.res).length, justes = Object.values(ETAT.res).filter(v => v === 1).length;
   $('#prog-faites').textContent = faites + ' / ' + QUESTIONS.length;
   $('#prog-justes').textContent = faites ? justes : '—';
@@ -1106,8 +1188,11 @@ function rendreParties() {
 }
 function reinitialiser(portee) {
   if (portee === 'erreurs') { Object.keys(ETAT.res).forEach(k => { if (ETAT.res[k] === 0) delete ETAT.res[k]; }); }
-  else { ETAT = ETAT_VIDE(); if (portee === 'tout') { try { localStorage.removeItem(CLE + '_confort'); } catch (e) {} document.body.classList.remove('confort'); $('#btn-confort').setAttribute('aria-pressed', 'false'); } }
-  sauver(); majPastille(); rendreParties(); rendreErreurs();
+  else {
+    ETAT = ETAT_VIDE(); Object.keys(QUIZS).forEach(k => delete QUIZS[k]); QUIZ = null; if (CTX === 'X') CTX = CTX_PARTIE;
+    if (portee === 'tout') { try { localStorage.removeItem(CLE + '_confort'); localStorage.removeItem(CLE + '_partie'); } catch (e) {} CTX = CTX_PARTIE = 'A'; document.body.classList.remove('confort'); $('#btn-confort').setAttribute('aria-pressed', 'false'); }
+  }
+  sauver(); majPastille(); if (!$('#panel-entrainer').hidden) rendreExercices(); rendreErreurs();
 }
 const REINIT_TXT = {
   resultats: ['Réinitialiser les résultats', 'Les scores, les réponses enregistrées et la liste des erreurs seront effacés sur cet appareil.', 'Résultats réinitialisés'],
@@ -1119,20 +1204,24 @@ $$('[data-reinit]').forEach(b => b.addEventListener('click', () => { const t = R
 /* ======================================================================
    9. Le questionnaire : une question à la fois, correction avec la citation du cours
    ====================================================================== */
-let QUIZ = null;
-const quizEnCours = () => !!QUIZ;
 const LETTRES = ['A', 'B', 'C', 'D', 'E'];
-function lancerQuiz(questions, titre, serieId) {
+// ctx : sous-onglet qui reçoit le questionnaire (par défaut celui affiché ; 'X' pour la révision des erreurs)
+function lancerQuiz(questions, titre, serieId, ctx) {
   if (!questions.length) return;
-  activerOnglet('entrainer', { sansScroll: true });
-  QUIZ = { questions, titre, serieId, i: 0, score: 0, res: [], choix: null, valide: false };
-  $('#ent-choix').hidden = true; $('#quiz').hidden = false;
-  afficherQuestion();
+  ctx = ctx || CTX;
+  if (QUIZ && ctx !== CTX) QUIZS[CTX] = QUIZ;
+  CTX = ctx; memoriserPartie(ctx);
+  QUIZ = QUIZS[ctx] = { questions, titre, serieId, i: 0, score: 0, res: [], choix: null, valide: false };
+  if ($('#panel-entrainer').hidden) activerOnglet('entrainer', { sansScroll: true });
+  rendreExercices();
   try { window.scrollTo({ top: 0 }); } catch (e) {}
 }
-function quitterQuiz() { QUIZ = null; $('#quiz').hidden = true; $('#quiz').innerHTML = ''; $('#ent-choix').hidden = false; rendreParties(); try { window.scrollTo({ top: 0 }); } catch (e) {} }
+function quitterQuiz() {
+  delete QUIZS[CTX]; QUIZ = null;
+  if (CTX === 'X') { CTX = CTX_PARTIE; QUIZ = QUIZS[CTX] || null; }
+  rendreExercices(); try { window.scrollTo({ top: 0 }); } catch (e) {}
+}
 function piste() {
-  const n = QUIZ.questions.length;
   return h('ol', { class: 'piste', 'aria-label': 'Avancement' }, QUIZ.questions.map((q, k) => {
     const etat = k < QUIZ.res.length ? (QUIZ.res[k] ? 'juste' : 'faux') : (k === QUIZ.i ? 'courant' : '');
     return h('li', { class: 'piste__pt ' + etat, title: 'Question ' + (k + 1) + (etat === 'juste' ? ' : juste' : etat === 'faux' ? ' : fausse' : ''), text: String(k + 1) });
@@ -1140,25 +1229,24 @@ function piste() {
 }
 function enteteQuiz() {
   return h('div', { class: 'quiz__barre' }, [
-    h('button', { type: 'button', class: 'btn btn--discret btn--petit', text: '← Quitter', onclick: () => { if (QUIZ.res.length && QUIZ.i < QUIZ.questions.length) confirmer('Quitter la série', 'Les réponses déjà données restent enregistrées ; le score de la série ne sera pas compté.', quitterQuiz); else quitterQuiz(); } }),
-    h('span', { class: 'quiz__titre', text: QUIZ.titre }),
+    h('button', { type: 'button', class: 'btn btn--discret btn--petit', text: '← Quitter', onclick: () => { if (QUIZ.res.length && !QUIZ.fini) confirmer('Quitter la série', 'Les réponses déjà données restent enregistrées ; le score de la série ne sera pas compté.', quitterQuiz); else quitterQuiz(); } }),
+    h('span', { class: 'quiz__titre' + (QUIZ.serieId ? ' quiz__titre--serie' : ''), text: QUIZ.titre }),
     h('span', { class: 'quiz__score', html: `Score <strong class="chiffre">${QUIZ.score}</strong>` }),
   ]);
 }
 function afficherQuestion() {
   const box = $('#quiz'); box.innerHTML = '';
   const q = QUIZ.questions[QUIZ.i], n = QUIZ.questions.length;
-  QUIZ.choix = null; QUIZ.valide = false;
-  const ordre = melange(q.options.map((t, k) => k));
+  // nouvel affichage de la question : on tire l'ordre des réponses ; retour sur l'onglet : on restaure l'état
+  if (QUIZ.ordreI !== QUIZ.i) { QUIZ.ordreI = QUIZ.i; QUIZ.ordre = melange(q.options.map((t, k) => k)); QUIZ.choix = null; QUIZ.valide = false; }
   box.append(enteteQuiz(), piste());
   const carte = h('article', { class: 'question', 'aria-live': 'polite' });
   carte.append(
     h('p', { class: 'question__num' }, [h('span', { text: 'Question ' }), h('strong', { class: 'chiffre', text: String(QUIZ.i + 1) }), h('span', { text: ' sur ' + n })]),
     h('h3', { class: 'question__texte', text: q.q }),
-    h('p', { class: 'question__consigne', text: 'Une seule bonne réponse. Touchez une réponse, puis « Valider ».' }),
   );
   const liste = h('div', { class: 'reponses', role: 'radiogroup', 'aria-label': 'Réponses' });
-  ordre.forEach((k, pos) => liste.appendChild(h('button', { type: 'button', class: 'reponse', role: 'radio', 'aria-checked': 'false', 'data-k': k, onclick: () => choisir(k) }, [h('span', { class: 'reponse__lettre', text: LETTRES[pos] }), h('span', { class: 'reponse__texte', text: q.options[k] })])));
+  QUIZ.ordre.forEach((k, pos) => liste.appendChild(h('button', { type: 'button', class: 'reponse', role: 'radio', 'aria-checked': 'false', 'data-k': k, onclick: () => choisir(k) }, [h('span', { class: 'reponse__lettre', text: LETTRES[pos] }), h('span', { class: 'reponse__texte', text: q.options[k] })])));
   const actions = h('div', { class: 'question__actions' });
   const btnValider = h('button', { type: 'button', class: 'btn btn--bleu btn--large', id: 'btn-valider', text: 'Valider', disabled: true, onclick: valider });
   actions.appendChild(btnValider);
@@ -1178,7 +1266,11 @@ function afficherQuestion() {
     const ok = QUIZ.choix === q.rep;
     QUIZ.res.push(ok ? 1 : 0); if (ok) QUIZ.score++;
     ETAT.res[q.id] = ok ? 1 : 0; sauver(); majPastille();
-    liste.querySelectorAll('.reponse').forEach(b => { const k = +b.dataset.k; b.disabled = true; if (k === q.rep) b.classList.add('juste'); else if (k === QUIZ.choix) b.classList.add('faux'); else b.classList.add('eteinte'); });
+    montrerCorrection(true);
+  }
+  function montrerCorrection(anime) {
+    const ok = QUIZ.choix === q.rep;
+    liste.querySelectorAll('.reponse').forEach(b => { const k = +b.dataset.k; b.disabled = true; b.setAttribute('aria-checked', k === QUIZ.choix ? 'true' : 'false'); if (k === q.rep) b.classList.add('juste'); else if (k === QUIZ.choix) b.classList.add('faux'); else b.classList.add('eteinte'); });
     box.querySelector('.quiz__barre').replaceWith(enteteQuiz()); box.querySelector('.piste').replaceWith(piste());
     actions.innerHTML = '';
     const pageCours = premierePage(q.cite[1]);
@@ -1192,18 +1284,34 @@ function afficherQuestion() {
     );
     const dernier = QUIZ.i + 1 >= n;
     actions.append(
-      h('button', { type: 'button', class: 'btn btn--bleu btn--large', id: 'btn-suivant', text: dernier ? 'Voir mon résultat' : 'Question suivante →', onclick: () => { QUIZ.i++; if (QUIZ.i >= n) afficherResultat(); else afficherQuestion(); try { $('#quiz').scrollIntoView({ block: 'start' }); } catch (e) {} } }),
+      h('button', { type: 'button', class: 'btn btn--bleu btn--large', id: 'btn-suivant', text: dernier ? 'Voir mon résultat' : 'Question suivante →', onclick: () => { QUIZ.i++; if (QUIZ.i >= n) afficherResultat(); else afficherQuestion(); rendreSousOnglets(); try { $('#quiz').scrollIntoView({ block: 'start' }); } catch (e) {} } }),
       h('button', { type: 'button', class: 'btn btn--secondaire btn--large', text: 'Lire la page ' + pageCours + ' du cours', onclick: () => ouvrirPageCours(pageCours) }),
     );
-    try { fb.scrollIntoView({ behavior: reduitMouvement() ? 'auto' : 'smooth', block: 'nearest' }); } catch (e) {}
-    const s = $('#btn-suivant'); if (s) s.focus({ preventScroll: true });
+    if (anime) {
+      amenerCorrection(fb, actions);
+      const s = $('#btn-suivant'); if (s) s.focus({ preventScroll: true });
+    }
   }
   QUIZ._valider = valider;
+  if (QUIZ.valide) montrerCorrection(false); else if (QUIZ.choix !== null) choisir(QUIZ.choix);
+}
+// fait apparaître la correction et le bouton « Question suivante » au-dessus de la barre d'onglets du smartphone
+function amenerCorrection(fb, actions) {
+  try {
+    const barre = document.body.classList.contains('onglets-bas') ? ($('.onglets').offsetHeight || 0) : 0;
+    const marge = 12, bas = window.innerHeight - barre - marge;
+    const haut = fb.getBoundingClientRect().top, fin = actions.getBoundingClientRect().bottom;
+    let dy = 0;
+    if (fin - haut <= bas - marge) { if (fin > bas) dy = fin - bas; else if (haut < marge) dy = haut - marge; }
+    else dy = haut - marge;
+    if (dy) window.scrollBy({ top: dy, behavior: reduitMouvement() ? 'auto' : 'smooth' });
+  } catch (e) { /* défilement non pris en charge */ }
 }
 function afficherResultat() {
   const box = $('#quiz'); box.innerHTML = '';
   const n = QUIZ.questions.length, s = QUIZ.score, pct = s / n;
-  if (QUIZ.serieId) { const l = ETAT.series[QUIZ.serieId] = ETAT.series[QUIZ.serieId] || []; l.push(s); if (l.length > 20) l.shift(); sauver(); }
+  QUIZ.fini = true;
+  if (QUIZ.serieId && !QUIZ.enregistre) { const l = ETAT.series[QUIZ.serieId] = ETAT.series[QUIZ.serieId] || []; l.push(s); if (l.length > 20) l.shift(); QUIZ.enregistre = true; sauver(); }
   const msg = pct === 1 ? 'Sans faute : bravo.' : pct >= 0.8 ? 'Très bien. Relisez la citation des questions manquées.' : pct >= 0.6 ? 'Bien. Refaites les questions manquées.' : 'À retravailler : relisez les pages du cours indiquées, puis refaites les questions manquées.';
   const manquees = QUIZ.questions.filter((q, k) => !QUIZ.res[k]);
   const recap = h('ol', { class: 'recap' }, QUIZ.questions.map((q, k) => h('li', { class: QUIZ.res[k] ? 'juste' : 'faux' }, [
@@ -1218,16 +1326,15 @@ function afficherResultat() {
     h('div', { class: 'question__actions' }, [
       manquees.length ? h('button', { type: 'button', class: 'btn btn--bleu btn--large', text: 'Refaire les ' + manquees.length + ' question' + (manquees.length > 1 ? 's' : '') + ' manquée' + (manquees.length > 1 ? 's' : ''), onclick: () => lancerQuiz(manquees, 'Questions manquées · ' + titre, null) }) : null,
       h('button', { type: 'button', class: 'btn ' + (manquees.length ? 'btn--secondaire' : 'btn--bleu') + ' btn--large', text: 'Recommencer', onclick: () => lancerQuiz(questions, titre, serieId) }),
-      h('button', { type: 'button', class: 'btn btn--secondaire btn--large', text: 'Choisir une autre partie', onclick: quitterQuiz }),
+      h('button', { type: 'button', class: 'btn btn--secondaire btn--large', text: 'Terminer', onclick: quitterQuiz }),
     ]),
     h('h4', { text: 'Détail des réponses' }), recap,
   ]));
-  QUIZ.fini = true;
 }
 // clavier : 1 à 4 ou A à D pour choisir, Entrée pour valider puis passer à la suite
 document.addEventListener('keydown', ev => {
   if (!QUIZ || QUIZ.fini || $('#panel-entrainer').hidden || document.querySelector('.modale:not([hidden])')) return;
-  if (ev.target && /INPUT|TEXTAREA/.test(ev.target.tagName)) return;
+  if (ev.target && (/INPUT|TEXTAREA/.test(ev.target.tagName) || ev.target.closest('#sous-onglets'))) return;
   const k = ev.key.toUpperCase(); const pos = '1234'.indexOf(k) >= 0 ? '1234'.indexOf(k) : 'ABCD'.indexOf(k);
   if (pos >= 0 && !QUIZ.valide && k.length === 1) { QUIZ._choisir(pos); ev.preventDefault(); }
   else if (ev.key === 'Enter' && ev.target.tagName !== 'BUTTON') { if (!QUIZ.valide) QUIZ._valider(); else { const s = $('#btn-suivant'); if (s) s.click(); } ev.preventDefault(); }
@@ -1241,7 +1348,7 @@ function rendreErreurs() {
   const err = erreurs();
   if (!err.length) { w.appendChild(h('div', { class: 'encadre encadre--ok' }, [h('div', { class: 'encadre__icone', text: '✓' }), h('div', { html: '<strong>Aucune erreur en attente.</strong> Les questions manquées dans l’onglet Exercices apparaîtront ici ; une question refaite juste disparaît de la liste.' })])); return; }
   w.appendChild(h('div', { class: 'question__actions', style: 'margin:0 0 1.5rem' }, [
-    h('button', { type: 'button', class: 'btn btn--bleu btn--large', text: 'Refaire mes ' + err.length + ' erreur' + (err.length > 1 ? 's' : ''), onclick: () => lancerQuiz(err, 'Mes erreurs', null) }),
+    h('button', { type: 'button', class: 'btn btn--bleu btn--large', text: err.length > 1 ? 'Refaire mes ' + err.length + ' erreurs' : 'Refaire mon erreur', onclick: () => lancerQuiz(err, 'Mes erreurs', null, 'X') }),
     h('button', { type: 'button', class: 'btn btn--discret btn--petit', text: 'Vider la liste', onclick: () => confirmer(REINIT_TXT.erreurs[0], REINIT_TXT.erreurs[1], () => { reinitialiser('erreurs'); toast(REINIT_TXT.erreurs[2]); }) }),
   ]));
   PARTIES.forEach(p => {
@@ -1249,7 +1356,7 @@ function rendreErreurs() {
     w.appendChild(h('div', { class: 'err-groupe' }, [
       h('h3', {}, [h('span', { class: 'id', text: p.id }), 'Partie ' + p.id + ' · ' + p.titre, h('span', { class: 'badge badge--erreur', text: String(l.length) })]),
       h('ul', { class: 'err-liste' }, l.map(q => h('li', {}, [h('span', { text: q.q }), h('span', { class: 'n', text: 'p. ' + q.cite[1] })]))),
-      h('button', { type: 'button', class: 'btn btn--secondaire btn--petit', text: 'Refaire les erreurs de la partie ' + p.id, onclick: () => lancerQuiz(l, 'Mes erreurs · partie ' + p.id, null) }),
+      h('button', { type: 'button', class: 'btn btn--secondaire btn--petit', text: 'Refaire les erreurs de la partie ' + p.id, onclick: () => lancerQuiz(l, 'Mes erreurs · partie ' + p.id, null, 'X') }),
     ]));
   });
 }
