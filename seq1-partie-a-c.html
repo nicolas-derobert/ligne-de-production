@@ -853,7 +853,7 @@ const PARTIES = [
   { id: 'B', titre: 'L’identification des personas', pages: '27 à 34' },
   { id: 'C', titre: 'Définir le bon produit', pages: '35 à 40' },
 ];
-const QUESTIONS = [
+const TOUTES_QUESTIONS = [
   /* ---------------- Partie A ---------------- */
   { p: 'A', q: 'Selon le cours, que peut devenir un client satisfait ?',
     options: ['Un ambassadeur de la marque', 'Un persona', 'Un fournisseur de la manufacture', 'Un responsable marketing'], rep: 0,
@@ -956,8 +956,12 @@ const QUESTIONS = [
     options: ['Le produit', 'Les ressources humaines', 'Les moyens de production', 'L’organisation'], rep: 3,
     cite: ['L\'organisation — Nouvelle construction : Sous-traiter ou acheter ce que l\'on ne sait pas faire ; adapter l\'implantation.', '40', 'Tableau des quatre leviers'] },
 ];
-// identifiant lisible : A1, A2… B1… C1…
-{ const n = {}; QUESTIONS.forEach(q => { n[q.p] = (n[q.p] || 0) + 1; q.id = q.p + n[q.p]; }); }
+// identifiant lisible : A1, A2… B1… C1… (attribué sur la liste complète : les numéros restent stables)
+{ const n = {}; TOUTES_QUESTIONS.forEach(q => { n[q.p] = (n[q.p] || 0) + 1; q.id = q.p + n[q.p]; }); }
+// Questions retirées à la relecture papier du 23 septembre 2026. Leurs numéros ne sont pas réattribués,
+// pour que la numérotation corresponde au document de relecture et aux résultats déjà enregistrés.
+const RETIREES = ['A5', 'A7', 'A8', 'B8', 'C4'];
+const QUESTIONS = TOUTES_QUESTIONS.filter(q => !RETIREES.includes(q.id));
 const questionParId = id => QUESTIONS.find(q => q.id === id);
 const partieParId = id => PARTIES.find(p => p.id === id);
 
@@ -1005,9 +1009,26 @@ const premierePage = p => parseInt(String(p).split(/[-–]/)[0], 10);
    series : scores des séries terminées, par partie
    ====================================================================== */
 const CLE = 'ehg_cph_hop_01_qcm_v5';
-const ETAT_VIDE = () => ({ res: {}, series: { A: [], B: [], C: [], T: [] } });
+// Version du jeu de questions et séries dont le contenu a changé à chaque version
+// 2 = A5, A7 et A8 retirées · 3 = B8 et C4 retirées (23 septembre 2026)
+const VERSION_QUESTIONS = 3;
+const SERIES_CHANGEES = { 2: ['A', 'T'], 3: ['B', 'C', 'T'] };
+const ETAT_VIDE = () => ({ v: VERSION_QUESTIONS, res: {}, series: { A: [], B: [], C: [], T: [] } });
 let ETAT = ETAT_VIDE();
-function charger() { try { const s = localStorage.getItem(CLE); if (s) { const o = JSON.parse(s); if (o && o.res && o.series) ETAT = Object.assign(ETAT_VIDE(), o); } } catch (e) { /* stockage indisponible */ } }
+function charger() {
+  try {
+    const s = localStorage.getItem(CLE); if (!s) return;
+    const o = JSON.parse(s); if (!(o && o.res && o.series)) return;
+    ETAT = Object.assign(ETAT_VIDE(), o);
+    // jeu de questions modifié : les scores des séries concernées ne sont plus comparables
+    for (let v = (o.v || 1) + 1; v <= VERSION_QUESTIONS; v++) (SERIES_CHANGEES[v] || []).forEach(k => { ETAT.series[k] = []; });
+    ETAT.v = VERSION_QUESTIONS;
+    // réponses aux questions retirées : ignorées
+    const ids = new Set(QUESTIONS.map(q => q.id));
+    Object.keys(ETAT.res).forEach(k => { if (!ids.has(k)) delete ETAT.res[k]; });
+    sauver();
+  } catch (e) { /* stockage indisponible */ }
+}
 function sauver() { try { localStorage.setItem(CLE, JSON.stringify(ETAT)); } catch (e) { /* idem */ } }
 const erreurs = () => QUESTIONS.filter(q => ETAT.res[q.id] === 0);
 function majPastille() { const n = erreurs().length; const p = $('#pastille-erreurs'); p.textContent = n; p.hidden = n === 0; }
