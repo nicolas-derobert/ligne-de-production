@@ -288,6 +288,48 @@ q.def::before, q.def::after { color: var(--ehg-or); font-weight: 400; }
 .btn--large { padding: .8rem 1.4rem; font-size: .85rem; }
 .sim-modes .n { font-family: var(--ehg-font-serif); color: var(--ehg-or); margin-right: .15em; }
 .sim-modes button[aria-pressed="true"] .n { color: #fff; }
+/* choix de l'exercice : deux cartes cliquables, l'exercice ouvert est mis en évidence */
+.exo-choix__consigne { margin: 0 0 .75rem; color: var(--ehg-graphite); }
+.exo-choix__main { font-size: 1.3em; color: var(--ehg-or); line-height: 1; margin-right: .3rem; vertical-align: -.1em; }
+.exo-choix { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 0 0 2rem; }
+.exo-carte { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "num corps picto" "etat etat etat"; gap: .6rem 1rem; align-items: start; text-align: left;
+  font: inherit; letter-spacing: inherit; color: var(--ehg-noir); background: var(--ehg-blanc); border: 2px solid var(--ehg-perle); border-top: 5px solid var(--ehg-or-clair); border-radius: var(--ehg-radius-lg);
+  padding: 1rem 1.1rem .9rem; cursor: pointer; box-shadow: var(--ehg-ombre); transition: border-color .15s, box-shadow .15s, transform .15s, background .15s; }
+.exo-carte:hover { border-color: var(--ehg-or); border-top-color: var(--ehg-or); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(20,20,20,.12); }
+.exo-carte:focus-visible { outline: 3px solid var(--ehg-or); outline-offset: 3px; }
+.exo-carte[aria-pressed="true"] { background: var(--ehg-or-pale); border-color: var(--ehg-or-fonce); border-top-color: var(--ehg-or-fonce); box-shadow: 0 0 0 1px var(--ehg-or-fonce); transform: none; cursor: default; }
+.exo-carte[aria-pressed="true"]::after { content: ''; position: absolute; left: 50%; bottom: -13px; transform: translateX(-50%); border: 11px solid transparent; border-bottom: 0; border-top-color: var(--ehg-or-fonce); }
+.exo-carte__num { grid-area: num; display: inline-flex; align-items: center; justify-content: center; width: 2.8rem; height: 2.8rem; border-radius: 50%; font-family: var(--ehg-font-serif); font-size: 1.6rem; line-height: 1;
+  color: var(--ehg-or-fonce); background: var(--ehg-blanc); border: 2px solid var(--ehg-or); }
+.exo-carte[aria-pressed="true"] .exo-carte__num { background: var(--ehg-or-fonce); border-color: var(--ehg-or-fonce); color: var(--ehg-blanc); }
+.exo-carte__corps { grid-area: corps; display: grid; gap: .15rem; }
+.exo-carte__sur { font-family: var(--ehg-font-titre); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ehg-acier); }
+.exo-carte[aria-pressed="true"] .exo-carte__sur { color: var(--ehg-or-fonce); }
+.exo-carte__titre { font-family: var(--ehg-font-titre); font-size: 1.2rem; line-height: 1.2; }
+.exo-carte__desc { font-size: .92em; color: var(--ehg-graphite); line-height: 1.45; }
+.exo-carte__meta { font-family: var(--ehg-font-titre); font-size: .78rem; color: var(--ehg-acier); margin-top: .2rem; }
+.exo-carte__picto { grid-area: picto; width: 4rem; height: auto; }
+.exo-carte__etat { grid-area: etat; font-family: var(--ehg-font-titre); font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; }
+.exo-carte__etat > span { display: inline-block; padding: .35rem .75rem; border-radius: 999px; }
+.exo-carte .etat-on { display: none; background: var(--ehg-or-fonce); color: var(--ehg-blanc); }
+.exo-carte .etat-off { border: 1px solid var(--ehg-or); color: var(--ehg-or-fonce); background: var(--ehg-blanc); }
+.exo-carte:hover .etat-off { background: var(--ehg-or); border-color: var(--ehg-or); color: var(--ehg-blanc); }
+.exo-carte[aria-pressed="true"] .etat-on { display: inline-block; }
+.exo-carte[aria-pressed="true"] .etat-off { display: none; }
+.exo-titre__num { display: inline-block; font-size: .7em; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-blanc); background: var(--ehg-or-fonce); padding: .2em .6em; border-radius: var(--ehg-radius); vertical-align: .15em; margin-right: .35rem; }
+@media (max-width: 48rem) {
+  .exo-choix { gap: .6rem; }
+  .exo-carte { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "num corps" "etat etat"; gap: .5rem .6rem; padding: .75rem .7rem .7rem; }
+  .exo-carte__num { width: 2.2rem; height: 2.2rem; font-size: 1.25rem; }
+  .exo-carte__titre { font-size: 1rem; }
+  .exo-carte__desc, .exo-carte__picto { display: none; }
+  .exo-carte__etat { font-size: .66rem; letter-spacing: .04em; }
+  .exo-carte__etat > span { padding: .3rem .6rem; white-space: nowrap; }
+  .exo-carte .etat-long, .exo-carte .meta-q { display: none; }
+  .exo-carte__meta { white-space: nowrap; }
+  .exo-carte__sur { white-space: nowrap; letter-spacing: .05em; }
+}
+@media (prefers-reduced-motion: reduce) { .exo-carte:hover { transform: none; } }
 .avant-apres { margin-top: 1.5rem; }
 .carte--or-bord { border-color: var(--ehg-or); }
 .avant-apres .tuile { margin-top: .5rem; }
@@ -555,7 +597,7 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
 @media print {
   @page { size: A4; margin: 18mm 16mm; }
   body { font-size: 10.5pt; }
-  .onglets, .btn, .entete__droite, .sim-modes { display: none !important; }
+  .onglets, .btn, .entete__droite, .sim-modes, .exo-choix, .exo-choix__consigne { display: none !important; }
   section[role="tabpanel"] { display: block !important; }
   .carte { box-shadow: none; break-inside: avoid; }
 }
@@ -772,15 +814,36 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
   <section id="panel-exercices" role="tabpanel" aria-labelledby="tab-exercices" hidden>
     <h2 style="margin-top:0">Exercices</h2>
     <p class="texte">Deux exercices de dix questions, corrigés question par question. Toutes les situations sont fictives ; chacune indique explicitement ce que fait la montre ou le service et ce que ressent le client.</p>
-    <div class="sim-modes" role="group" aria-label="Choix de l'exercice">
-      <button type="button" data-exo="placer" aria-pressed="true"><span class="n">1</span> Placer le point</button>
-      <button type="button" data-exo="categorie" aria-pressed="false"><span class="n">2</span> Identifier la catégorie</button>
+    <p class="exo-choix__consigne"><span class="exo-choix__main" aria-hidden="true">☛</span> <strong>Cliquez sur un exercice pour l'ouvrir.</strong> Vous pouvez passer de l'un à l'autre à tout moment : votre progression est conservée.</p>
+    <div class="exo-choix" role="group" aria-label="Choix de l'exercice">
+      <button type="button" class="exo-carte" data-exo="placer" aria-pressed="true" aria-controls="exo-placer">
+        <span class="exo-carte__num">1</span>
+        <span class="exo-carte__corps">
+          <span class="exo-carte__sur">Exercice 1</span>
+          <span class="exo-carte__titre">Placer le point</span>
+          <span class="exo-carte__desc">Situer un client sur le diagramme : degré de réalisation et satisfaction.</span>
+          <span class="exo-carte__meta"><span class="meta-q">10 questions · </span><span id="carte-e1-score">0 / 20 points</span></span>
+        </span>
+        <svg class="exo-carte__picto" viewBox="0 0 64 48" aria-hidden="true"><path d="M4 24h56M32 4v40" stroke="#898989" stroke-width="2" fill="none"/><path d="M48 12v12M32 12h16" stroke="#AA8802" stroke-width="2" stroke-dasharray="3 3" fill="none"/><circle cx="48" cy="12" r="5.5" fill="#AA8802"/></svg>
+        <span class="exo-carte__etat"><span class="etat-on">✓ <span class="etat-long">Exercice </span>ouvert</span><span class="etat-off"><span class="etat-long">Cliquer pour </span>ouvrir ›</span></span>
+      </button>
+      <button type="button" class="exo-carte" data-exo="categorie" aria-pressed="false" aria-controls="exo-categorie">
+        <span class="exo-carte__num">2</span>
+        <span class="exo-carte__corps">
+          <span class="exo-carte__sur">Exercice 2</span>
+          <span class="exo-carte__titre">Identifier la catégorie</span>
+          <span class="exo-carte__desc">Lire une parole de client et reconnaître la courbe qui passe par ses deux faces.</span>
+          <span class="exo-carte__meta"><span class="meta-q">10 questions · </span><span id="carte-e2-score">0 / 10 points</span></span>
+        </span>
+        <svg class="exo-carte__picto" viewBox="0 0 64 48" aria-hidden="true"><path d="M4 24h56M32 4v40" stroke="#898989" stroke-width="2" fill="none"/><path d="M6 43 C18 30 26 25 58 22" stroke="#9B2C2C" stroke-width="2.5" fill="none"/><circle cx="12" cy="38" r="4.5" fill="#fff" stroke="#AA8802" stroke-width="2.5"/><circle cx="52" cy="22.4" r="4.5" fill="#AA8802"/></svg>
+        <span class="exo-carte__etat"><span class="etat-on">✓ <span class="etat-long">Exercice </span>ouvert</span><span class="etat-off"><span class="etat-long">Cliquer pour </span>ouvrir ›</span></span>
+      </button>
     </div>
 
     <!-- Exercice 1 : placer le point -->
     <div id="exo-placer">
       <div class="exo-entete">
-        <h3 style="margin-top:0">Placer le point</h3>
+        <h3 style="margin-top:0"><span class="exo-titre__num">Exercice 1</span> Placer le point</h3>
         <div class="exo-entete__droite"><div class="score" id="e1-score"></div><button type="button" class="btn btn--secondaire btn--petit btn-aide" data-aide="placer" data-titre="Les niveaux de chaque axe" aria-haspopup="dialog" aria-controls="modale-aide">? Aide</button></div>
       </div>
       <p class="texte">Chaque situation donne deux informations : le <strong>degré de réalisation</strong> de la fonction et le <strong>niveau de satisfaction</strong> du client. Glissez le point à l'endroit correspondant. Deux points par question : un pour l'abscisse, un pour l'ordonnée. L'indice est gratuit ; si vous affichez la solution, la question n'est pas comptée.</p>
@@ -791,7 +854,7 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
     <!-- Exercice 2 : identifier la catégorie -->
     <div id="exo-categorie" hidden>
       <div class="exo-entete">
-        <h3 style="margin-top:0">Identifier la catégorie</h3>
+        <h3 style="margin-top:0"><span class="exo-titre__num">Exercice 2</span> Identifier la catégorie</h3>
         <div class="exo-entete__droite"><div class="score" id="e2-score"></div><button type="button" class="btn btn--secondaire btn--petit btn-aide" data-aide="categorie" data-titre="Lire une parole de client, puis croiser les deux faces" aria-haspopup="dialog" aria-controls="modale-aide">? Aide</button></div>
       </div>
       <p class="texte">Chaque parole de client (fictive) contient les <strong>deux faces</strong> d'une caractéristique : ce que le client ressent quand elle est réalisée, et ce qu'il ressentirait si elle était absente ou peu réalisée. Les deux points sont placés sur le diagramme ; à vous de reconnaître la courbe qui passe par les deux, donc la catégorie. Un point par question.</p>
@@ -1872,13 +1935,16 @@ $$('.btn-aide').forEach(b => b.addEventListener('click', () => {
   ouvrirModale(m);
 }));
 // choix de l'exercice
-$$('.sim-modes button[data-exo]').forEach(b => b.addEventListener('click', () => {
-  $$('.sim-modes button[data-exo]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+$$('.exo-carte[data-exo]').forEach(b => b.addEventListener('click', () => {
+  $$('.exo-carte[data-exo]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
   ['placer', 'categorie'].forEach(m => { $('#exo-' + m).hidden = m !== b.dataset.exo; });
 }));
 
 function progression(id, i, n) { $('#' + id + '-progress').style.width = (100 * i / n).toFixed(0) + '%'; }
-function scoreHtml(id, pts, max) { $('#' + id + '-score').innerHTML = `<span class="chiffre">${pts}</span> / ${max} points`; }
+function scoreHtml(id, pts, max) {
+  $('#' + id + '-score').innerHTML = `<span class="chiffre">${pts}</span> / ${max} points`;
+  const c = $('#carte-' + id + '-score'); if (c) c.textContent = pts + ' / ' + max + ' points'; // rappel du score sur la carte de choix
+}
 function ecranFin(corps, titre, pts, max, onRestart) {
   corps.innerHTML = '';
   const pct = Math.round(100 * pts / max);
