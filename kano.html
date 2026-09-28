@@ -208,6 +208,8 @@ q.def::before, q.def::after { color: var(--ehg-or); font-weight: 400; }
 .lecture div { padding: .9rem 1rem; border-radius: var(--ehg-radius-lg); background: var(--ehg-brume); }
 .lecture .lab { display: block; font-family: var(--ehg-font-titre); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-acier); margin-bottom: .25rem; }
 .lecture .val { font-family: var(--ehg-font-titre); font-size: 1.15rem; }
+.lecture--sous-diag { margin: .75rem 0 0; }
+.consigne-diag { margin: 0 0 .6rem; }
 
 .champ__label { display: block; font-family: var(--ehg-font-titre); font-size: .85rem; font-weight: 500; margin-bottom: .3rem; }
 
@@ -1941,16 +1943,18 @@ function e1Afficher() {
     s.txt,
     h('span', { class: 'src', text: 'Situation fictive · ' + s.ctx }),
   ]));
-  const grille = h('div', { class: 'grille grille--diag' }); const zoneSvg = h('div', { class: 'carte zone-drag diag-colle' }); const droite = h('div');
+  // consigne au-dessus du diagramme ; lecture (degré de réalisation, satisfaction) juste en dessous, dans la même carte
+  corps.appendChild(h('h4', { class: 'consigne-diag', text: 'Placez le point' }));
+  const grille = h('div', { class: 'grille grille--diag' }); const zoneSvg = h('div', { class: 'carte diag-colle' }); const droite = h('div');
+  const svgBox = h('div', { class: 'zone-drag' }); const lecture = lectureEl(); lecture.classList.add('lecture--sous-diag');
+  zoneSvg.append(svgBox, lecture);
   grille.append(zoneSvg, droite); corps.appendChild(grille);
-  droite.appendChild(h('h4', { style: 'margin-top:0', text: 'Placez le point' }));
-  const lecture = lectureEl(); droite.appendChild(lecture);
-  const D = diagrammeDrag(zoneSvg, p => { lecture.querySelector('.lecture-deg').textContent = degParCle(degDepuisX(p.x)).nom; lecture.querySelector('.lecture-sat').textContent = satParCle(satDepuisY(p.y)).nom; });
+  const D = diagrammeDrag(svgBox, p => { lecture.querySelector('.lecture-deg').textContent = degParCle(degDepuisX(p.x)).nom; lecture.querySelector('.lecture-sat').textContent = satParCle(satDepuisY(p.y)).nom; });
   let solutionVue = false;
   const aide = h('div');
   const btnIndice = h('button', { class: 'btn btn--secondaire btn--petit', type: 'button', text: 'Indice' });
   const btnSolution = h('button', { class: 'btn btn--secondaire btn--petit', type: 'button', text: 'Voir la solution' });
-  droite.appendChild(h('div', { class: 'choix', style: 'margin:.25rem 0 .5rem' }, [btnIndice, btnSolution]));
+  droite.appendChild(h('div', { class: 'choix', style: 'margin:0 0 .5rem' }, [btnIndice, btnSolution]));
   droite.appendChild(aide);
   btnIndice.addEventListener('click', () => {
     btnIndice.disabled = true;
