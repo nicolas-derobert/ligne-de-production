@@ -356,17 +356,59 @@ q.def::before, q.def::after { color: var(--ehg-or); font-weight: 400; }
 .poignee:focus-visible .poignee__disque { stroke: var(--ehg-noir); stroke-width: 4; }
 
 /* simulation : modèle A → modèle B (révélation, animation, info-bulles) */
-.m-actions { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin: 0 0 1rem; }
-.m-cache .col-b { display: none; }
-#m-table-wrap.m-cache tr.modif td { background: transparent; }
-#m-table-wrap:not(.m-cache) .col-b { animation: apparait .6s ease both; }
-#m-table tr:nth-child(1) .col-b { animation-delay: .15s; } #m-table tr:nth-child(2) .col-b { animation-delay: .3s; } #m-table tr:nth-child(3) .col-b { animation-delay: .45s; }
-#m-table tr:nth-child(4) .col-b { animation-delay: .6s; } #m-table tr:nth-child(5) .col-b { animation-delay: .75s; } #m-table tr:nth-child(6) .col-b { animation-delay: .9s; }
-@keyframes apparait { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
-.m-carte-b { position: relative; }
-.m-carte-b.m-cache #m-svg-b, .m-carte-b.m-cache .tuile { visibility: hidden; }
-.m-voile { display: none; position: absolute; inset: 3rem 1.5rem 1.5rem; border-radius: var(--ehg-radius-lg); background: var(--ehg-brume); border: 1px dashed var(--ehg-or); flex-direction: column; align-items: center; justify-content: center; gap: .35rem; text-align: center; font-family: var(--ehg-font-titre); font-size: 1.05rem; color: var(--ehg-graphite); padding: 1rem; }
-.m-carte-b.m-cache .m-voile { display: flex; }
+/* modèle A (avant : repère gris, ton clair) / modèle B (après : repère or, ton soutenu) */
+.badge-mod { display: inline-flex; align-items: center; justify-content: center; width: 1.7em; height: 1.7em; border-radius: 50%; font-family: var(--ehg-font-serif); font-weight: 600; font-size: 1.05em; letter-spacing: 0; text-transform: none; line-height: 1; margin-right: .5em; vertical-align: middle; flex: 0 0 auto; }
+.badge-mod--a { background: var(--ehg-blanc); color: var(--ehg-graphite); border: 2px solid var(--ehg-acier); }
+.badge-mod--b { background: var(--ehg-or); color: var(--ehg-blanc); border: 2px solid var(--ehg-or); }
+#m-table-wrap th[rowspan] { vertical-align: bottom; }
+#m-table-wrap .ab-titre { font-size: .8rem; letter-spacing: .08em; padding: .55rem .7rem; border-bottom: 0; white-space: nowrap; }
+#m-table-wrap .ab-titre.col-a { background: var(--ehg-perle); color: var(--ehg-graphite); border-top: 4px solid var(--ehg-acier); }
+#m-table-wrap .ab-titre.col-b { background: var(--ehg-or-fonce); color: var(--ehg-blanc); border-top: 4px solid var(--ehg-or); }
+#m-table-wrap .ab-titre.col-b .badge-mod--b { border-color: var(--ehg-blanc); }
+#m-table-wrap .ab-sous th { font-size: .66rem; }
+#m-table-wrap th.col-a, #m-table-wrap td.col-a { background: var(--ehg-brume); color: var(--ehg-graphite); border-left: 3px solid var(--ehg-acier); }
+#m-table-wrap th.col-b, #m-table-wrap td.col-b { background: #FAF6EA; }
+#m-table-wrap .col-b--debut { border-left: 3px solid var(--ehg-or); }
+#m-table-wrap tr.modif td:not(.col-a):not(.col-b) { background: transparent; }
+#m-table-wrap tr.modif td.col-b { background: var(--ehg-or-pale); }
+#m-table-wrap td.col-a .jauge > span { opacity: .45; }
+#m-table-wrap td.col-b strong { font-weight: 600; color: var(--ehg-noir); }
+.niv__lib { white-space: nowrap; }
+.marque-b { display: inline-block; width: 1.1em; margin-right: .25rem; text-align: center; font-size: .85em; color: var(--ehg-acier); }
+.marque-b--modif { color: var(--ehg-ok); }
+.chg-modif { color: var(--ehg-or-fonce); }
+.carte--a { border-top: 4px solid var(--ehg-acier); }
+.carte--b { border-top: 4px solid var(--ehg-or); }
+.carte-ab__entete { display: flex; align-items: center; justify-content: space-between; gap: .5rem .75rem; flex-wrap: wrap; margin-bottom: .5rem; }
+.carte-ab__entete .surtitre { margin: 0; display: inline-flex; align-items: center; font-size: .8rem; color: var(--ehg-graphite); }
+.carte--b .carte-ab__entete .surtitre { color: var(--ehg-or-fonce); }
+.carte-ab__entete .btn { flex: 0 0 auto; }
+.carte-ab__entete { min-height: 2.5rem; }
+/* tablette : colonnes plus souples pour que le tableau tienne dans la largeur */
+@media (max-width: 64rem) {
+  #m-table-wrap .ab-titre, #m-table-wrap td.cat { white-space: normal; }
+  #m-table-wrap .jauge { width: 4.5rem; }
+  #m-table-wrap .niv { white-space: normal; }
+  #m-table-wrap td, #m-table-wrap th { padding-left: .5rem; padding-right: .5rem; }
+}
+/* téléphone : le tableau A / B devient une fiche par caractéristique (A puis B, l'un sous l'autre) */
+@media (max-width: 48rem) {
+  #m-table-wrap, #m-table-wrap tbody, #m-table-wrap td { display: block; }
+  #m-table-wrap thead { display: none; }
+  #m-table-wrap tr { display: grid; grid-template-columns: 2.4rem minmax(0, 1fr); grid-template-areas: "num nom" "num cat" "a a" "b b" "chg chg"; border: var(--ehg-filet); border-radius: var(--ehg-radius-lg); overflow: hidden; margin-bottom: .75rem; background: var(--ehg-blanc); }
+  #m-table-wrap td { border-bottom: 0; padding: .45rem .7rem; font-size: .95em; }
+  #m-table-wrap td:nth-child(1) { grid-area: num; padding-top: .6rem; }
+  #m-table-wrap td:nth-child(2) { grid-area: nom; font-family: var(--ehg-font-titre); padding-top: .6rem; padding-bottom: 0; }
+  #m-table-wrap td:nth-child(3) { grid-area: cat; padding-top: 0; white-space: normal; }
+  #m-table-wrap td:nth-child(4) { grid-area: a; }
+  #m-table-wrap td:nth-child(5) { grid-area: b; }
+  #m-table-wrap td:nth-child(6) { grid-area: chg; border-left: 3px solid var(--ehg-or); }
+  #m-table-wrap td.col-a::before, #m-table-wrap td.col-b--debut::before, #m-table-wrap td:nth-child(6)::before { display: block; font-family: var(--ehg-font-titre); font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; margin-bottom: .2rem; }
+  #m-table-wrap td.col-a::before { content: 'Modèle A · avant'; color: var(--ehg-graphite); }
+  #m-table-wrap td.col-b--debut::before { content: 'Modèle B · après'; color: var(--ehg-or-fonce); }
+  #m-table-wrap td:nth-child(6)::before { content: 'Ce qui change'; color: var(--ehg-or-fonce); }
+  .carte-ab__entete { min-height: 0; }
+}
 .pts-version circle { transition: none; }
 .pt-version { cursor: pointer; outline: none; }
 .pt-version:focus-visible circle:nth-child(3) { stroke: var(--ehg-noir); stroke-width: 4; }
@@ -695,28 +737,26 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
         <div class="encadre__icone">→</div>
         <div>
           <p><strong>Mise en situation (fictive).</strong> Une manufacture fait évoluer un modèle de montre. Une enquête auprès de 120 clients du <strong>modèle A</strong> a classé six caractéristiques dans une catégorie de Kano et mesuré leur degré de réalisation. Le <strong>modèle B</strong> applique trois décisions : corriger les basiques non atteintes, améliorer une fonction proportionnelle de 25 %, ajouter un nouvel attractif.</p>
-          <p style="margin-bottom:0">Observez d'abord le modèle A. Révélez ensuite le modèle B : chaque caractéristique modifiée se déplace <em>sur sa courbe</em>, et l'effet sur la satisfaction dépend de la courbe autant que du déplacement. Survolez ou touchez un point cerclé pour identifier l'amélioration.</p>
+          <p style="margin-bottom:0">Comparez le <strong>modèle A</strong> (avant : repère gris, points en ton clair) et le <strong>modèle B</strong> (après : repère or, points en ton soutenu). Chaque caractéristique modifiée s'est déplacée <em>sur sa courbe</em>, et l'effet sur la satisfaction dépend de la courbe autant que du déplacement. Survolez ou touchez un point cerclé pour identifier l'amélioration ; le bouton « Rejouer l'animation » montre le passage de A à B.</p>
         </div>
       </div>
-      <div class="m-actions">
-        <button type="button" class="btn btn--or" id="m-toggle" aria-pressed="false" aria-controls="m-svg-b m-table">Révéler le modèle B ▶</button>
-        <button type="button" class="btn btn--secondaire" id="m-rejouer" hidden>Rejouer l'animation</button>
-      </div>
-      <table class="tableau tableau--donnees m-cache" id="m-table-wrap">
-        <thead><tr><th>N°</th><th>Caractéristique</th><th>Catégorie</th><th>Modèle A</th><th class="col-b">Modèle B</th><th class="col-b">Ce qui change</th></tr></thead>
+      <table class="tableau tableau--donnees" id="m-table-wrap">
+        <thead>
+          <tr class="ab-groupes"><th rowspan="2">N°</th><th rowspan="2">Caractéristique</th><th rowspan="2">Catégorie</th><th class="ab-titre col-a"><span class="badge-mod badge-mod--a" aria-hidden="true">A</span>Modèle A · avant</th><th class="ab-titre col-b col-b--debut" colspan="2"><span class="badge-mod badge-mod--b" aria-hidden="true">B</span>Modèle B · après</th></tr>
+          <tr class="ab-sous"><th class="col-a">Degré de réalisation</th><th class="col-b col-b--debut">Degré de réalisation</th><th class="col-b">Ce qui change</th></tr>
+        </thead>
         <tbody id="m-table"></tbody>
       </table>
       <p class="note">Degré de réalisation : pour une basique, part des montres livrées conformes ; pour une proportionnelle, niveau atteint par rapport au meilleur du marché ; pour un attractif, présence sur le modèle.</p>
       <div class="grille grille--2 avant-apres">
-        <div class="carte">
-          <span class="surtitre">Avant · modèle A</span>
+        <div class="carte carte--a">
+          <div class="carte-ab__entete"><span class="surtitre"><span class="badge-mod badge-mod--a" aria-hidden="true">A</span>Avant · modèle A</span></div>
           <div id="m-svg-a"></div>
           <div class="tuile a"><span class="lab">Indice de satisfaction</span><span class="val" id="m-idx-a">—</span></div>
         </div>
-        <div class="carte carte--or-bord m-carte-b m-cache" id="m-carte-b">
-          <span class="surtitre">Après · modèle B</span>
+        <div class="carte carte--or-bord carte--b" id="m-carte-b">
+          <div class="carte-ab__entete"><span class="surtitre"><span class="badge-mod badge-mod--b" aria-hidden="true">B</span>Après · modèle B</span><button type="button" class="btn btn--secondaire btn--petit" id="m-rejouer" aria-controls="m-svg-b">↻ Rejouer l'animation</button></div>
           <div id="m-svg-b"></div>
-          <div class="m-voile" id="m-voile"><span>Modèle B masqué</span><span class="note">Révélez-le avec le bouton ci-dessus.</span></div>
           <div class="tuile"><span class="lab">Indice de satisfaction</span><span class="val" id="m-idx-b">—</span> <span class="delta" id="m-idx-delta"></span></div>
         </div>
       </div>
@@ -1127,7 +1167,8 @@ $$('table.tableau').forEach(t => {
   const wrap = h('div', { class: 'defile' });
   t.parentNode.insertBefore(wrap, t); wrap.appendChild(t);
   const cols = t.tHead && t.tHead.rows[0] ? t.tHead.rows[0].cells.length : (t.rows[0] ? t.rows[0].cells.length : 0);
-  if (cols >= 4) { t.classList.add('tableau--large'); wrap.classList.add('defile--large'); }
+  // le tableau A / B (#m-table-wrap) se présente en fiches sur téléphone : pas de défilement horizontal
+  if (cols >= 4 && t.id !== 'm-table-wrap') { t.classList.add('tableau--large'); wrap.classList.add('defile--large'); }
 });
 
 // hauteur de la barre d'onglets (collante sur petit écran) : sert de décalage aux diagrammes collants
@@ -1724,33 +1765,25 @@ function revelerB(anime) {
 }
 {
   const tb = $('#m-table');
-  const niv = (v, cle) => { const n = v[cle]; const ok = v.cat !== 'B' || n >= 100; return h('span', { class: 'niv' }, [h('span', { class: 'jauge ' + (v.cat === 'B' ? (ok ? 'ok' : 'ko') : '') }, h('span', { style: 'width:' + n + '%' })), libNiv(v, cle)]); };
+  // niveau d'une caractéristique ; colonne B : ▲ si modifiée (texte en gras), = si inchangée
+  const niv = (v, cle) => {
+    const n = v[cle], ok = v.cat !== 'B' || n >= 100, modif = v.a !== v.b;
+    const marque = cle === 'b' ? h('span', { class: 'marque-b' + (modif ? ' marque-b--modif' : ''), 'aria-hidden': 'true', text: modif ? '▲' : '=' }) : null;
+    return h('span', { class: 'niv' }, [marque, h('span', { class: 'jauge ' + (v.cat === 'B' ? (ok ? 'ok' : 'ko') : '') }, h('span', { style: 'width:' + n + '%' })), h('span', { class: 'niv__lib' }, cle === 'b' && modif ? h('strong', { text: libNiv(v, cle) }) : libNiv(v, cle))]);
+  };
   VERSIONS.forEach(v => {
     const modif = v.a !== v.b;
     const info = modif ? h('button', { type: 'button', class: 'info', 'aria-label': 'Détail de l’amélioration ' + v.id, text: 'i' }) : null;
     if (info) avecBulle(info, bulleHtml([v]));
     tb.appendChild(h('tr', { class: modif ? 'modif' : '' }, [
       h('td', {}, h('span', { class: 'pastille-v', style: 'background:' + coulV(v), text: v.id, title: 'Couleur de la caractéristique ' + v.id })), h('td', { text: v.nom }), h('td', { class: 'cat cat-' + v.cat, text: nomCat(v.cat) }),
-      h('td', {}, niv(v, 'a')), h('td', { class: 'col-b' }, niv(v, 'b')), h('td', { class: 'col-b ' + (modif ? 'cat-A' : 'note') }, [info, (modif ? ' ' : '') + v.chg]),
+      h('td', { class: 'col-a' }, niv(v, 'a')), h('td', { class: 'col-b col-b--debut' }, niv(v, 'b')), h('td', { class: 'col-b ' + (modif ? 'chg-modif' : 'note') }, [info, (modif ? ' ' : '') + v.chg]),
     ]));
   });
   const A = diagrammeVersion($('#m-svg-a'), 'a'); A.items.forEach(it => placerItem(it, 1));
   $('#m-idx-a').textContent = indice('a');
-  revelerB(false); // état initial (masqué) : B déjà dessiné, prêt à être révélé
-  const btn = $('#m-toggle'), rejouer = $('#m-rejouer');
-  let visible = false;
-  const majB = () => {
-    $('#m-table-wrap').classList.toggle('m-cache', !visible); $('#m-carte-b').classList.toggle('m-cache', !visible);
-    btn.setAttribute('aria-pressed', visible ? 'true' : 'false'); btn.textContent = visible ? 'Masquer le modèle B' : 'Révéler le modèle B ▶';
-    rejouer.hidden = !visible;
-  };
-  btn.addEventListener('click', () => {
-    visible = !visible; majB();
-    if (visible) { revelerB(true); try { $('#m-carte-b').scrollIntoView({ behavior: reduit() ? 'auto' : 'smooth', block: 'center' }); } catch (e) {} }
-    else { animB++; cacherBulle(); }
-  });
-  rejouer.addEventListener('click', () => { cacherBulle(); revelerB(true); });
-  majB();
+  revelerB(false); // modèle B affiché d'emblée, dans son état final
+  $('#m-rejouer').addEventListener('click', () => { cacherBulle(); revelerB(true); });
 }
 
 /* ======================================================================
