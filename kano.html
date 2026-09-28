@@ -6,12 +6,12 @@
 <meta name="theme-color" content="#141414">
 <meta name="apple-mobile-web-app-title" content="Kano · EHG">
 <title>Le diagramme de Kano — Voix du client · EHG</title>
-<meta name="description" content="Application pédagogique autonome : théorie, simulation et exercices sur la voix du client et le diagramme de Kano. École d'Horlogerie de Genève, module CPH_HOP_01.">
+<meta name="description" content="Application pédagogique autonome : théorie, exemples, exemple d'application en entreprise et exercices sur la voix du client et le diagramme de Kano. École d'Horlogerie de Genève, module CPH_HOP_01.">
 <!--
   ============================================================================
   Le diagramme de Kano — Voix du client · École d'Horlogerie de Genève
   Module CPH_HOP_01 · Application pédagogique autonome (un seul fichier)
-  Quatre onglets : Théorie · Exemples · Simulation · Exercices
+  Quatre onglets : Théorie · Exemples · Exemple d'application en entreprise · Exercices
   Charte graphique EHG : Century Gothic (titres, graisse régulière), Calibri
   (texte), Cambria (chiffres, or #AA8802), or unique, gris neutres, filets fins.
   Aucune dépendance externe obligatoire : le fichier fonctionne hors ligne
@@ -74,10 +74,10 @@ ul.liste { padding-left: 1.2rem; } ul.liste li { margin-bottom: .35rem; } ul.lis
 .entete__droite { display: flex; align-items: center; gap: 1rem; font-family: var(--ehg-font-titre); font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ehg-acier); }
 .titre { padding: 2.25rem 0 1rem; }
 /* couleur propre à chaque onglet — valeurs de la charte EHG (ehg.css) :
-   Théorie = graphite · Exemples = bordeaux · Simulation = vert · Exercices = or (or foncé pour le texte et l'état actif) */
+   Théorie = graphite · Exemples = bordeaux · Application en entreprise = vert · Exercices = or (or foncé pour le texte et l'état actif) */
 body { --accent: #3A3A3A; --accent-trait: #3A3A3A; --accent-pale: #EAEAEA; }
 body[data-onglet="exemples"] { --accent: #9B2C2C; --accent-trait: #9B2C2C; --accent-pale: #F5E4E4; }
-body[data-onglet="simulation"] { --accent: #2E6B4B; --accent-trait: #2E6B4B; --accent-pale: #E4EFE8; }
+body[data-onglet="entreprise"] { --accent: #2E6B4B; --accent-trait: #2E6B4B; --accent-pale: #E4EFE8; }
 body[data-onglet="exercices"] { --accent: #7D6400; --accent-trait: #AA8802; --accent-pale: #F4EDD6; }
 .onglets { display: flex; gap: .5rem; border-bottom: 3px solid var(--accent); margin-bottom: 2rem; overflow-x: auto; transition: border-color .2s; }
 .onglets button { --c: #3A3A3A; --c-trait: #3A3A3A; --c-pale: #EAEAEA;
@@ -85,7 +85,11 @@ body[data-onglet="exercices"] { --accent: #7D6400; --accent-trait: #AA8802; --ac
   background: var(--c-pale); color: var(--c); border: 0; border-top: 4px solid var(--c-trait); border-radius: 6px 6px 0 0;
   padding: .75rem 1.4rem .7rem; transition: background .15s, color .15s; }
 .onglets button[data-tab="exemples"] { --c: #9B2C2C; --c-trait: #9B2C2C; --c-pale: #F5E4E4; }
-.onglets button[data-tab="simulation"] { --c: #2E6B4B; --c-trait: #2E6B4B; --c-pale: #E4EFE8; }
+.onglets button[data-tab="entreprise"] { --c: #2E6B4B; --c-trait: #2E6B4B; --c-pale: #E4EFE8; }
+/* libellé long (grand écran) / libellé court (barre d'onglets étroite) */
+.onglets .lib-court { display: none; }
+@media (max-width: 60rem) { .onglets .lib-long { display: none; } .onglets .lib-court { display: inline; } }
+@media (max-width: 48rem) { .onglets .lib-en { display: none; } }
 .onglets button[data-tab="exercices"] { --c: #7D6400; --c-trait: #AA8802; --c-pale: #F4EDD6; }
 .onglets button:hover { box-shadow: inset 0 -2px 0 var(--c-trait); }
 .onglets button[aria-selected="true"] { background: var(--c); color: #fff; box-shadow: none; }
@@ -532,7 +536,7 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
   <nav class="onglets" role="tablist" aria-label="Sections de l'application">
     <button role="tab" id="tab-theorie" aria-controls="panel-theorie" aria-selected="true" data-tab="theorie"><span class="n">1</span>Théorie</button>
     <button role="tab" id="tab-exemples" aria-controls="panel-exemples" aria-selected="false" data-tab="exemples"><span class="n">2</span>Exemples</button>
-    <button role="tab" id="tab-simulation" aria-controls="panel-simulation" aria-selected="false" data-tab="simulation"><span class="n">3</span>Simulation</button>
+    <button role="tab" id="tab-entreprise" aria-controls="panel-entreprise" aria-selected="false" data-tab="entreprise" title="Exemple d'application en entreprise"><span class="n">3</span><span class="lib-long">Exemple d'application en entreprise</span><span class="lib-court"><span class="lib-en">En </span>entreprise</span></button>
     <button role="tab" id="tab-exercices" aria-controls="panel-exercices" aria-selected="false" data-tab="exercices"><span class="n">4</span>Exercices</button>
   </nav>
 
@@ -681,10 +685,10 @@ button, .btn, summary { touch-action: manipulation; -webkit-tap-highlight-color:
   </section>
 
   <!-- ================================================================ -->
-  <!-- 3. SIMULATION (nouvelle version d'un modèle de montre)            -->
+  <!-- 3. EXEMPLE D'APPLICATION EN ENTREPRISE (nouvelle version d'un modèle) -->
   <!-- ================================================================ -->
-  <section id="panel-simulation" role="tabpanel" aria-labelledby="tab-simulation" hidden>
-    <h2 style="margin-top:0">Simulation</h2>
+  <section id="panel-entreprise" role="tabpanel" aria-labelledby="tab-entreprise" hidden>
+    <h2 style="margin-top:0">Exemple d'application en entreprise</h2>
     <h3 style="margin-top:0">Nouvelle version d'un modèle de montre</h3>
     <div id="sim-modele">
       <div class="encadre encadre--or">
@@ -1102,7 +1106,7 @@ function activerOnglet(nom) {
   $$('.onglets [role="tab"]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === nom ? 'true' : 'false'));
   $$('section[role="tabpanel"]').forEach(s => { s.hidden = s.id !== 'panel-' + nom; });
   document.body.dataset.onglet = nom;
-  // L'adresse garde l'onglet ouvert (#theorie, #simulation, #exercices) quand le navigateur l'autorise ;
+  // L'adresse garde l'onglet ouvert (#theorie, #exemples, #entreprise, #exercices) quand le navigateur l'autorise ;
   // dans un aperçu isolé (iframe « sandbox », origine nulle) l'historique est verrouillé : on ignore simplement.
   try { if (location.hash !== '#' + nom) history.replaceState(null, '', '#' + nom); } catch (e) { /* aperçu isolé : sans conséquence */ }
   try { window.scrollTo({ top: 0 }); } catch (e) { /* idem */ }
@@ -1228,7 +1232,7 @@ const PAS = [
   { titre: 'Le diagramme complet',
     html: `<p>Les cinq courbes réunies, avec le code couleur utilisé dans tout le module. Retenez la forme avant la couleur : <span class="cat-B"><strong>plonge puis s’aplatit</strong></span> (basique), <span class="cat-P"><strong>monte tout droit</strong></span> (proportionnel), <span class="cat-A"><strong>plate puis s’envole</strong></span> (attractif), <span class="cat-I"><strong>sur l’axe</strong></span> (indifférent), <span class="cat-R"><strong>descend</strong></span> (inverse).</p>
       <p>Un point dit où est le client ; la courbe dit comment il réagirait si la réalisation changeait. Or un même point peut appartenir à deux courbes — c’est l’objet de la partie 5 : il faut toujours imaginer l’autre face.</p>
-      <p>L’onglet <strong>Simulation</strong> permet de déplacer un client le long de chaque courbe.</p>`,
+      <p>L’onglet <strong>Exemples</strong> permet de déplacer un client le long de chaque courbe ; l’onglet <strong>Exemple d’application en entreprise</strong> montre comment une manufacture s’en sert pour faire évoluer un modèle.</p>`,
     scene: { axes: {}, curves: [{ cat: 'I' }, { cat: 'R' }, { cat: 'B' }, { cat: 'P' }, { cat: 'A' }] } },
 ];
 let pasCourant = 0;
@@ -1270,7 +1274,7 @@ renderScene($('#svg-ambigu-b'), { axes: { ticksX: true, ticksXText: false, ticks
   notes: [{ x: -0.9, y: 0.85, text: 'Attractif ou indifférent ?', cls: 'lib', bold: true }, { x: -0.9, y: 0.75, text: 'Il faut savoir ce que dirait le client' }, { x: -0.9, y: 0.66, text: 'si la fonction était réalisée.' }] });
 
 /* ======================================================================
-   5. Simulation
+   5. Exemples (diagramme interactif) et exemple d'application en entreprise
    ====================================================================== */
 
 /* ======================================================================
@@ -1347,7 +1351,7 @@ function picto(kind) {
 const marqueur = plein => { const sv = el('svg', { viewBox: '0 0 20 20', width: 12, height: 12, 'aria-hidden': 'true', style: 'margin-right:.35rem;vertical-align:-1px' }); el('circle', { cx: 10, cy: 10, r: 7, fill: plein ? '#AA8802' : '#fff', stroke: '#AA8802', 'stroke-width': 3 }, sv); return sv; };
 
 /* ======================================================================
-   5. Simulation
+   5. Exemples (diagramme interactif) et exemple d'application en entreprise
    ====================================================================== */
 
 // --- Mode A : explorer le diagramme --------------------------------------
@@ -1582,7 +1586,7 @@ majExemple(); majSim();
   maj();
 }
 
-// --- Mode B : nouvelle version d'un modèle de montre (mise en situation fictive) ---
+// --- Exemple d'application en entreprise : nouvelle version d'un modèle de montre (mise en situation fictive) ---
 const VERSIONS = [
   { id: 1, nom: 'Étanche aux éclaboussures', cat: 'B', a: 100, b: 100, chg: 'inchangée : basique déjà atteinte' },
   { id: 2, nom: 'Verre livré sans rayure', cat: 'B', a: 60, b: 100, chg: 'basique corrigée : contrôle avant expédition' },
@@ -1843,7 +1847,7 @@ function scoreHtml(id, pts, max) { $('#' + id + '-score').innerHTML = `<span cla
 function ecranFin(corps, titre, pts, max, onRestart) {
   corps.innerHTML = '';
   const pct = Math.round(100 * pts / max);
-  const appreciation = pct >= 85 ? 'Excellent : la lecture du diagramme est en place.' : pct >= 65 ? 'Bien. Relisez les corrections des questions manquées.' : 'À retravailler : reprenez les parties 3 à 5 de l’onglet Théorie, puis l’onglet Simulation, avant de recommencer.';
+  const appreciation = pct >= 85 ? 'Excellent : la lecture du diagramme est en place.' : pct >= 65 ? 'Bien. Relisez les corrections des questions manquées.' : 'À retravailler : reprenez les parties 3 à 5 de l’onglet Théorie, puis l’onglet Exemples, avant de recommencer.';
   corps.appendChild(h('div', { class: 'carte carte--brume ecran-fin' }, [
     h('span', { class: 'surtitre', text: titre }),
     h('p', { html: `<span class="chiffre" style="font-size:2.4rem">${pts}</span> / ${max} — ${appreciation}` }),
@@ -1985,11 +1989,12 @@ function e2Afficher() {
 e1Depart(); e2Depart();
 
 /* ======================================================================
-   8. Démarrage : onglet demandé dans l'adresse (#theorie, #simulation, #exercices)
+   8. Démarrage : onglet demandé dans l'adresse (#theorie, #exemples, #entreprise, #exercices)
    ====================================================================== */
 try {
-  const hash = location.hash.replace('#', '');
-  if (['theorie', 'exemples', 'simulation', 'exercices'].includes(hash)) activerOnglet(hash);
+  let hash = location.hash.replace('#', '');
+  if (hash === 'simulation') hash = 'entreprise'; // anciens liens et QR codes
+  if (['theorie', 'exemples', 'entreprise', 'exercices'].includes(hash)) activerOnglet(hash);
 } catch (e) { /* adresse inaccessible dans un aperçu isolé : on reste sur la théorie */ }
 
 /* ======================================================================
