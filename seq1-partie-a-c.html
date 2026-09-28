@@ -602,6 +602,19 @@ body.en-quiz main.page { padding-top: 1.25rem; }
 .err-liste { list-style: none; margin: 0 0 .75rem; padding: 0; display: grid; gap: .4rem; }
 .err-liste li { display: grid; grid-template-columns: 1fr auto; gap: .75rem; align-items: center; padding: .55rem .8rem; background: var(--ehg-brume); border-radius: var(--ehg-radius-lg); font-size: .95em; }
 .err-liste li .n { font-family: var(--ehg-font-titre); font-size: .72rem; color: var(--ehg-acier); white-space: nowrap; }
+.err-cartes { list-style: none; margin: 0 0 .75rem; padding: 0; display: grid; gap: .75rem; }
+.err-carte { display: grid; gap: .5rem; background: var(--ehg-blanc); border: var(--ehg-filet); border-radius: var(--ehg-radius-lg); padding: 1rem 1.1rem; box-shadow: var(--ehg-ombre); }
+.err-carte__q { margin: 0 0 .15rem; font-family: var(--ehg-font-titre); font-size: 1.05rem; line-height: 1.4; }
+.err-rep { display: grid; grid-template-columns: 1.5rem 1fr; gap: .5rem; align-items: start; padding: .55rem .75rem; border-radius: var(--ehg-radius); border-left: 3px solid; }
+.err-rep--faux { background: var(--ehg-erreur-pale); border-left-color: var(--ehg-erreur); }
+.err-rep--juste { background: var(--ehg-ok-pale); border-left-color: var(--ehg-ok); }
+.err-rep__ico { font-weight: 700; font-size: 1.05rem; line-height: 1.45; text-align: center; }
+.err-rep--faux .err-rep__ico { color: var(--ehg-erreur); } .err-rep--juste .err-rep__ico { color: var(--ehg-ok); }
+.err-rep__lab { display: block; font-family: var(--ehg-font-titre); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ehg-graphite); }
+.err-rep__txt { display: block; line-height: 1.45; }
+.err-rep--juste .err-rep__txt { font-weight: 600; }
+.err-carte__cours summary { cursor: pointer; font-family: var(--ehg-font-titre); font-size: .8rem; letter-spacing: .04em; color: var(--ehg-bleu); padding: .15rem 0; }
+.err-carte__cite { margin: .5rem 0 .6rem; padding: .6rem .8rem; background: var(--ehg-brume); border-radius: var(--ehg-radius); box-shadow: inset 3px 0 0 var(--ehg-or); font-size: .98rem; }
 /* modales */
 .modale { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; }
 .modale__fond { position: absolute; inset: 0; background: rgba(20,20,20,.55); }
@@ -787,7 +800,7 @@ body.modale-ouverte { overflow: hidden; }
   <!-- ================================================================ -->
   <section id="panel-erreurs" role="tabpanel" aria-labelledby="tab-erreurs" hidden>
     <h2 style="margin-top:0">Mes erreurs</h2>
-    <p class="texte">Les questions dont la dernière réponse était fausse, regroupées par partie, avec la page du cours à relire.</p>
+    <p class="texte">Toutes les questions des parties A, B et C dont votre dernière réponse était fausse : votre réponse, la bonne réponse attendue et la page du cours à relire.</p>
     <div id="err-contenu"></div>
   </section>
 </main>
@@ -864,7 +877,7 @@ const TOUTES_QUESTIONS = [
   { p: 'A', q: 'Quelle est la définition du besoin ?',
     options: ['Un besoin ou une attente formulé, premier maillon opposable', 'Le niveau que le client suppose obtenir sans l’avoir demandé', 'Ce que l’utilisateur cherche à obtenir, exprimé sans nommer aucune solution', 'Une caractéristique chiffrée associée à un moyen de contrôle'], rep: 2,
     cite: ['Ce que l\'utilisateur cherche à obtenir, exprimé sans nommer aucune solution.', '19', 'Besoin · définition à retenir'] },
-  { p: 'A', q: 'Un client dit : « Je m’attends à ce que ma montre supporte la natation. » De quoi s’agit-il ?',
+  { p: 'A', q: 'Un client pense : « Je m’attends à ce que ma montre supporte la natation. » De quoi s’agit-il ?',
     options: ['D’un besoin', 'D’une attente', 'D’une exigence', 'D’une spécification'], rep: 1,
     cite: ['Le niveau que le client suppose obtenir sans l\'avoir demandé. C\'est l\'étalon de sa satisfaction.', '19', 'Attente · définition à retenir'] },
   { p: 'A', q: 'Sous quelles formes une exigence peut-elle se présenter ?',
@@ -958,9 +971,9 @@ const TOUTES_QUESTIONS = [
 ];
 // identifiant lisible : A1, A2… B1… C1… (attribué sur la liste complète : les numéros restent stables)
 { const n = {}; TOUTES_QUESTIONS.forEach(q => { n[q.p] = (n[q.p] || 0) + 1; q.id = q.p + n[q.p]; }); }
-// Questions retirées à la relecture papier du 23 septembre 2026. Leurs numéros ne sont pas réattribués,
+// Questions retirées à la relecture papier (23 et 28 septembre 2026). Leurs numéros ne sont pas réattribués,
 // pour que la numérotation corresponde au document de relecture et aux résultats déjà enregistrés.
-const RETIREES = ['A5', 'A7', 'A8', 'B8', 'C4'];
+const RETIREES = ['A3', 'A5', 'A7', 'A8', 'A12', 'B4', 'B8', 'C4'];
 const QUESTIONS = TOUTES_QUESTIONS.filter(q => !RETIREES.includes(q.id));
 const questionParId = id => QUESTIONS.find(q => q.id === id);
 const partieParId = id => PARTIES.find(p => p.id === id);
@@ -1010,22 +1023,25 @@ const premierePage = p => parseInt(String(p).split(/[-–]/)[0], 10);
    ====================================================================== */
 const CLE = 'ehg_cph_hop_01_qcm_v5';
 // Version du jeu de questions et séries dont le contenu a changé à chaque version
-// 2 = A5, A7 et A8 retirées · 3 = B8 et C4 retirées (23 septembre 2026)
-const VERSION_QUESTIONS = 3;
-const SERIES_CHANGEES = { 2: ['A', 'T'], 3: ['B', 'C', 'T'] };
-const ETAT_VIDE = () => ({ v: VERSION_QUESTIONS, res: {}, series: { A: [], B: [], C: [], T: [] } });
+// 2 = A5, A7 et A8 retirées · 3 = B8 et C4 retirées (23 septembre 2026) · 4 = A3, A12 et B4 retirées (28 septembre 2026)
+const VERSION_QUESTIONS = 4;
+const SERIES_CHANGEES = { 2: ['A', 'T'], 3: ['B', 'C', 'T'], 4: ['A', 'B', 'T'] };
+// choix : texte de la dernière réponse donnée à chaque question (affiché dans « Mes erreurs »)
+const ETAT_VIDE = () => ({ v: VERSION_QUESTIONS, res: {}, choix: {}, series: { A: [], B: [], C: [], T: [] } });
 let ETAT = ETAT_VIDE();
 function charger() {
   try {
     const s = localStorage.getItem(CLE); if (!s) return;
     const o = JSON.parse(s); if (!(o && o.res && o.series)) return;
     ETAT = Object.assign(ETAT_VIDE(), o);
+    if (!ETAT.choix || typeof ETAT.choix !== 'object') ETAT.choix = {};
     // jeu de questions modifié : les scores des séries concernées ne sont plus comparables
     for (let v = (o.v || 1) + 1; v <= VERSION_QUESTIONS; v++) (SERIES_CHANGEES[v] || []).forEach(k => { ETAT.series[k] = []; });
     ETAT.v = VERSION_QUESTIONS;
     // réponses aux questions retirées : ignorées
     const ids = new Set(QUESTIONS.map(q => q.id));
     Object.keys(ETAT.res).forEach(k => { if (!ids.has(k)) delete ETAT.res[k]; });
+    Object.keys(ETAT.choix).forEach(k => { if (!ids.has(k)) delete ETAT.choix[k]; });
     sauver();
   } catch (e) { /* stockage indisponible */ }
 }
@@ -1202,13 +1218,13 @@ function rendreIntro() {
       errP.length ? h('button', { type: 'button', class: 'btn btn--secondaire btn--large', text: errP.length > 1 ? 'Refaire mes ' + errP.length + ' erreurs' : 'Refaire mon erreur', onclick: () => lancerQuiz(errP, 'Mes erreurs · ' + s.titre, null) }) : null,
     ]),
   ]));
-  const err = erreurs().length, faites = Object.keys(ETAT.res).length, justes = Object.values(ETAT.res).filter(v => v === 1).length;
+  const err = erreurs().length, faites = QUESTIONS.filter(q => q.id in ETAT.res).length, justes = QUESTIONS.filter(q => ETAT.res[q.id] === 1).length;
   $('#prog-faites').textContent = faites + ' / ' + QUESTIONS.length;
   $('#prog-justes').textContent = faites ? justes : '—';
   $('#prog-err').textContent = err;
 }
 function reinitialiser(portee) {
-  if (portee === 'erreurs') { Object.keys(ETAT.res).forEach(k => { if (ETAT.res[k] === 0) delete ETAT.res[k]; }); }
+  if (portee === 'erreurs') { Object.keys(ETAT.res).forEach(k => { if (ETAT.res[k] === 0) { delete ETAT.res[k]; delete ETAT.choix[k]; } }); }
   else {
     ETAT = ETAT_VIDE(); Object.keys(QUIZS).forEach(k => delete QUIZS[k]); QUIZ = null; if (CTX === 'X') CTX = CTX_PARTIE;
     if (portee === 'tout') { try { localStorage.removeItem(CLE + '_confort'); localStorage.removeItem(CLE + '_partie'); } catch (e) {} CTX = CTX_PARTIE = 'A'; document.body.classList.remove('confort'); $('#btn-confort').setAttribute('aria-pressed', 'false'); }
@@ -1286,7 +1302,7 @@ function afficherQuestion() {
     QUIZ.valide = true;
     const ok = QUIZ.choix === q.rep;
     QUIZ.res.push(ok ? 1 : 0); if (ok) QUIZ.score++;
-    ETAT.res[q.id] = ok ? 1 : 0; sauver(); majPastille();
+    ETAT.res[q.id] = ok ? 1 : 0; ETAT.choix[q.id] = q.options[QUIZ.choix]; sauver(); majPastille();
     montrerCorrection(true);
   }
   function montrerCorrection(anime) {
@@ -1372,11 +1388,31 @@ function rendreErreurs() {
     h('button', { type: 'button', class: 'btn btn--bleu btn--large', text: err.length > 1 ? 'Refaire mes ' + err.length + ' erreurs' : 'Refaire mon erreur', onclick: () => lancerQuiz(err, 'Mes erreurs', null, 'X') }),
     h('button', { type: 'button', class: 'btn btn--discret btn--petit', text: 'Vider la liste', onclick: () => confirmer(REINIT_TXT.erreurs[0], REINIT_TXT.erreurs[1], () => { reinitialiser('erreurs'); toast(REINIT_TXT.erreurs[2]); }) }),
   ]));
+  // une carte par erreur : question, réponse donnée, bonne réponse, citation et page du cours
+  const carte = q => {
+    const donnee = ETAT.choix[q.id], page = premierePage(q.cite[1]);
+    return h('li', { class: 'err-carte' }, [
+      h('p', { class: 'err-carte__q', text: q.q }),
+      h('div', { class: 'err-rep err-rep--faux' }, [
+        h('span', { class: 'err-rep__ico', 'aria-hidden': 'true', text: '✗' }),
+        h('div', {}, [h('span', { class: 'err-rep__lab', text: 'Votre réponse' }), donnee ? h('span', { class: 'err-rep__txt', text: donnee }) : h('span', { class: 'err-rep__txt note', text: 'Non enregistrée (question faite avant la mise à jour de l’application).' })]),
+      ]),
+      h('div', { class: 'err-rep err-rep--juste' }, [
+        h('span', { class: 'err-rep__ico', 'aria-hidden': 'true', text: '✓' }),
+        h('div', {}, [h('span', { class: 'err-rep__lab', text: 'Bonne réponse attendue' }), h('span', { class: 'err-rep__txt', text: q.options[q.rep] })]),
+      ]),
+      h('details', { class: 'err-carte__cours' }, [
+        h('summary', { text: 'Ce que dit le cours · page ' + q.cite[1] }),
+        h('blockquote', { class: 'citation__texte err-carte__cite', text: '« ' + q.cite[0] + ' »' }),
+        h('button', { type: 'button', class: 'btn btn--secondaire btn--petit', text: 'Lire la page ' + page + ' du cours', onclick: () => ouvrirPageCours(page) }),
+      ]),
+    ]);
+  };
   PARTIES.forEach(p => {
     const l = err.filter(q => q.p === p.id); if (!l.length) return;
     w.appendChild(h('div', { class: 'err-groupe' }, [
       h('h3', {}, [h('span', { class: 'id', text: p.id }), 'Partie ' + p.id + ' · ' + p.titre, h('span', { class: 'badge badge--erreur', text: String(l.length) })]),
-      h('ul', { class: 'err-liste' }, l.map(q => h('li', {}, [h('span', { text: q.q }), h('span', { class: 'n', text: 'p. ' + q.cite[1] })]))),
+      h('ul', { class: 'err-cartes' }, l.map(carte)),
       h('button', { type: 'button', class: 'btn btn--secondaire btn--petit', text: 'Refaire les erreurs de la partie ' + p.id, onclick: () => lancerQuiz(l, 'Mes erreurs · partie ' + p.id, null, 'X') }),
     ]));
   });
