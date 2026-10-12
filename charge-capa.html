@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="clair">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flexibilité quantitative</title>
+<meta name="description" content="Partie D du module CPH_HOP_01 Lignes de production : théorie (ventes, charge, capacité, flexibilité quantitative) et simulateur de plan de charge. École d'Horlogerie de Genève.">
+<meta name="theme-color" content="#141414">
+<!--
+  ============================================================================
+  Flexibilité quantitative · École d'Horlogerie de Genève
+  Module CPH_HOP_01 · Lignes de production · Partie D « Définir la quantité à produire »
+  Contenu aligné sur le support COURS_Lignes_de_production_CPH_HOP_01_v21_EHG.pptx, partie D (six problématiques),
+  d'après le journal des modifications du support (versions 18 à 21).
+  Page autonome (un seul fichier), fonctionne hors ligne. Polices web chargées seulement si une connexion existe.
+  Les données des exemples et des simulateurs sont dans les blocs JSON ci-dessous : elles sont modifiables.
+  Document élaboré avec l'assistance d'outils d'intelligence artificielle.
+  ============================================================================
+-->
+
+<!-- Données des exemples du cours (fictives, reprises du support) -->
+<script type="application/json" id="donnees-cours">
+{
+  "mois": ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."],
+  "moisLong": ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+  "demandeModeleA": {
+    "legende": "Montres A demandées par la boutique, par mois (exemple fictif).",
+    "valeurs": [8, 8, 9, 9, 11, 10, 9, 7, 9, 10, 12, 18]
+  },
+  "poseCadran": {
+    "legende": "Atelier de pose cadran et aiguilles, un seul modèle : montres par mois (exemple fictif).",
+    "charge": [100, 100, 100, 120, 170, 180, 180, 150, 150, 150, 150, 150],
+    "capacite": 150
+  },
+  "remontage": {
+    "legende": "Atelier de remontage, heures par mois (exemple fictif).",
+    "chargeRealisee": [200, 230, 255, 285, 300, 340],
+    "chargePrevue": [180, 210, 330, 390, 450, 330],
+    "capacite": [320, 320, 352, 320, 304, 352, 208, 320, 336, 352, 336, 256]
+  }
+}
+</script>
+
+<!-- Simulateurs 1 et 2 · ventes en boutique, quantité de chaque mois (fictif) -->
+<script type="application/json" id="donnees-sim-ventes">
+{
+  "visites": 90,
+  "tauxConversion": 20,
+  "visitesMin": 30,
+  "visitesMax": 200,
+  "tauxMin": 5,
+  "tauxMax": 100,
+  "modele": "A",
+  "quantiteMoisMoyen": 10,
+  "coefficients": [0.8, 0.8, 0.9, 0.9, 1.1, 1.0, 0.9, 0.7, 0.9, 1.0, 1.2, 1.8]
+}
+</script>
+
+<!-- Simulateur 3 · plan de charge de l'atelier de remontage (fictif) -->
+<script type="application/json" id="donnees-sim-plan">
+{
+  "atelier": "Atelier de remontage",
+  "ventesMoisMoyen": 400,
+  "coefficients": [0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 0.6, 0.7, 1.1, 1.3, 1.5, 1.1],
+  "tempsUnitaire": 0.75,
+  "operateurs": 2,
+  "heuresParJour": 8,
+  "joursTravail": [20, 20, 22, 20, 19, 22, 13, 20, 21, 22, 21, 16],
+  "chargeRealisee": [200, 230, 255, 285, 300, 340],
+  "premierMoisPrevu": 6,
+  "moisSelectionne": 10
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500&family=Source+Sans+3:wght@400;600&family=Playfair+Display:wght@400;600&display=swap">
+<style>
+/* ---------- 1. Charte EHG (source : ehg.css v1.0) ---------- */
+:root {
+  --ehg-noir: #141414; --ehg-or: #AA8802; --ehg-blanc: #FFFFFF;
+  --ehg-or-clair: #D4B24C; --ehg-or-pale: #F4EDD6; --ehg-or-fonce: #7D6400;
+  --ehg-graphite: #3A3A3A; --ehg-acier: #898989; --ehg-perle: #EAEAEA; --ehg-brume: #F6F6F6;
+  --ehg-ok: #2E6B4B; --ehg-ok-pale: #E4EFE8; --ehg-erreur: #9B2C2C; --ehg-erreur-pale: #F5E4E4;
+  --ehg-font-titre: "Jost", "Century Gothic", "Futura", "Avenir Next", "Calibri Light", sans-serif;
+  --ehg-font-texte: "Source Sans 3", "Calibri", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --ehg-font-serif: "Playfair Display", "Cambria", "Georgia", "Times New Roman", serif;
+  --ehg-radius: 4px; --ehg-radius-lg: 8px;
+  --ehg-largeur: 72rem;
+  /* Composant « Formule » du support v18 : bleu réservé aux formules à retenir */
+  --formule-bleu: #24467A; --formule-pale: #E8EDF6;
+
+  /* Rôles (thème clair) */
+  --c-fond: #FFFFFF; --c-surface: #FFFFFF; --c-texte: #141414; --c-texte2: #3A3A3A; --c-discret: #6E6E6E;
+  --c-filet: #EAEAEA; --c-brume: #F6F6F6; --c-acier: #898989; --c-barre: #9A9A9A;
+  --c-or: #AA8802; --c-or-texte: #7D6400; --c-or-pale: #F4EDD6;
+  --c-ok: #2E6B4B; --c-ok-pale: #E4EFE8; --c-err: #9B2C2C; --c-err-pale: #F5E4E4;
+  --c-bleu: var(--formule-bleu); --c-bleu-pale: var(--formule-pale);
+  --c-ombre: 0 1px 2px rgba(20,20,20,.06), 0 4px 12px rgba(20,20,20,.06);
+  --c-onglet: #3A3A3A; --c-onglet-pale: #EAEAEA;
+  --fs: 1.0625rem; --lh: 1.6; --ls: .01em;
+  color-scheme: light;
+}
+:root[data-theme="sombre"] {
+  --c-fond: #121212; --c-surface: #1B1B1B; --c-texte: #EDEDED; --c-texte2: #CFCFCF; --c-discret: #A3A3A3;
+  --c-filet: #333333; --c-brume: #202020; --c-acier: #9A9A9A; --c-barre: #7A7A7A;
+  --c-or: #D4B24C; --c-or-texte: #D4B24C; --c-or-pale: #2C2611;
+  --c-ok: #7CC49B; --c-ok-pale: #16261D; --c-err: #E38A8A; --c-err-pale: #2E1A1A;
+  --c-bleu: #A9C1EE; --c-bleu-pale: #18233A;
+  --c-ombre: none;
+  --c-onglet: #CFCFCF; --c-onglet-pale: #2A2A2A;
+  color-scheme: dark;
+}
+body.confort { --fs: 1.1875rem; --lh: 1.85; --ls: .035em; word-spacing: .12em; }
+body[data-onglet="simulateur"] { --c-onglet: #2E6B4B; --c-onglet-pale: #E4EFE8; }
+:root[data-theme="sombre"] body[data-onglet="simulateur"] { --c-onglet: #7CC49B; --c-onglet-pale: #16261D; }
+
+/* ---------- 2. Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; font-family: var(--ehg-font-texte); font-size: var(--fs); line-height: var(--lh); letter-spacing: var(--ls);
+  color: var(--c-texte); background: var(--c-fond); -webkit-font-smoothing: antialiased; text-align: left; }
+h1, h2, h3, h4 { font-family: var(--ehg-font-titre); font-weight: 400; line-height: 1.22; color: var(--c-texte); margin: 0 0 .7rem; letter-spacing: 0; }
+h1 { font-size: 2.1rem; } h2 { font-size: 1.45rem; } h3 { font-size: 1.2rem; } h4 { font-size: 1.04rem; font-weight: 500; }
+p, ul, ol, table { margin: 0 0 .9rem; }
+ul { padding-left: 1.2rem; } li { margin-bottom: .35rem; }
+strong, b { font-weight: 600; }
+a { color: inherit; text-decoration: underline; text-decoration-color: var(--c-or); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--c-or); outline-offset: 2px; }
+::selection { background: var(--c-or-pale); }
+abbr[title] { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
+.page { max-width: var(--ehg-largeur); margin: 0 auto; padding-inline: 1.5rem; }
+.note { font-size: .88em; color: var(--c-discret); }
+.chiffre { font-family: var(--ehg-font-serif); color: var(--c-or-texte); font-variant-numeric: lining-nums tabular-nums; }
+.surtitre { display: block; font-family: var(--ehg-font-titre); font-size: .72rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--c-discret); margin-bottom: .35rem; }
+[hidden] { display: none !important; }
+button { font: inherit; letter-spacing: inherit; color: inherit; }
+button, summary, .cliquable { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+/* ---------- 3. En-tête, onglets, pied ---------- */
+.entete { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: .9rem; border-bottom: 1px solid var(--c-filet); }
+.logotype { font-family: var(--ehg-font-titre); font-size: 1.15rem; color: var(--c-texte); text-decoration: none; white-space: nowrap; }
+.logotype .g { color: var(--c-or); }
+.entete__droite { display: flex; align-items: center; gap: .5rem; }
+.titre { padding-block: 1.6rem .6rem; }
+.titre h1 { margin: 0; }
+.onglets { display: flex; gap: .5rem; border-bottom: 3px solid var(--c-onglet); margin-bottom: 1rem; }
+.onglets button { --c: #3A3A3A; --cp: #EAEAEA;
+  font-family: var(--ehg-font-titre); font-size: .9rem; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; cursor: pointer;
+  background: var(--cp); color: var(--c); border: 0; border-top: 4px solid var(--c); border-radius: 6px 6px 0 0; padding: .7rem 1.4rem .65rem; min-height: 44px; }
+.onglets button[data-onglet="simulateur"] { --c: #2E6B4B; --cp: #E4EFE8; }
+:root[data-theme="sombre"] .onglets button { --c: #CFCFCF; --cp: #2A2A2A; }
+:root[data-theme="sombre"] .onglets button[data-onglet="simulateur"] { --c: #7CC49B; --cp: #16261D; }
+.onglets button[aria-selected="true"] { background: var(--c); color: var(--c-fond); }
+.onglets .n { font-family: var(--ehg-font-serif); margin-right: .45em; text-transform: none; letter-spacing: 0; font-size: 1.1em; }
+.sous-onglets { display: flex; gap: .4rem; flex-wrap: wrap; margin: 0 0 1.2rem; }
+.sous-onglets .lib { white-space: nowrap; }
+.sous-onglets button { display: inline-flex; align-items: center; gap: .45rem; cursor: pointer; font-family: var(--ehg-font-titre); font-size: .9rem; line-height: 1.2;
+  padding: .5rem .95rem; min-height: 42px; border-radius: 999px; border: 1px solid var(--c-filet); background: var(--c-surface); color: var(--c-texte); }
+.sous-onglets button:hover { border-color: var(--c-onglet); }
+.sous-onglets button .n { font-family: var(--ehg-font-serif); color: var(--c-or-texte); font-size: 1.05em; }
+.sous-onglets button[aria-selected="true"] { background: var(--c-onglet); border-color: var(--c-onglet); color: var(--c-fond); }
+.sous-onglets button[aria-selected="true"] .n { color: inherit; }
+.pied { border-top: 1px solid var(--c-filet); padding-block: 1.4rem; margin-top: 3rem; display: flex; justify-content: space-between; gap: .4rem 1.5rem; flex-wrap: wrap; font-size: .82rem; color: var(--c-discret); }
+
+/* ---------- 4. Boutons ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; font-family: var(--ehg-font-titre); font-size: .78rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase;
+  padding: .6rem 1.1rem; border-radius: var(--ehg-radius); border: 1px solid var(--c-texte); background: var(--c-texte); color: var(--c-fond); cursor: pointer; line-height: 1.1; min-height: 40px; }
+.btn:hover { opacity: .88; }
+.btn--secondaire { background: transparent; color: var(--c-texte); }
+.btn--secondaire:hover { background: var(--c-brume); opacity: 1; }
+.btn--petit { padding: .4rem .75rem; font-size: .7rem; min-height: 36px; }
+.btn[disabled] { opacity: .4; cursor: not-allowed; }
+.btn[aria-pressed="true"] { background: var(--c-or-pale); border-color: var(--c-or); color: var(--c-texte); }
+.btn__txt { white-space: nowrap; }
+.actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+
+/* ---------- 5. Théorie ---------- */
+.probleme { margin: 0 0 1.2rem; padding: 1rem 1.2rem; border-radius: var(--ehg-radius-lg); background: var(--c-brume); }
+.probleme__ctx { margin: 0 0 .25rem; color: var(--c-texte2); }
+.probleme__q { margin: 0; font-size: 1.35rem; color: var(--c-or-texte); }
+.outils-notions { display: flex; justify-content: flex-end; margin: -.4rem 0 .6rem; }
+details.notion { border: 1px solid var(--c-filet); border-radius: var(--ehg-radius-lg); background: var(--c-surface); margin: 0 0 .75rem; box-shadow: var(--c-ombre); }
+details.notion > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: .8rem; padding: .85rem 1.1rem; min-height: 52px; }
+details.notion > summary::-webkit-details-marker { display: none; }
+details.notion > summary .num { font-family: var(--ehg-font-serif); color: var(--c-or-texte); font-size: 1.25rem; min-width: 1.6rem; }
+details.notion > summary .tt { flex: 1; font-family: var(--ehg-font-titre); font-size: 1.12rem; line-height: 1.25; }
+details.notion > summary .st { display: block; font-family: var(--ehg-font-texte); font-size: .88rem; color: var(--c-discret); margin-top: .1rem; }
+details.notion > summary::after { content: ''; flex: 0 0 .7rem; height: .7rem; border-right: 2px solid var(--c-acier); border-bottom: 2px solid var(--c-acier); transform: rotate(45deg); margin: -.3rem .2rem 0 0; transition: transform .15s; }
+details.notion[open] > summary::after { transform: rotate(-135deg); margin-top: .3rem; }
+details.notion[open] > summary { border-bottom: 1px solid var(--c-filet); }
+.notion__corps { padding: 1rem 1.2rem 1.1rem; }
+.notion__corps > :last-child { margin-bottom: 0; }
+
+.formule { background: var(--c-bleu-pale); color: var(--c-bleu); border-radius: var(--ehg-radius-lg); padding: .75rem 1.1rem; margin: 0 0 1rem; }
+.formule__lib { display: block; font-family: var(--ehg-font-titre); font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; margin-bottom: .2rem; }
+.formule__txt { font-family: var(--ehg-font-serif); font-size: 1.22rem; line-height: 1.4; margin: 0; }
+.formule__txt b { font-weight: 600; }
+.formule__ex { margin: .45rem 0 0; font-family: var(--ehg-font-texte); font-size: .98rem; color: var(--c-texte2); }
+.formule__ex b { color: var(--c-texte); }
+.bleu { color: var(--c-bleu); font-family: var(--ehg-font-serif); }
+.boite { border-radius: var(--ehg-radius-lg); padding: .75rem 1.1rem; margin: 0 0 1rem; background: var(--c-or-pale); }
+.boite__lib { display: block; font-family: var(--ehg-font-titre); font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: var(--c-or-texte); margin-bottom: .2rem; }
+.boite > p:last-child, .boite > ul:last-child { margin-bottom: 0; }
+.boite--brume { background: var(--c-brume); }
+.boite--brume .boite__lib { color: var(--c-discret); }
+.grille2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; margin: 0 0 1rem; }
+.grille3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; margin: 0 0 1rem; }
+.carte { border: 1px solid var(--c-filet); border-radius: var(--ehg-radius-lg); padding: .85rem 1rem; background: var(--c-surface); }
+.carte h4 { margin: 0 0 .4rem; font-family: var(--ehg-font-titre); }
+.carte > :last-child { margin-bottom: 0; }
+.carte--brume { background: var(--c-brume); border-color: transparent; }
+.etape { display: grid; grid-template-columns: 2.2rem 1fr; gap: .2rem .7rem; margin: 0 0 1rem; }
+.etape__n { width: 2rem; height: 2rem; border-radius: 50%; border: 1px solid var(--c-filet); background: var(--c-brume); display: grid; place-items: center; font-family: var(--ehg-font-serif); font-size: 1.05rem; }
+.etape__c { min-width: 0; }
+.etape__c > :last-child { margin-bottom: 0; }
+.etape__c h4 { margin: .2rem 0 .45rem; }
+.ex { font-variant-numeric: tabular-nums; }
+.tableau { width: 100%; border-collapse: collapse; font-size: .95em; }
+.tableau th, .tableau td { padding: .5rem .6rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--c-filet); }
+.tableau thead th { font-family: var(--ehg-font-titre); font-weight: 500; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--c-texte2); border-bottom: 2px solid var(--c-texte); }
+.tableau td ul { margin: 0; padding-left: 1rem; }
+.tab-comparer { max-width: 40rem; font-size: .95rem; margin: .2rem 0 .3rem; }
+.tab-comparer th, .tab-comparer td { text-align: right; white-space: nowrap; padding: .4rem .45rem; }
+.tab-comparer th:first-child, .tab-comparer td.sit, .tab-comparer thead th:last-child { text-align: left; }
+.tab-comparer tbody th { font-weight: 400; }
+.tab-comparer td { font-family: var(--ehg-font-serif); font-variant-numeric: tabular-nums lining-nums; }
+.tab-comparer td.sit { font-family: var(--ehg-font-texte); }
+.tab-comparer .err { color: var(--c-err); font-weight: 600; }
+body.mobile .tab-comparer { font-size: .86rem; }
+body.mobile .tab-comparer th, body.mobile .tab-comparer td { padding: .35rem .25rem; }
+body.mobile .tab-comparer thead th { white-space: normal; letter-spacing: .02em; }
+body.mobile .tab-comparer td.sit { white-space: normal; }
+.conclusion { margin: .4rem 0 0; }
+.repere { display: inline-block; font-family: var(--ehg-font-titre); font-size: .72rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--c-discret); border: 1px solid var(--c-filet); border-radius: 999px; padding: .15rem .65rem; margin: 0 0 .6rem; }
+.repere--or { color: var(--c-or-texte); border-color: var(--c-or); background: var(--c-or-pale); }
+.rappel { padding: .1rem 0 .2rem; margin: 0 0 1rem; border-bottom: 1px solid var(--c-filet); }
+.rappel .etape { margin-bottom: .55rem; }
+.rappel .etape__c h4 { margin-bottom: .2rem; }
+.rappel p.bleu { margin: 0 0 .2rem; }
+.etape__n--or { background: var(--c-or-pale); border-color: var(--c-or); color: var(--c-or-texte); }
+.tableau td li { margin-bottom: .2rem; }
+.defile { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.gros-or { font-family: var(--ehg-font-serif); color: var(--c-or-texte); font-size: 1.9rem; line-height: 1.1; display: block; }
+
+/* ---------- 6. Graphiques ---------- */
+.graphe-bloc { margin: 0 0 1rem; }
+.graphe { position: relative; width: 100%; }
+.graphe svg { display: block; width: 100%; height: auto; overflow: visible; }
+.legende-g { display: flex; flex-wrap: wrap; gap: .3rem 1.1rem; font-size: .88rem; color: var(--c-texte2); margin: .35rem 0 .2rem; }
+.legende-g span { display: inline-flex; align-items: center; gap: .4rem; }
+.leg-barre { display: inline-block; width: 12px; height: 13px; border-radius: 2px 2px 0 0; }
+.leg-ligne { display: inline-block; width: 22px; height: 3px; background: var(--c-texte); }
+.leg-tiret { display: inline-block; width: 22px; border-top: 2px dashed var(--c-acier); }
+.caption { font-size: .85rem; color: var(--c-discret); margin: .15rem 0 0; }
+.g-grille { stroke: var(--c-filet); stroke-width: 1; }
+.g-axe { stroke: var(--c-texte2); stroke-width: 1; }
+.g-txt { fill: var(--c-discret); font-family: var(--ehg-font-texte); }
+.g-mois { fill: var(--c-texte2); font-family: var(--ehg-font-texte); }
+.g-val { fill: var(--c-texte2); font-family: var(--ehg-font-texte); }
+.g-acc { stroke: var(--c-texte2); stroke-width: 1.2; fill: none; }
+.g-acc-txt { fill: var(--c-texte); font-family: var(--ehg-font-texte); font-weight: 600; }
+.b-acier { fill: var(--c-barre); }
+.b-or { fill: var(--c-or); }
+.b-avance { fill: var(--c-or); opacity: .45; }
+.b-depasse { fill: var(--c-err); }
+.l-capa { stroke: var(--c-texte); stroke-width: 3; stroke-linecap: butt; }
+.l-fin { stroke: var(--c-acier); stroke-width: 1.4; stroke-dasharray: 5 4; }
+.g-fin-txt { fill: var(--c-texte2); font-family: var(--ehg-font-texte); font-weight: 600; }
+.g-coef { fill: var(--c-or-texte); font-family: var(--ehg-font-serif); }
+.g-sel { fill: var(--c-or-pale); }
+.g-hit { fill: transparent; cursor: pointer; outline: none; }
+.g-hit:focus-visible { stroke: var(--c-or); stroke-width: 2; }
+
+/* ---------- 7. Infobulle ---------- */
+.infobulle { position: fixed; z-index: 200; max-width: min(19rem, calc(100vw - 1rem)); background: var(--c-surface); color: var(--c-texte); border: 1px solid var(--c-filet);
+  border-radius: var(--ehg-radius); box-shadow: 0 6px 18px rgba(20,20,20,.18); padding: .55rem .75rem; font-size: .88rem; line-height: 1.45; pointer-events: none; }
+.infobulle strong { font-family: var(--ehg-font-titre); font-weight: 400; font-size: .98rem; display: block; margin-bottom: .15rem; }
+.infobulle .l { display: flex; justify-content: space-between; gap: 1rem; }
+.infobulle .l b { font-family: var(--ehg-font-serif); font-weight: 400; font-variant-numeric: tabular-nums; }
+.infobulle .calc { display: block; color: var(--c-bleu); font-family: var(--ehg-font-serif); font-size: .9rem; margin-top: .1rem; }
+.infobulle .sit-err { color: var(--c-err); } .infobulle .sit-ok { color: var(--c-ok); }
+
+/* ---------- 8. Simulateurs ---------- */
+.consigne { margin: 0 0 1rem; max-width: 52rem; }
+.sim-grille { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(16rem, 1fr); gap: 1rem; align-items: start; }
+/* Plan de charge : paramètres à gauche, effet visible à droite */
+.plan { display: grid; grid-template-columns: minmax(20rem, 27rem) minmax(0, 1fr); gap: 1rem; align-items: start; }
+.plan-droite { position: sticky; top: .75rem; display: grid; gap: .8rem; min-width: 0; }
+.plan-statut { display: none; margin: .35rem 0 0; font-size: .9rem; line-height: 1.35; }
+.plan-statut b { font-family: var(--ehg-font-serif); font-weight: 600; }
+.plan-statut .err { color: var(--c-err); } .plan-statut .ok { color: var(--c-ok); }
+.leg-plan-mobile { display: none; }
+.live-mobile { display: none; margin: 0 0 .8rem; padding: .5rem .7rem; border-radius: var(--ehg-radius); background: var(--c-or-pale); }
+.live-mobile b { font-family: var(--ehg-font-serif); font-weight: 400; font-size: 1.35rem; color: var(--c-or-texte); }
+body.mobile .live-mobile { display: block; }
+.bloc-param { border-radius: var(--ehg-radius-lg); padding: .9rem 1rem 1rem; margin: 0 0 1rem; }
+.bloc-param--base { background: var(--c-brume); border: 1px solid var(--c-filet); }
+.bloc-param--adapt { background: var(--c-surface); border: 2px solid var(--c-or); box-shadow: var(--c-ombre); }
+.bloc-param__tete { display: flex; gap: .7rem; align-items: flex-start; margin: 0 0 .8rem; }
+.bloc-param__tete h3 { margin: 0; font-size: 1.12rem; }
+.bloc-param__tete p { margin: .1rem 0 0; font-size: .9rem; color: var(--c-texte2); }
+.bloc-param__n { flex: 0 0 2rem; width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; font-family: var(--ehg-font-serif); font-size: 1.1rem; color: var(--c-fond); background: var(--c-texte2); }
+.bloc-param--adapt .bloc-param__n { background: var(--c-or); color: #fff; }
+.bloc-param .levier { background: var(--c-surface); }
+.panneau { border: 1px solid var(--c-filet); border-radius: var(--ehg-radius-lg); background: var(--c-surface); padding: 1rem 1.1rem; box-shadow: var(--c-ombre); }
+.panneau h3 { margin: 0 0 .6rem; font-size: 1.08rem; }
+.panneau + .panneau { margin-top: 1rem; }
+.sim-grille > .panneau + .panneau { margin-top: 0; }
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; margin: 0 0 .8rem; }
+.kpi { background: var(--c-brume); border-radius: var(--ehg-radius-lg); padding: .6rem .75rem; }
+.kpi__val { display: block; font-family: var(--ehg-font-serif); font-size: 1.65rem; line-height: 1.1; color: var(--c-texte); font-variant-numeric: tabular-nums lining-nums; }
+.kpi__lib { display: block; font-size: .84rem; color: var(--c-texte2); line-height: 1.3; }
+.kpi--err { background: var(--c-err-pale); } .kpi--err .kpi__val { color: var(--c-err); }
+.kpi--ok { background: var(--c-ok-pale); } .kpi--ok .kpi__val { color: var(--c-ok); }
+.encadre { display: flex; gap: .75rem; align-items: flex-start; padding: .75rem 1rem; border-radius: var(--ehg-radius-lg); background: var(--c-brume); margin: 0 0 .8rem; }
+.encadre__icone { flex: 0 0 1.2rem; font-family: var(--ehg-font-serif); font-size: 1.2rem; line-height: 1.25; }
+.encadre > div > :last-child { margin-bottom: 0; }
+.encadre p { margin: 0 0 .45rem; }
+.encadre ul { margin: .2rem 0 .3rem; padding-left: 1.1rem; }
+.encadre--ok { background: var(--c-ok-pale); } .encadre--ok .encadre__icone { color: var(--c-ok); }
+.encadre--err { background: var(--c-err-pale); } .encadre--err .encadre__icone { color: var(--c-err); }
+.encadre--or { background: var(--c-or-pale); } .encadre--or .encadre__icone { color: var(--c-or-texte); }
+.puces-mois { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .3rem; margin: 0 0 .8rem; }
+.puces-mois button { display: inline-flex; align-items: center; justify-content: center; gap: .35rem; cursor: pointer; font-family: var(--ehg-font-titre); font-size: .88rem; padding: .45rem .15rem; min-height: 40px; min-width: 0; border-radius: 999px; border: 1px solid var(--c-filet); background: var(--c-surface); color: var(--c-texte); }
+.puces-mois button[aria-pressed="true"] { border-color: var(--c-or); background: var(--c-or-pale); box-shadow: 0 0 0 1px var(--c-or) inset; }
+.puces-k { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .3rem; margin: .1rem 0 .55rem; }
+.puces-k button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .05rem; min-width: 0; min-height: 50px; padding: .3rem 0; cursor: pointer; border-radius: var(--ehg-radius-lg); border: 1px solid var(--c-filet); background: var(--c-surface); color: var(--c-texte); font-family: var(--ehg-font-titre); font-size: .82rem; line-height: 1.15; }
+.puces-k .k { font-family: var(--ehg-font-serif); font-size: .95rem; font-variant-numeric: tabular-nums lining-nums; color: var(--c-texte2); white-space: nowrap; }
+.puces-k button.modifie { background: var(--c-or-pale); }
+.puces-k button.modifie .k { color: var(--c-or-texte); font-weight: 600; }
+.puces-k button[aria-pressed="true"] { border-color: var(--c-or); box-shadow: 0 0 0 1px var(--c-or) inset; }
+.puces-k button[aria-pressed="true"] .m { font-weight: 600; }
+.puces-mois .pt { width: .6rem; height: .6rem; border-radius: 50%; background: var(--c-ok); }
+.puces-mois .pt.err { background: var(--c-err); }
+.levier { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .25rem .8rem; align-items: center; padding: .6rem .7rem; border-radius: var(--ehg-radius); border: 1px solid var(--c-filet); margin: 0 0 .45rem; background: var(--c-surface); }
+.bloc-param .levier.rempli, .levier.rempli { background: var(--c-or-pale); border-color: var(--c-or); }
+.levier__nom { font-weight: 600; line-height: 1.3; }
+.levier__aide { grid-column: 1 / -1; font-size: .86rem; color: var(--c-texte2); line-height: 1.35; }
+.levier__aide .bleu { font-size: .95em; }
+.levier.inactif { opacity: .55; }
+.famille { font-family: var(--ehg-font-titre); font-size: .86rem; font-weight: 500; letter-spacing: 0; color: var(--c-texte2); margin: .9rem 0 .4rem; padding-bottom: .2rem; border-bottom: 1px solid var(--c-filet); }
+.famille:first-child { margin-top: 0; }
+.stepper { display: inline-flex; align-items: center; gap: .3rem; }
+.stepper button { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--c-acier); background: var(--c-surface); cursor: pointer; font-size: 1.25rem; line-height: 1; display: grid; place-items: center; }
+.stepper button:hover:not([disabled]) { border-color: var(--c-texte); }
+.stepper button[disabled] { opacity: .35; cursor: default; }
+.stepper output { min-width: 4.6rem; text-align: center; font-family: var(--ehg-font-serif); font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.choix-chips { display: inline-flex; flex-wrap: wrap; gap: .35rem; }
+.choix-chips button { cursor: pointer; padding: .4rem .75rem; min-height: 38px; border-radius: 999px; border: 1px solid var(--c-filet); background: var(--c-surface); font-family: var(--ehg-font-serif); font-size: 1rem; }
+.choix-chips button[aria-pressed="true"] { border-color: var(--c-or); background: var(--c-or-pale); box-shadow: 0 0 0 1px var(--c-or) inset; }
+.curseur { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem .8rem; align-items: center; margin: 0 0 .9rem; }
+.curseur label { font-weight: 600; }
+.curseur output { font-family: var(--ehg-font-serif); font-size: 1.3rem; color: var(--c-or-texte); text-align: right; min-width: 4ch; }
+.curseur input[type="range"] { grid-column: 1 / -1; width: 100%; accent-color: var(--c-or); min-height: 36px; }
+.resultat { text-align: left; }
+.resultat .gros-or { font-size: 2.6rem; }
+.points { display: block; width: 100%; height: auto; max-width: 30rem; }
+.points .p-vis { fill: none; stroke: var(--c-acier); stroke-width: 1.4; }
+.points .p-ach { fill: var(--c-or); stroke: var(--c-or); stroke-width: 1.4; }
+.detail summary { cursor: pointer; font-family: var(--ehg-font-titre); font-size: .92rem; color: var(--c-texte2); padding: .4rem 0; min-height: 40px; display: flex; align-items: center; }
+.tab-calc { font-size: .86rem; min-width: 46rem; }
+.tab-calc th, .tab-calc td { padding: .38rem .4rem; text-align: right; white-space: nowrap; }
+.tab-calc th:first-child, .tab-calc td:first-child { text-align: left; position: sticky; left: 0; background: var(--c-surface); }
+.tab-calc thead th { cursor: pointer; }
+.tab-calc .sel { background: var(--c-or-pale); }
+.tab-calc .err { color: var(--c-err); font-weight: 600; }
+.tab-calc .ok { color: var(--c-ok); }
+.tab-calc .passe { color: var(--c-discret); }
+
+/* ---------- 9. Modales ---------- */
+.modale { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.modale__fond { position: absolute; inset: 0; background: rgba(20,20,20,.55); }
+.modale__boite { position: relative; background: var(--c-surface); color: var(--c-texte); border-radius: var(--ehg-radius-lg); box-shadow: 0 12px 40px rgba(20,20,20,.35); width: min(34rem, 100%); max-height: calc(100dvh - 2rem); overflow: auto; }
+.modale__entete { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; padding: 1.1rem 1.3rem .8rem; border-bottom: 1px solid var(--c-filet); position: sticky; top: 0; background: var(--c-surface); z-index: 1; }
+.modale__entete h3 { margin: 0; }
+.modale__corps { padding: 1rem 1.3rem 1.3rem; }
+body.modale-ouverte { overflow: hidden; }
+.reglage { margin: 0 0 1.1rem; }
+.reglage__lib { display: block; font-family: var(--ehg-font-titre); font-size: .9rem; margin-bottom: .35rem; }
+.segmente { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--c-filet); border-radius: 999px; overflow: hidden; }
+.segmente button { cursor: pointer; border: 0; background: transparent; padding: .5rem 1rem; min-height: 40px; font-family: var(--ehg-font-titre); font-size: .88rem; }
+.segmente button + button { border-left: 1px solid var(--c-filet); }
+.segmente button[aria-pressed="true"] { background: var(--c-texte); color: var(--c-fond); }
+.qr-zone { width: min(17rem, 100%); margin: 0 auto; background: #fff; padding: .4rem; border-radius: var(--ehg-radius); }
+.qr-zone svg { display: block; width: 100%; height: auto; }
+.qr-url { font-family: var(--ehg-font-titre); font-size: .9rem; text-align: center; word-break: break-all; margin: .7rem 0 .5rem; color: var(--c-texte2); }
+.input { width: 100%; font: inherit; font-size: 16px; color: var(--c-texte); background: var(--c-surface); border: 1px solid var(--c-acier); border-radius: var(--ehg-radius); padding: .55rem .7rem; letter-spacing: 0; }
+.modale--plein .modale__boite { width: 100%; height: 100%; max-height: none; border-radius: 0; }
+.modale--plein .qr-zone { width: min(75vh, 80vw); }
+.modale--plein .qr-options { display: none; }
+
+/* ---------- 10. Affichage smartphone (classe posée par le commutateur Auto / Mobile / Ordinateur) ---------- */
+body.mobile .page { padding-inline: 1rem; }
+body.mobile h1 { font-size: 1.55rem; }
+body.mobile .titre { padding-block: 1.1rem .4rem; }
+body.mobile .onglets { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: var(--c-surface); margin: 0; padding: 0 .5rem env(safe-area-inset-bottom, 0px); border-top: 1px solid var(--c-filet); border-bottom: 0; box-shadow: 0 -2px 10px rgba(20,20,20,.1); gap: 0; }
+body.mobile .onglets button { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .1rem; border-radius: 0; background: var(--c-surface); color: var(--c); font-size: .72rem; padding: .45rem 0 .5rem; min-height: 58px; border-top-width: 3px; border-top-color: transparent; }
+body.mobile .onglets button[aria-selected="true"] { background: var(--cp); color: var(--c); border-top-color: var(--c); }
+body.mobile .onglets button .n { margin: 0; font-size: 1.05rem; line-height: 1; }
+body.mobile { padding-bottom: calc(66px + env(safe-area-inset-bottom, 0px)); }
+body.mobile .sous-onglets { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: .25rem; margin: 0 -1rem .9rem; padding: .4rem .5rem; position: sticky; top: 0; z-index: 30; background: var(--c-fond); border-bottom: 1px solid var(--c-filet); box-shadow: 0 2px 6px rgba(20,20,20,.06); }
+body.mobile .sous-onglets button { flex-direction: column; justify-content: center; gap: .05rem; min-width: 0; min-height: 52px; padding: .3rem .15rem; border-radius: var(--ehg-radius-lg); border: 1px solid var(--c-filet); font-size: .8rem; letter-spacing: 0; line-height: 1.15; text-align: center; }
+body.mobile .sous-onglets button .n { font-size: 1.1rem; line-height: 1; }
+body.mobile .sous-onglets .lib { white-space: normal; overflow-wrap: anywhere; }
+body.mobile .sous-onglets--6 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+body.mobile .sous-onglets--6 button { flex-direction: row; gap: .35rem; min-height: 40px; padding: .25rem .2rem; font-size: .84rem; }
+body.mobile .sous-onglets--6 button .n { font-size: 1rem; }
+body.mobile .plan { display: flex; flex-direction: column; align-items: stretch; gap: .8rem; }
+body.mobile .plan-droite { display: contents; }
+body.mobile .plan-graphe { order: 0; position: sticky; top: var(--h-sous, 64px); z-index: 20; padding: .45rem .55rem .5rem; box-shadow: 0 4px 12px rgba(20,20,20,.12); }
+body.mobile .plan-params { order: 1; }
+body.mobile .plan-bilan { order: 2; }
+body.mobile .plan-graphe .leg-plan { display: none; }
+body.mobile .plan-statut { display: block; }
+body.mobile .leg-plan-mobile { display: block; }
+body.mobile .bloc-param { padding: .8rem .7rem .9rem; }
+body.mobile .puces-mois button { flex-direction: column; gap: .15rem; border-radius: var(--ehg-radius-lg); min-height: 48px; font-size: .82rem; padding: .3rem 0; }
+body.mobile .levier { gap: .25rem .5rem; padding: .5rem .6rem; }
+body.mobile .levier .stepper { gap: .2rem; }
+body.mobile .levier .stepper button { width: 38px; height: 38px; }
+body.mobile .levier .stepper output { min-width: 3.4rem; font-size: 1rem; }
+body.mobile .levier .choix-chips button { padding: .35rem .55rem; }
+body.mobile .plan-statut { font-size: .86rem; }
+body.mobile .entete__droite .btn__txt { display: none; }
+body.mobile .entete__droite .btn { min-width: 2.6rem; padding: .45rem .55rem; }
+body.mobile .logotype { font-size: 1rem; white-space: normal; min-width: 0; line-height: 1.2; }
+body.mobile .entete { gap: .5rem; }
+body.mobile .entete__droite { gap: .35rem; flex-shrink: 0; }
+body.mobile .grille2, body.mobile .grille3 { grid-template-columns: 1fr; }
+body.mobile .sim-grille { grid-template-columns: 1fr; }
+body.mobile .probleme__q { font-size: 1.18rem; }
+body.mobile .notion__corps { padding: .9rem .9rem 1rem; }
+body.mobile details.notion > summary { padding: .75rem .85rem; }
+body.mobile .formule__txt { font-size: 1.08rem; }
+body.mobile .panneau { padding: .85rem .8rem; }
+body.mobile .modale { padding: 0; align-items: stretch; }
+body.mobile .modale__boite { width: 100%; max-height: none; border-radius: 0; }
+body.mobile .pied { flex-direction: column; }
+body.mobile .tableau--leviers thead { display: none; }
+body.mobile .tableau--leviers tr { display: block; border-bottom: 2px solid var(--c-texte); padding: .4rem 0; }
+body.mobile .tableau--leviers td, body.mobile .tableau--leviers th { display: block; border: 0; padding: .3rem 0; }
+body.mobile .tableau--leviers td::before { content: attr(data-col); display: block; font-family: var(--ehg-font-titre); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--c-discret); }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+@media print {
+  .onglets, .entete__droite, .sous-onglets, .outils-notions { display: none !important; }
+  details.notion { box-shadow: none; break-inside: avoid; }
+}
+</style>
+</head>
+<body data-onglet="theorie">
+<header class="page entete">
+  <a class="logotype" href="#theorie">École d'Horlo<span class="g">g</span>erie Genève</a>
+  <div class="entete__droite">
+    <button class="btn btn--secondaire btn--petit" id="btn-confort" type="button" aria-pressed="false" title="Texte plus grand et plus aéré (dyslexie, dysorthographie)"><span aria-hidden="true" style="text-transform:none;font-family:var(--ehg-font-serif);font-size:1rem;letter-spacing:0">Aa</span><span class="btn__txt">Confort de lecture</span></button>
+    <button class="btn btn--secondaire btn--petit" id="btn-qr" type="button" aria-haspopup="dialog" aria-controls="modale-qr" title="Afficher un QR code pour ouvrir la page sur un téléphone"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M1 1h6v6H1zM2.5 2.5v3h3v-3zM9 1h6v6H9zm1.5 1.5v3h3v-3zM1 9h6v6H1zm1.5 1.5v3h3v-3zM9 9h2v2H9zm2 2h2v2h-2zm2-2h2v2h-2zm-4 4h2v2H9zm4 0h2v2h-2z"/></svg><span class="btn__txt">QR code</span></button>
+    <button class="btn btn--petit" id="btn-reglages" type="button" aria-haspopup="dialog" aria-controls="modale-reglages" title="Thème, affichage, confort de lecture"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="btn__txt">Réglages</span></button>
+  </div>
+</header>
+
+<main class="page" id="principal">
+  <div class="titre"><h1>La flexibilité quantitative</h1></div>
+
+  <nav class="onglets" role="tablist" aria-label="Sections de la page">
+    <button role="tab" id="tab-theorie" aria-controls="panneau-theorie" aria-selected="true" data-onglet="theorie"><span class="n">1</span>Théorie</button>
+    <button role="tab" id="tab-simulateur" aria-controls="panneau-simulateur" aria-selected="false" data-onglet="simulateur"><span class="n">2</span>Simulateur</button>
+  </nav>
+
+  <!-- ============================== 1. THÉORIE ============================== -->
+  <section id="panneau-theorie" role="tabpanel" aria-labelledby="tab-theorie">
+    <div class="sous-onglets sous-onglets--6" role="tablist" aria-label="Les six problématiques" data-groupe="theorie" style="--n:6">
+      <button role="tab" aria-selected="true" data-cible="th1"><span class="n">1</span><span class="lib">Ventes</span></button>
+      <button role="tab" aria-selected="false" data-cible="th2"><span class="n">2</span><span class="lib">Prévision</span></button>
+      <button role="tab" aria-selected="false" data-cible="th3"><span class="n">3</span><span class="lib">Charge</span></button>
+      <button role="tab" aria-selected="false" data-cible="th4"><span class="n">4</span><span class="lib">Capacité</span></button>
+      <button role="tab" aria-selected="false" data-cible="th5"><span class="n">5</span><span class="lib">Étudier</span></button>
+      <button role="tab" aria-selected="false" data-cible="th6"><span class="n">6</span><span class="lib">Adapter</span></button>
+    </div>
+
+    <!-- ---------- Problématique 1 ---------- -->
+    <div class="sous-panneau" id="th1" role="tabpanel">
+      <div class="probleme">
+        <span class="surtitre">Problématique 1</span>
+        <p class="probleme__ctx">Des visiteurs entrent dans la boutique. Certains achètent.</p>
+        <h2 class="probleme__q">Comment prévoir le volume de ventes et l’influencer ?</h2>
+      </div>
+      <div class="outils-notions"><button type="button" class="btn btn--secondaire btn--petit js-tout">Tout ouvrir</button></div>
+
+      <details class="notion" open>
+        <summary><span class="num">1</span><span class="tt">Taux de conversion</span></summary>
+        <div class="notion__corps">
+          <p>En boutique, on distingue deux groupes :</p>
+          <ul>
+            <li>les <b>visiteurs</b> qui entrent mais n’achètent pas ;</li>
+            <li>les visiteurs <b>convertis en acheteurs</b> : ils réalisent un acte d’achat.</li>
+          </ul>
+          <p><b>Objectif principal des boutiques :</b> augmenter le taux de conversion des visiteurs en acheteurs.</p>
+          <div class="formule"><span class="formule__lib">Formule</span>
+            <p class="formule__txt"><b>Taux de conversion</b> = clients avec achat ÷ clients entrants</p></div>
+          <div class="boite"><span class="boite__lib">Exemple</span>
+            <p>27 clients visitent la boutique le 23 décembre. 3 d’entre eux achètent.</p>
+            <p class="ex">Taux de conversion = 3 ÷ 27 ≈ 0,11, soit <b>11 %</b>.</p></div>
+        </div>
+      </details>
+
+      <details class="notion">
+        <summary><span class="num">2</span><span class="tt">Deux leviers pour augmenter les ventes</span></summary>
+        <div class="notion__corps">
+          <div class="formule"><span class="formule__lib">Formule</span>
+            <p class="formule__txt"><b>Ventes du mois</b> = visites × taux de conversion</p>
+            <p class="formule__ex">Situation de départ : 90 visites × 20 % = <b>18 achats</b>. Hypothèse : une montre par achat. Exemple fictif.</p></div>
+          <div class="grille2">
+            <div class="carte"><h4>Augmenter les visites</h4><p class="ex">135 visites × 20 % = <b>27 achats</b></p></div>
+            <div class="carte"><h4>Augmenter le taux de conversion</h4><p class="ex">90 visites × 30 % = <b>27 achats</b></p></div>
+          </div>
+          <p>Dans les deux cas, les ventes mensuelles passent de 18 à <span class="chiffre">27</span>.</p>
+          <p>Ce sont les <b>deux leviers d’action</b> des entreprises.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- ---------- Problématique 2 ---------- -->
+    <div class="sous-panneau" id="th2" role="tabpanel" hidden>
+      <div class="probleme">
+        <span class="surtitre">Problématique 2</span>
+        <h2 class="probleme__q">Comment prévoir les ventes futures ?</h2>
+      </div>
+      <div class="outils-notions"><button type="button" class="btn btn--secondaire btn--petit js-tout">Tout ouvrir</button></div>
+
+      <details class="notion" open>
+        <summary><span class="num">1</span><span class="tt">Fournir la bonne quantité</span></summary>
+        <div class="notion__corps">
+          <div class="grille2">
+            <div class="graphe-bloc">
+              <div class="graphe" data-graphe="demandeA" role="img" aria-label="Montres A demandées par mois : 8, 8, 9, 9, 11, 10, 9, 7, 9, 10, 12 et 18 en décembre."></div>
+              <p class="caption" data-legende="demandeA"></p>
+            </div>
+            <div>
+              <p><b>Un mois moyen</b><br>La boutique demande 10 montres A.</p>
+              <p><b>En décembre</b><br>Elle en demande 18 : 1,8 fois la quantité d’un mois moyen.</p>
+              <p><b>La manufacture</b><br>Elle doit fournir chaque quantité à temps, sans fabriquer de montres en trop.</p>
+            </div>
+          </div>
+          <div class="formule"><span class="formule__lib">Formule</span>
+            <p class="formule__txt"><b>Quantité demandée du mois</b> = quantité d’un mois moyen × coefficient saisonnier du mois</p>
+            <p class="formule__ex">Décembre : 10 × 1,8 = <b>18 montres A</b>.</p></div>
+        </div>
+      </details>
+    </div>
+
+    <!-- ---------- Problématique 3 ---------- -->
+    <div class="sous-panneau" id="th3" role="tabpanel" hidden>
+      <div class="probleme">
+        <span class="surtitre">Problématique 3</span>
+        <p class="probleme__ctx">On connaît les quantités à produire chaque mois.</p>
+        <h2 class="probleme__q">Comment prévoir la charge ?</h2>
+      </div>
+
+      <details class="notion" open>
+        <summary><span class="num">1</span><span class="tt">La charge<span class="st">Ce que l’atelier doit faire sur une période.</span></span></summary>
+        <div class="notion__corps">
+          <div class="boite"><span class="boite__lib">Définition de travail</span>
+            <p><b>Charge :</b> travail à réaliser sur une période, pour produire les quantités demandées.</p></div>
+          <div class="formule"><span class="formule__lib">Formule</span>
+            <p class="formule__txt"><b>Charge</b> = quantité à produire × temps unitaire</p>
+            <p class="formule__ex"><b>Quantité à produire :</b> quantité prévue pour la période, issue de la prévision des ventes.</p>
+            <p class="formule__ex"><b>Temps unitaire :</b> temps pour réaliser une montre au poste. Il vient de la gamme.</p></div>
+          <div class="grille2">
+            <div class="carte"><h4>Exemple fictif · atelier d’emboîtage, mars</h4>
+              <p class="ex">Modèle A : 300 montres × 0,5 h = 150 h</p>
+              <p class="ex">Modèle B : 200 montres × 0,75 h = 150 h</p>
+              <p class="ex"><b>Charge totale : 300 h</b></p></div>
+            <div class="carte"><h4>Pourquoi compter en heures ?</h4>
+              <p>Une montre B demande 1,5 fois le temps d’une montre A.</p>
+              <p>Le total de 500 montres mélange ces deux durées.</p>
+              <p>Les heures mesurent le travail de chaque montre.</p></div>
+          </div>
+          <div class="boite"><span class="boite__lib">À retenir</span>
+            <p>La charge se compte en heures dans le cas général ; en montres seulement si l’atelier fabrique un seul modèle.</p></div>
+        </div>
+      </details>
+    </div>
+
+    <!-- ---------- Problématique 4 ---------- -->
+    <div class="sous-panneau" id="th4" role="tabpanel" hidden>
+      <div class="probleme">
+        <span class="surtitre">Problématique 4</span>
+        <p class="probleme__ctx">On connaît la charge de l’atelier.</p>
+        <h2 class="probleme__q">Comment calculer la capacité d’un système de production ?</h2>
+      </div>
+      <div class="outils-notions"><button type="button" class="btn btn--secondaire btn--petit js-tout">Tout ouvrir</button></div>
+
+      <details class="notion" open>
+        <summary><span class="num">1</span><span class="tt">La capacité<span class="st">Ce que l’atelier peut faire sur la même période.</span></span></summary>
+        <div class="notion__corps">
+          <div class="boite"><span class="boite__lib">Définition de travail</span>
+            <p><b>Capacité :</b> travail maximal que les ressources (opérateurs, postes, machines) peuvent réaliser sur la même période.</p></div>
+          <div class="formule"><span class="formule__lib">Formule</span>
+            <p class="formule__txt"><b>Capacité</b> = nombre de ressources × temps disponible</p>
+            <p class="formule__ex"><b>Temps disponible :</b> heures de travail de la période, vacances et jours fériés déduits.</p></div>
+          <div class="grille2">
+            <div class="carte"><h4>Exemple fictif · atelier d’emboîtage, mars</h4>
+              <p class="ex">2 opérateurs × 8 h × 20 jours = 320 h</p>
+              <p class="ex"><b>Capacité : 320 h</b></p></div>
+            <div class="formule" style="margin:0"><span class="formule__lib">Un seul modèle · en montres</span>
+              <p class="formule__txt"><b>Capacité du mois</b> = capacité par jour × jours de travail du mois</p></div>
+          </div>
+          <div class="boite"><span class="boite__lib">À retenir</span>
+            <p>Charge et capacité se comparent dans la même unité et sur la même période. Mars : charge 300 h, capacité 320 h.</p></div>
+        </div>
+      </details>
+
+      <details class="notion">
+        <summary><span class="num">2</span><span class="tt">Comparer la charge et la capacité<span class="st">Le plan de charge compare les deux, mois par mois.</span></span></summary>
+        <div class="notion__corps">
+          <div class="graphe-bloc">
+            <div class="graphe" data-graphe="comparer" role="img" aria-label="Plan de charge : charge de 100 à 120 de janvier à avril, de 170 à 180 de mai à juillet, 150 d’août à décembre ; capacité de 150 chaque mois."></div>
+            <div class="legende-g"><span><i class="leg-barre" style="background:var(--c-barre)"></i>Charge</span><span><i class="leg-ligne"></i>Capacité</span></div>
+            <p class="caption" data-legende="poseCadran"></p>
+          </div>
+          <div class="grille3">
+            <div class="carte carte--brume"><h4>Surcapacité <span class="note">(sous-charge)</span></h4><p>Charge inférieure à la capacité.</p></div>
+            <div class="carte carte--brume"><h4>Sous-capacité <span class="note">(surcharge)</span></h4><p>Charge supérieure à la capacité.</p></div>
+            <div class="carte carte--brume"><h4>Adéquation</h4><p>Charge égale à la capacité : aucune marge pour une absence ou une panne.</p></div>
+          </div>
+          <div class="formule"><span class="formule__lib">Formule</span>
+            <p class="formule__txt"><b>Taux de charge</b> = charge ÷ capacité × 100</p>
+            <p class="formule__ex">Juin : 180 ÷ 150 × 100 = <span class="chiffre" style="font-size:1.25rem">120 %</span></p></div>
+        </div>
+      </details>
+
+      <details class="notion">
+        <summary><span class="num">3</span><span class="tt">La surcapacité<span class="st">La charge reste inférieure à la capacité : de janvier à avril dans l’exemple.</span></span></summary>
+        <div class="notion__corps">
+          <div class="grille2">
+            <div>
+              <div class="etape"><span class="etape__n">1</span><div class="etape__c"><h4>Repérer</h4>
+                <p>Les barres de charge restent sous la ligne de capacité.</p>
+                <p>Le taux de charge est inférieur à 100 % : 67 % en janvier.</p></div></div>
+              <div class="etape"><span class="etape__n">2</span><div class="etape__c"><h4>Calculer</h4>
+                <div class="formule"><p class="formule__txt"><b>Capacité inutilisée</b> = capacité − charge</p></div>
+                <p class="ex">Janvier : 150 − 100 = 50 montres.</p>
+                <p>Un tiers de la capacité payée reste inutilisé.</p></div></div>
+            </div>
+            <div class="graphe-bloc">
+              <div class="graphe" data-graphe="surcap" role="img" aria-label="Plan de charge, janvier à avril mis en évidence : charge inférieure à la capacité."></div>
+              <div class="legende-g"><span><i class="leg-barre" style="background:var(--c-barre)"></i>Charge</span><span><i class="leg-ligne"></i>Capacité</span></div>
+            </div>
+          </div>
+          <div class="etape"><span class="etape__n">3</span><div class="etape__c"><h4>Conséquences pour la manufacture</h4>
+            <div class="grille2">
+              <div class="carte"><h4>Des ressources payées, mais inutilisées</h4><p>Les opérateurs, les postes et les locaux coûtent, même sans travail. Avec moins de montres produites, le coût de chaque montre augmente.</p></div>
+              <div class="carte"><h4>La surproduction, puis le stock</h4><p>Produire sans commande pour occuper les postes crée un stock. Le stock immobilise de l’argent et peut rester invendu, par exemple au changement de collection.</p></div>
+            </div></div></div>
+        </div>
+      </details>
+
+      <details class="notion">
+        <summary><span class="num">4</span><span class="tt">La sous-capacité<span class="st">La charge dépasse la capacité : de mai à juillet dans l’exemple.</span></span></summary>
+        <div class="notion__corps">
+          <div class="grille2">
+            <div>
+              <div class="etape"><span class="etape__n">1</span><div class="etape__c"><h4>Repérer</h4>
+                <p>Les barres de charge dépassent la ligne de capacité.</p>
+                <p>Le taux de charge est supérieur à 100 % : 120 % en juin.</p></div></div>
+              <div class="etape"><span class="etape__n">2</span><div class="etape__c"><h4>Calculer</h4>
+                <div class="formule"><p class="formule__txt"><b>Au-delà de la capacité</b> = charge − capacité</p></div>
+                <p class="ex">Mai à juillet : 20 + 30 + 30 = 80 montres.</p>
+                <p>La charge dépasse la capacité de 80 montres.</p></div></div>
+            </div>
+            <div class="graphe-bloc">
+              <div class="graphe" data-graphe="souscap" role="img" aria-label="Plan de charge, mai à juillet mis en évidence : charge supérieure à la capacité."></div>
+              <div class="legende-g"><span><i class="leg-barre" style="background:var(--c-barre)"></i>Charge</span><span><i class="leg-ligne"></i>Capacité</span></div>
+            </div>
+          </div>
+          <div class="etape"><span class="etape__n">3</span><div class="etape__c"><h4>Conséquences</h4>
+            <div class="grille2">
+              <div class="carte"><h4>Pour la boutique et le client</h4><ul>
+                <li><b>Retards de livraison :</b> la boutique reçoit ses montres trop tard.</li>
+                <li><b>Ventes manquées :</b> le client achète ailleurs.</li></ul></div>
+              <div class="carte"><h4>Pour la manufacture</h4><ul>
+                <li><b>Équipes surchargées :</b> fatigue, risque d’erreurs et de défauts.</li>
+                <li><b>Coûts plus élevés :</b> heures supplémentaires, personnel temporaire.</li></ul></div>
+            </div></div></div>
+        </div>
+      </details>
+    </div>
+
+    <!-- ---------- Problématique 5 ---------- -->
+    <div class="sous-panneau" id="th5" role="tabpanel" hidden>
+      <div class="probleme">
+        <span class="surtitre">Problématique 5</span>
+        <p class="probleme__ctx">On connaît la charge et la capacité d’un mois.</p>
+        <h2 class="probleme__q">Comment étudier la charge et la capacité des mois à venir ?</h2>
+      </div>
+      <div class="outils-notions"><button type="button" class="btn btn--secondaire btn--petit js-tout">Tout ouvrir</button></div>
+
+      <details class="notion" open>
+        <summary><span class="num">1</span><span class="tt">Calculer la charge et la capacité<span class="st">Trois étapes connues, puis la comparaison mois par mois.</span></span></summary>
+        <div class="notion__corps">
+          <span class="repere">Rappel</span>
+          <div class="rappel">
+            <div class="etape"><span class="etape__n">1</span><div class="etape__c"><h4>Prévoir les quantités</h4>
+              <p class="bleu"><b>Quantité prévue</b> = ventes d’un mois moyen × coefficient saisonnier</p>
+              <p class="bleu"><b>Coefficient saisonnier</b> = ventes habituelles du mois ÷ ventes d’un mois moyen</p></div></div>
+            <div class="etape"><span class="etape__n">2</span><div class="etape__c"><h4>Calculer la charge</h4>
+              <p class="bleu"><b>Charge</b> = quantité prévue × temps unitaire</p></div></div>
+            <div class="etape"><span class="etape__n">3</span><div class="etape__c"><h4>Calculer la capacité</h4>
+              <p class="bleu"><b>Capacité</b> = nombre de ressources × temps disponible du mois</p></div></div>
+          </div>
+          <span class="repere repere--or">Nouveau</span>
+          <div class="etape"><span class="etape__n etape__n--or">4</span><div class="etape__c"><h4>Comparer, mois par mois</h4>
+            <p>La planification compare la charge et la capacité de chaque mois à venir.</p>
+            <div class="formule"><span class="formule__lib">Formule</span>
+              <p class="formule__txt"><b>Taux de charge</b> = charge ÷ capacité × 100</p></div></div></div>
+          <div class="defile"><table class="tableau tab-comparer" id="th-comparer"></table></div>
+          <p class="caption" data-legende="remontage"></p>
+          <p class="conclusion" id="th-comparer-conclusion"></p>
+          <div class="boite"><span class="boite__lib">À retenir</span>
+            <p>La prévision part des données : ventes d’un mois moyen et coefficients saisonniers. Continuer la hausse des derniers mois ignore la saison.</p></div>
+        </div>
+      </details>
+
+      <details class="notion">
+        <summary><span class="num">2</span><span class="tt">Lire le plan de charge<span class="st">Fin juin, la sous-capacité d’octobre à décembre est déjà visible.</span></span></summary>
+        <div class="notion__corps">
+          <div class="graphe-bloc">
+            <div class="graphe" data-graphe="planRemontage" role="img" aria-label="Plan de charge en heures : charge réalisée de janvier à juin, de 200 à 340 h ; charge prévue de juillet à décembre : 180, 210, 330, 390, 450 et 330 h ; capacité de 208 à 352 h selon les jours de travail."></div>
+            <div class="legende-g"><span><i class="leg-barre" style="background:var(--c-barre)"></i>Charge réalisée</span><span><i class="leg-barre" style="background:var(--c-or)"></i>Charge prévue</span><span><i class="leg-ligne"></i>Capacité</span></div>
+            <p class="caption" data-legende="remontage"></p>
+          </div>
+          <div class="grille3">
+            <div class="carte carte--brume"><h4>Au-delà de la capacité</h4><p><span class="bleu">Charge − capacité</span>, d’octobre à décembre :</p><p class="ex">38 + 114 + 74 = <b>226 h</b></p></div>
+            <div class="carte carte--brume"><h4>Capacité inutilisée</h4><p><span class="bleu">Capacité − charge</span>, de juillet à septembre :</p><p class="ex">28 + 110 + 6 = <b>144 h</b></p></div>
+            <div class="carte carte--brume"><h4>Le temps pour agir</h4><p>Trois mois pour prévoir des heures, du personnel, de la sous-traitance, ou produire plus tôt dans la capacité inutilisée.</p></div>
+          </div>
+          <div class="boite"><span class="boite__lib">À retenir</span>
+            <p>Étudier tôt la charge et la capacité laisse le temps d’agir. Chaque mois, la charge réalisée remplace la prévision.</p></div>
+        </div>
+      </details>
+    </div>
+
+    <!-- ---------- Problématique 6 ---------- -->
+    <div class="sous-panneau" id="th6" role="tabpanel" hidden>
+      <div class="probleme">
+        <span class="surtitre">Problématique 6</span>
+        <p class="probleme__ctx">On connaît la charge et la capacité des mois à venir.</p>
+        <h2 class="probleme__q">Comment adapter la capacité ?</h2>
+      </div>
+      <div class="outils-notions"><button type="button" class="btn btn--secondaire btn--petit js-tout">Tout ouvrir</button></div>
+
+      <details class="notion" open>
+        <summary><span class="num">1</span><span class="tt">La flexibilité quantitative<span class="st">Faire varier les quantités produites, à la hausse comme à la baisse.</span></span></summary>
+        <div class="notion__corps">
+          <div class="boite"><span class="boite__lib">Définition de travail</span>
+            <p><b>Flexibilité quantitative :</b> aptitude d’un système de production à faire varier les quantités produites, à la hausse comme à la baisse, sans perte excessive de temps ni de coût.</p></div>
+          <div class="grille2">
+            <div class="carte"><h4>Adapter la capacité à la charge</h4>
+              <p>La manufacture ajoute ou retire des ressources : heures de travail, personnes, postes, sous-traitants.</p>
+              <p class="note">Exemple : des heures supplémentaires de mai à juillet.</p>
+              <p><b>Avantage :</b> peu de ressources inutilisées.<br><b>Coût :</b> des heures majorées, du personnel à former, un risque de défauts.</p></div>
+            <div class="carte"><h4>Adapter la charge à la capacité</h4>
+              <p>La manufacture déplace la charge dans le temps : elle produit plus tôt ou décale une livraison.</p>
+              <p class="note">Exemple : produire en mars des montres livrées en mai.</p>
+              <p><b>Avantage :</b> une charge régulière.<br><b>Coût :</b> un stock à financer, un risque d’invendus.</p></div>
+          </div>
+          <div class="boite"><span class="boite__lib">À retenir</span>
+            <p>Les deux façons d’agir se combinent. Chacune a un coût.</p></div>
+        </div>
+      </details>
+
+      <details class="notion">
+        <summary><span class="num">2</span><span class="tt">Adapter la capacité à la charge<span class="st">Les leviers, dans les deux sens.</span></span></summary>
+        <div class="notion__corps">
+          <div class="defile">
+            <table class="tableau tableau--leviers">
+              <thead><tr><th></th><th>Ressources humaines</th><th>Moyens de production</th><th>Organisation</th></tr></thead>
+              <tbody>
+                <tr><th scope="row"><b>Augmenter</b><br><span class="note">en sous-capacité</span></th>
+                  <td data-col="Ressources humaines"><ul><li>Heures supplémentaires</li><li>Horaire annualisé (haute saison)</li><li>Personnel temporaire</li><li>Contrats de durée déterminée</li><li>Renfort d’opérateurs polyvalents</li></ul></td>
+                  <td data-col="Moyens de production"><ul><li>Équipe supplémentaire (travail en deux équipes)</li><li>Poste supplémentaire</li></ul></td>
+                  <td data-col="Organisation"><ul><li>Sous-traitance d’une partie du travail</li></ul></td></tr>
+                <tr><th scope="row"><b>Réduire</b><br><span class="note">en surcapacité</span></th>
+                  <td data-col="Ressources humaines"><ul><li>Reprise des heures et des vacances</li><li>Horaire annualisé (basse saison)</li><li>Formation</li><li>Temps partiel, départs non remplacés</li><li>Réduction de l’horaire de travail (<abbr title="Réduction de l’horaire de travail">RHT</abbr>)</li><li>Licenciements, en dernier recours</li></ul></td>
+                  <td data-col="Moyens de production"><ul><li>Arrêt d’une équipe ou d’un poste</li><li>Maintenance préventive</li></ul></td>
+                  <td data-col="Organisation"><ul><li>Reprise du travail confié à un sous-traitant</li></ul></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note" style="margin-top:.6rem">Chaque levier doit respecter le contrat de travail, la loi et la convention collective de la branche.</p>
+          <div class="boite boite--brume"><span class="boite__lib">Horlogerie, 2025</span>
+            <p><span class="chiffre" style="font-size:1.5rem">Plus d’un quart</span><br>des entreprises liées à l’horlogerie appliquaient la <abbr title="Réduction de l’horaire de travail">RHT</abbr> fin novembre 2025.</p>
+            <p>Contexte : ralentissement de la consommation mondiale, baisse des volumes, droits de douane américains.</p>
+            <p><b>La réduction de l’horaire de travail (RHT) indemnise une partie des salaires lors d’une baisse de travail économique et temporaire. Elle exclut les baisses saisonnières.</b></p>
+            <p class="note">Sources : Convention patronale de l’industrie horlogère suisse, recensement 2025 ; Conseil fédéral, 27.05.2026.</p></div>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============================== 2. SIMULATEUR ============================== -->
+  <section id="panneau-simulateur" role="tabpanel" aria-labelledby="tab-simulateur" hidden>
+    <div class="sous-onglets" role="tablist" aria-label="Simulateurs" data-groupe="simulateur" style="--n:3">
+      <button role="tab" aria-selected="true" data-cible="sim1"><span class="n">1</span><span class="lib">Ventes</span></button>
+      <button role="tab" aria-selected="false" data-cible="sim2"><span class="n">2</span><span class="lib">Saisonnalité</span></button>
+      <button role="tab" aria-selected="false" data-cible="sim3"><span class="n">3</span><span class="lib">Plan de charge</span></button>
+    </div>
+
+    <!-- ---------- Simulateur 1 · ventes ---------- -->
+    <div class="sous-panneau" id="sim1" role="tabpanel">
+      <div class="sim-grille">
+        <div class="panneau">
+          <h3>Les deux leviers des ventes</h3>
+          <p class="consigne">Déplacez les curseurs. Observez les ventes du mois.</p>
+          <div class="curseur"><label for="sv-visites">Visites du mois</label><output id="sv-visites-o" for="sv-visites"></output><input type="range" id="sv-visites"></div>
+          <div class="curseur"><label for="sv-taux">Taux de conversion</label><output id="sv-taux-o" for="sv-taux"></output><input type="range" id="sv-taux"></div>
+          <p class="live-mobile" aria-hidden="true">Ventes du mois : <b id="sv-ventes-m"></b></p>
+          <div class="actions" id="sv-leviers"></div>
+        </div>
+        <div class="panneau resultat">
+          <span class="surtitre">Ventes du mois</span>
+          <span class="gros-or" id="sv-ventes"></span>
+          <div class="formule" style="margin:.6rem 0 .8rem"><span class="formule__lib">Formule</span>
+            <p class="formule__txt"><b>Ventes du mois</b> = visites × taux de conversion</p>
+            <p class="formule__ex" id="sv-calc"></p></div>
+          <svg class="points" id="sv-points" role="img" aria-label="Visiteurs : les points pleins sont les acheteurs."></svg>
+          <div class="legende-g"><span><svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="5" style="fill:var(--c-or);stroke:var(--c-or)"/></svg>Acheteurs</span><span><svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="5" style="fill:none;stroke:var(--c-acier);stroke-width:1.4"/></svg>Visiteurs sans achat</span></div>
+          <p class="note" style="margin:.3rem 0 0">Hypothèse : une montre par achat. Exemple fictif.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- Simulateur 2 · saisonnalité ---------- -->
+    <div class="sous-panneau" id="sim2" role="tabpanel" hidden>
+      <p class="consigne"><b>Montres A, demandées par la boutique.</b> Réglez la quantité d’un mois moyen. Choisissez un mois. Modifiez son coefficient saisonnier.</p>
+      <div class="plan">
+        <div class="plan-params">
+          <section class="bloc-param bloc-param--base" aria-labelledby="bs-titre">
+            <div class="bloc-param__tete"><div><h3 id="bs-titre">La quantité de chaque mois</h3><p>Quantité d’un mois moyen et coefficient saisonnier de chaque mois</p></div></div>
+            <div id="sv-ligne-q"></div>
+            <div class="puces-k" id="sv-mois" role="group" aria-label="Mois et coefficient saisonnier"></div>
+            <div id="sv-ligne-k"></div>
+            <div class="actions" style="margin-top:.6rem">
+              <button type="button" class="btn btn--secondaire btn--petit" id="sv-reinit">Valeurs de départ</button>
+            </div>
+          </section>
+        </div>
+        <div class="plan-droite">
+          <div class="panneau plan-graphe">
+            <div class="graphe" id="sv-graphe" role="img" aria-label="Quantité demandée chaque mois."></div>
+            <p class="plan-statut" id="sv-statut" aria-live="polite"></p>
+          </div>
+          <div class="plan-bilan">
+            <div class="formule"><span class="formule__lib">Formule</span>
+              <p class="formule__txt"><b>Quantité demandée du mois</b> = quantité d’un mois moyen × coefficient saisonnier du mois</p>
+              <p class="formule__ex" id="sv-q-calc"></p></div>
+            <p class="caption">Quantité demandée de montres A, par mois. Coefficients saisonniers de départ : fictifs. Touchez une barre pour voir le calcul.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- Simulateur 3 · plan de charge ---------- -->
+    <div class="sous-panneau" id="sim3" role="tabpanel" hidden>
+      <p class="consigne"><b>Atelier de remontage, fin juin.</b> Réglez les paramètres de base. Choisissez ensuite un mois de juillet à décembre. Ajoutez des leviers jusqu’à supprimer la sous-capacité.</p>
+      <div class="plan">
+        <div class="plan-params">
+          <section class="bloc-param bloc-param--base" aria-labelledby="bp-base">
+            <div class="bloc-param__tete"><span class="bloc-param__n" aria-hidden="true">1</span><div><h3 id="bp-base">Paramètres de base</h3><p>Prévision et ressources de l’atelier</p></div></div>
+            <div id="sp-prevision"></div>
+          </section>
+          <section class="bloc-param bloc-param--adapt" aria-labelledby="bp-adapt">
+            <div class="bloc-param__tete"><span class="bloc-param__n" aria-hidden="true">2</span><div><h3 id="bp-adapt">Leviers d’adaptation</h3><p id="sp-titre-mois">Leviers du mois choisi</p></div></div>
+            <div class="puces-mois" id="sp-mois" role="group" aria-label="Mois à adapter"></div>
+            <div id="sp-leviers"></div>
+            <div class="actions" style="margin-top:.6rem">
+              <button type="button" class="btn btn--secondaire btn--petit" id="sp-effacer-mois">Effacer les leviers du mois</button>
+              <button type="button" class="btn btn--secondaire btn--petit" id="sp-reinit">Réinitialiser le simulateur</button>
+            </div>
+          </section>
+        </div>
+        <div class="plan-droite">
+          <div class="panneau plan-graphe">
+            <div class="graphe" id="sp-graphe" role="img" aria-label="Plan de charge de l’atelier de remontage, en heures."></div>
+            <p class="plan-statut" id="sp-statut" aria-live="polite"></p>
+            <div class="legende-g leg-plan">
+              <span><i class="leg-barre" style="background:var(--c-barre)"></i>Charge réalisée</span>
+              <span><i class="leg-barre" style="background:var(--c-or)"></i>Charge prévue</span>
+              <span><i class="leg-barre" style="background:var(--c-or);opacity:.45"></i>Production avancée</span>
+              <span><i class="leg-barre" style="background:var(--c-err)"></i>Au-delà de la capacité</span>
+              <span><i class="leg-ligne"></i>Capacité</span>
+            </div>
+            <p class="caption leg-plan">Atelier de remontage, heures par mois (exemple fictif). Touchez une barre pour voir le calcul.</p>
+          </div>
+          <div class="plan-bilan">
+            <div class="kpis" id="sp-kpis"></div>
+            <div id="sp-verdict"></div>
+            <div class="leg-plan-mobile">
+              <div class="legende-g">
+                <span><i class="leg-barre" style="background:var(--c-barre)"></i>Charge réalisée</span>
+                <span><i class="leg-barre" style="background:var(--c-or)"></i>Charge prévue</span>
+                <span><i class="leg-barre" style="background:var(--c-or);opacity:.45"></i>Production avancée</span>
+                <span><i class="leg-barre" style="background:var(--c-err)"></i>Au-delà de la capacité</span>
+                <span><i class="leg-ligne"></i>Capacité</span>
+              </div>
+              <p class="caption">Atelier de remontage, heures par mois (exemple fictif). Touchez une barre pour voir le calcul.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <details class="detail panneau" style="margin-top:1rem">
+        <summary>Détail des calculs, mois par mois</summary>
+        <div class="defile" id="sp-tableau"></div>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer class="page pied">
+  <span>École d’Horlogerie de Genève · Module CPH_HOP_01 · Lignes de production · Partie D · Application pédagogique</span>
+  <span>Exemples chiffrés : fictifs.</span>
+  <span>Document élaboré avec l’assistance d’outils d’intelligence artificielle.</span>
+</footer>
+
+<div class="infobulle" id="infobulle" role="status" hidden></div>
+
+<!-- Modale : réglages -->
+<div class="modale" id="modale-reglages" role="dialog" aria-modal="true" aria-labelledby="reglages-titre" hidden>
+  <div class="modale__fond" data-fermer></div>
+  <div class="modale__boite">
+    <div class="modale__entete"><h3 id="reglages-titre">Réglages</h3><button type="button" class="btn btn--secondaire btn--petit modale__fermer" data-fermer aria-label="Fermer">✕</button></div>
+    <div class="modale__corps">
+      <div class="reglage"><span class="reglage__lib">Thème</span><div class="segmente" data-reglage="theme" role="group" aria-label="Thème"><button type="button" data-v="auto">Auto</button><button type="button" data-v="clair">Clair</button><button type="button" data-v="sombre">Sombre</button></div></div>
+      <div class="reglage"><span class="reglage__lib">Affichage</span><div class="segmente" data-reglage="affichage" role="group" aria-label="Affichage"><button type="button" data-v="auto">Auto</button><button type="button" data-v="mobile">Mobile</button><button type="button" data-v="ordinateur">Ordinateur</button></div></div>
+      <div class="reglage"><span class="reglage__lib">Confort de lecture</span><div class="segmente" data-reglage="confort" role="group" aria-label="Confort de lecture"><button type="button" data-v="non">Désactivé</button><button type="button" data-v="oui">Activé</button></div></div>
+      <p class="note">Les réglages restent enregistrés dans ce navigateur.</p>
+      <p class="note">Exemples chiffrés : fictifs. Document élaboré avec l’assistance d’outils d’intelligence artificielle.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modale : QR code -->
+<div class="modale" id="modale-qr" role="dialog" aria-modal="true" aria-labelledby="qr-titre" hidden>
+  <div class="modale__fond" data-fermer></div>
+  <div class="modale__boite">
+    <div class="modale__entete"><div><span class="surtitre">Ouvrir sur un téléphone</span><h3 id="qr-titre">La flexibilité quantitative</h3></div><button type="button" class="btn btn--secondaire btn--petit modale__fermer" data-fermer aria-label="Fermer">✕</button></div>
+    <div class="modale__corps">
+      <div class="qr-zone" id="qr-zone"></div>
+      <p class="qr-url" id="qr-url"></p>
+      <p class="note" id="qr-note" hidden></p>
+      <details class="qr-options" id="qr-options">
+        <summary class="note">Modifier l’adresse encodée</summary>
+        <label class="reglage__lib" for="qr-input" style="margin-top:.6rem">Adresse (URL) à encoder</label>
+        <input class="input" type="url" id="qr-input" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://…">
+      </details>
+      <div class="actions" style="margin-top:1rem">
+        <button type="button" class="btn btn--secondaire" id="qr-agrandir" aria-pressed="false">Agrandir pour projeter</button>
+        <button type="button" class="btn btn--secondaire" id="qr-copier">Copier l’adresse</button>
+        <button type="button" class="btn" data-fermer>Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ======================================================================
+   QR code — encodeur autonome (mode octet, versions 1 à 40, niveau M),
+   conforme à ISO/IEC 18004. Repris des applications EHG du module.
+   ====================================================================== */
+const QR = (() => {
+  const EC_M = [
+    [10, 1, 16, 0, 0], [16, 1, 28, 0, 0], [26, 1, 44, 0, 0], [18, 2, 32, 0, 0], [24, 2, 43, 0, 0],
+    [16, 4, 27, 0, 0], [18, 4, 31, 0, 0], [22, 2, 38, 2, 39], [22, 3, 36, 2, 37], [26, 4, 43, 1, 44],
+    [30, 1, 50, 4, 51], [22, 6, 36, 2, 37], [22, 8, 37, 1, 38], [24, 4, 40, 5, 41], [24, 5, 41, 5, 42],
+    [28, 7, 45, 3, 46], [28, 10, 46, 1, 47], [26, 9, 43, 4, 44], [26, 3, 44, 11, 45], [26, 3, 41, 13, 42],
+    [26, 17, 42, 0, 0], [28, 17, 46, 0, 0], [28, 4, 47, 14, 48], [28, 6, 45, 14, 46], [28, 8, 47, 13, 48],
+    [28, 19, 46, 4, 47], [28, 22, 45, 3, 46], [28, 3, 45, 23, 46], [28, 21, 45, 7, 46], [28, 19, 47, 10, 48],
+    [28, 2, 46, 29, 47], [28, 10, 46, 23, 47], [28, 14, 46, 21, 47], [28, 14, 46, 23, 47], [28, 12, 47, 26, 48],
+    [28, 6, 47, 34, 48], [28, 29, 46, 14, 47], [28, 13, 46, 32, 47], [28, 40, 47, 7, 48], [28, 18, 47, 31, 48],
+  ];
+  const ALIGN = [[], [], [6, 18], [6, 22], [6, 26], [6, 30], [6, 34], [6, 22, 38], [6, 24, 42], [6, 26, 46], [6, 28, 50],
+    [6, 30, 54], [6, 32, 58], [6, 34, 62], [6, 26, 46, 66], [6, 26, 48, 70], [6, 26, 50, 74], [6, 30, 54, 78], [6, 30, 56, 82], [6, 30, 58, 86], [6, 34, 62, 90],
+    [6, 28, 50, 72, 94], [6, 26, 50, 74, 98], [6, 30, 54, 78, 102], [6, 28, 54, 80, 106], [6, 32, 58, 84, 110], [6, 30, 58, 86, 114], [6, 34, 62, 90, 118], [6, 26, 50, 74, 98, 122], [6, 30, 54, 78, 102, 126], [6, 26, 52, 78, 104, 130],
+    [6, 30, 56, 82, 108, 134], [6, 34, 60, 86, 112, 138], [6, 30, 58, 86, 114, 142], [6, 34, 62, 90, 118, 146], [6, 30, 54, 78, 102, 126, 150], [6, 24, 50, 76, 102, 128, 154], [6, 28, 54, 80, 106, 132, 158], [6, 32, 58, 84, 110, 136, 162], [6, 26, 54, 82, 110, 138, 166], [6, 30, 58, 86, 114, 142, 170]];
+  const EXP = new Array(512), LOG = new Array(256);
+  { let x = 1; for (let i = 0; i < 255; i++) { EXP[i] = x; LOG[x] = i; x <<= 1; if (x & 0x100) x ^= 0x11d; } for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255]; }
+  const mul = (a, b) => (a && b) ? EXP[LOG[a] + LOG[b]] : 0;
+  function genPoly(n) { let g = [1]; for (let i = 0; i < n; i++) { const ng = new Array(g.length + 1).fill(0); for (let j = 0; j < g.length; j++) { ng[j] ^= g[j]; ng[j + 1] ^= mul(g[j], EXP[i]); } g = ng; } return g; }
+  function rs(data, n) { const g = genPoly(n); const r = new Array(n).fill(0); for (const d of data) { const f = d ^ r[0]; r.shift(); r.push(0); if (f) for (let j = 0; j < n; j++) r[j] ^= mul(g[j + 1], f); } return r; }
+  const utf8 = s => Array.from(new TextEncoder().encode(s));
+  function encode(text) {
+    const bytes = utf8(text);
+    let v = 1;
+    for (; v <= 40; v++) { const e = EC_M[v - 1]; const cap = e[1] * e[2] + e[3] * e[4]; const lenBits = v < 10 ? 8 : 16; if (4 + lenBits + 8 * bytes.length <= 8 * cap) break; }
+    if (v > 40) throw new Error('Texte trop long pour un QR code');
+    const e = EC_M[v - 1], totalData = e[1] * e[2] + e[3] * e[4];
+    const bits = []; const put = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >> i) & 1); };
+    put(4, 4); put(bytes.length, v < 10 ? 8 : 16); bytes.forEach(b => put(b, 8));
+    for (let i = 0; i < 4 && bits.length < totalData * 8; i++) bits.push(0);
+    while (bits.length % 8) bits.push(0);
+    const data = []; for (let i = 0; i < bits.length; i += 8) { let b = 0; for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j]; data.push(b); }
+    for (let p = 0; data.length < totalData; p++) data.push(p % 2 ? 0x11 : 0xec);
+    const blocks = [], ecs = []; let pos = 0;
+    for (let g = 0; g < 2; g++) { const nb = g ? e[3] : e[1], sz = g ? e[4] : e[2]; for (let b = 0; b < nb; b++) { const d = data.slice(pos, pos + sz); pos += sz; blocks.push(d); ecs.push(rs(d, e[0])); } }
+    const out = []; const maxD = Math.max(...blocks.map(b => b.length));
+    for (let i = 0; i < maxD; i++) blocks.forEach(b => { if (i < b.length) out.push(b[i]); });
+    for (let i = 0; i < e[0]; i++) ecs.forEach(b => out.push(b[i]));
+    const N = 17 + 4 * v; const M = Array.from({ length: N }, () => new Array(N).fill(null));
+    const set = (r, c, val) => { M[r][c] = val ? 1 : 0; };
+    const finder = (r, c) => { for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) { const rr = r + i, cc = c + j; if (rr < 0 || cc < 0 || rr >= N || cc >= N) continue; const on = (i >= 0 && i <= 6 && (j === 0 || j === 6)) || (j >= 0 && j <= 6 && (i === 0 || i === 6)) || (i >= 2 && i <= 4 && j >= 2 && j <= 4); set(rr, cc, on); } };
+    finder(0, 0); finder(0, N - 7); finder(N - 7, 0);
+    const al = ALIGN[v]; al.forEach(r => al.forEach(c => { if (M[r][c] !== null) return; for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) set(r + i, c + j, Math.max(Math.abs(i), Math.abs(j)) !== 1); }));
+    for (let i = 8; i < N - 8; i++) { if (M[6][i] === null) set(6, i, i % 2 === 0); if (M[i][6] === null) set(i, 6, i % 2 === 0); }
+    set(N - 8, 8, 1);
+    const fmtPos = []; for (let i = 0; i < 8; i++) { fmtPos.push([8, i < 6 ? i : i + 1]); fmtPos.push([i < 6 ? i : i + 1, 8]); } fmtPos.push([8, 8]);
+    for (let i = 0; i < 8; i++) { fmtPos.push([N - 1 - i, 8]); fmtPos.push([8, N - 8 + i]); }
+    fmtPos.forEach(([r, c]) => { if (M[r][c] === null) M[r][c] = 0; });
+    if (v >= 7) for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) { M[i][N - 11 + j] = 0; M[N - 11 + j][i] = 0; }
+    const reserved = M.map(row => row.map(x => x !== null));
+    let bi = 0; const allBits = []; out.forEach(b => { for (let i = 7; i >= 0; i--) allBits.push((b >> i) & 1); });
+    for (let c = N - 1; c > 0; c -= 2) { if (c === 6) c--; for (let k = 0; k < N; k++) { const r = ((c + 1) & 2) ? k : N - 1 - k; for (let d = 0; d < 2; d++) { const cc = c - d; if (M[r][cc] === null) { M[r][cc] = bi < allBits.length ? allBits[bi] : 0; bi++; } } } }
+    const MASKS = [(r, c) => (r + c) % 2 === 0, (r, c) => r % 2 === 0, (r, c) => c % 3 === 0, (r, c) => (r + c) % 3 === 0, (r, c) => (Math.floor(r / 2) + Math.floor(c / 3)) % 2 === 0, (r, c) => (r * c) % 2 + (r * c) % 3 === 0, (r, c) => ((r * c) % 2 + (r * c) % 3) % 2 === 0, (r, c) => ((r + c) % 2 + (r * c) % 3) % 2 === 0];
+    const formatBits = mask => { const v5 = (0 << 3) | mask; let d = v5 << 10; const g = 0x537; for (let i = 14; i >= 10; i--) if (d & (1 << i)) d ^= g << (i - 10); return ((v5 << 10) | d) ^ 0x5412; };
+    const versionBits = () => { let d = v << 12; const g = 0x1f25; for (let i = 17; i >= 12; i--) if (d & (1 << i)) d ^= g << (i - 12); return (v << 12) | d; };
+    const applyFormat = (G, mask) => {
+      const f = formatBits(mask); const bit = i => (f >> (14 - i)) & 1;
+      for (let i = 0; i < 6; i++) G[8][i] = bit(i); G[8][7] = bit(6); G[8][8] = bit(7); G[7][8] = bit(8); for (let i = 9; i < 15; i++) G[14 - i][8] = bit(i);
+      for (let i = 0; i < 7; i++) G[N - 1 - i][8] = bit(i); for (let i = 7; i < 15; i++) G[8][N - 15 + i] = bit(i); G[N - 8][8] = 1;
+      if (v >= 7) { const vb = versionBits(); for (let i = 0; i < 18; i++) { const b = (vb >> i) & 1; G[Math.floor(i / 3)][N - 11 + (i % 3)] = b; G[N - 11 + (i % 3)][Math.floor(i / 3)] = b; } }
+    };
+    const penalty = G => {
+      let p = 0;
+      for (let pass = 0; pass < 2; pass++) for (let i = 0; i < N; i++) { let run = 1; for (let j = 1; j < N; j++) { const a = pass ? G[j][i] : G[i][j], b = pass ? G[j - 1][i] : G[i][j - 1]; if (a === b) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+      for (let i = 0; i < N - 1; i++) for (let j = 0; j < N - 1; j++) { const s = G[i][j] + G[i][j + 1] + G[i + 1][j] + G[i + 1][j + 1]; if (s === 0 || s === 4) p += 3; }
+      const pat1 = [1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0], pat2 = [0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1];
+      for (let pass = 0; pass < 2; pass++) for (let i = 0; i < N; i++) for (let j = 0; j <= N - 11; j++) { let m1 = true, m2 = true; for (let k = 0; k < 11; k++) { const val = pass ? G[j + k][i] : G[i][j + k]; if (val !== pat1[k]) m1 = false; if (val !== pat2[k]) m2 = false; } if (m1) p += 40; if (m2) p += 40; }
+      let dark = 0; G.forEach(row => row.forEach(x => { dark += x; })); const ratio = Math.abs(dark * 100 / (N * N) - 50); p += Math.floor(ratio / 5) * 10;
+      return p;
+    };
+    let best = null, bestP = Infinity;
+    for (let m = 0; m < 8; m++) {
+      const G = M.map((row, r) => row.map((x, c) => reserved[r][c] ? x : (MASKS[m](r, c) ? x ^ 1 : x)));
+      applyFormat(G, m);
+      const p = penalty(G); if (p < bestP) { bestP = p; best = G; }
+    }
+    return best;
+  }
+  function svg(text, opts = {}) {
+    const G = encode(text), N = G.length, q = opts.quiet === undefined ? 4 : opts.quiet, S = N + 2 * q;
+    let d = '';
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (G[r][c]) d += `M${c + q},${r + q}h1v1h-1z`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S} ${S}" shape-rendering="crispEdges" role="img" aria-label="QR code"><rect width="${S}" height="${S}" fill="#fff"/><path d="${d}" fill="#141414"/></svg>`;
+  }
+  return { encode, svg };
+})();
+
+(function () {
+'use strict';
+
+/* ======================================================================
+   0. Utilitaires
+   ====================================================================== */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const NB = ' ';
+// typographie française : espace insécable avant : ; ? ! % » et après « ; entre un nombre et h / j / %
+function typo(s) {
+  return String(s)
+    .replace(/ ([:;?!%»])/g, NB + '$1')
+    .replace(/« /g, '«' + NB)
+    .replace(/(\d) (?=(h|j|%|montres?|jours?|opérateurs?|achats|visites)\b)/g, '$1' + NB);
+}
+function typoDom(racine) {
+  const w = document.createTreeWalker(racine, NodeFilter.SHOW_TEXT, { acceptNode: n => (n.parentNode && /^(SCRIPT|STYLE)$/.test(n.parentNode.nodeName)) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  const nodes = []; while (w.nextNode()) nodes.push(w.currentNode);
+  nodes.forEach(n => { const t = typo(n.nodeValue); if (t !== n.nodeValue) n.nodeValue = t; });
+}
+function h(tag, attrs = {}, children = []) {
+  const e = document.createElement(tag);
+  for (const k in attrs) {
+    const v = attrs[k];
+    if (v === null || v === undefined || v === false) continue;
+    if (k === 'class') e.className = v;
+    else if (k === 'html') e.innerHTML = typo(v);
+    else if (k === 'text') e.textContent = typo(v);
+    else if (k.startsWith('on') && typeof v === 'function') e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v === true ? '' : v);
+  }
+  (Array.isArray(children) ? children : [children]).forEach(c => {
+    if (c === null || c === undefined || c === false) return;
+    e.appendChild(typeof c === 'string' ? document.createTextNode(typo(c)) : c);
+  });
+  return e;
+}
+const SVGNS = 'http://www.w3.org/2000/svg';
+function sv(tag, attrs = {}, texte) { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) if (attrs[k] !== null && attrs[k] !== undefined) e.setAttribute(k, attrs[k]); if (texte !== undefined) e.textContent = texte; return e; }
+// nombres à la française : virgule décimale, d décimales au plus
+function nf(n, d = 1) { const p = Math.pow(10, d); const r = Math.round(n * p) / p; return String(r).replace('-', '−').replace('.', ','); }
+const pc = n => nf(n, 0) + NB + '%';
+const k1 = n => n.toFixed(1).replace('.', ',');
+const maj1 = s => s.charAt(0).toUpperCase() + s.slice(1);
+const somme = a => a.reduce((s, x) => s + x, 0);
+function listeMois(idx) {
+  const n = idx.map(i => COURS.moisLong[i]);
+  if (n.length <= 1) return n.join('');
+  return n.slice(0, -1).join(', ') + ' et ' + n[n.length - 1];
+}
+function lireJSON(id) { try { return JSON.parse(document.getElementById(id).textContent); } catch (e) { console.error('Données illisibles : ' + id, e); return {}; } }
+const COURS = lireJSON('donnees-cours');
+const SIMV = lireJSON('donnees-sim-ventes');
+const SIMP = lireJSON('donnees-sim-plan');
+const stock = {
+  lire(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  ecrire(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* stockage indisponible */ } },
+};
+
+/* ======================================================================
+   1. Infobulle (souris, clavier, toucher)
+   ====================================================================== */
+const bulle = $('#infobulle');
+let bulleCible = null;
+function montrerBulle(cible, html, x, y) {
+  bulle.innerHTML = html; bulle.hidden = false; bulleCible = cible;
+  const r = cible.getBoundingClientRect();
+  const bx = x !== undefined ? x : r.left + r.width / 2;
+  const by = y !== undefined ? y : r.top;
+  const bw = bulle.offsetWidth, bh = bulle.offsetHeight;
+  let left = Math.min(Math.max(8, bx - bw / 2), window.innerWidth - bw - 8);
+  let top = by - bh - 12;
+  if (top < 8) top = Math.min(window.innerHeight - bh - 8, (y !== undefined ? y : r.bottom) + 14);
+  bulle.style.left = left + 'px'; bulle.style.top = top + 'px';
+}
+function cacherBulle() { bulle.hidden = true; bulleCible = null; }
+window.addEventListener('scroll', cacherBulle, { passive: true });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') cacherBulle(); });
+document.addEventListener('pointerdown', e => { if (bulleCible && !bulleCible.contains(e.target)) cacherBulle(); });
+function attacherBulle(el, fnHtml, onClick) {
+  el.addEventListener('pointerenter', ev => { if (ev.pointerType === 'mouse') montrerBulle(el, fnHtml(), ev.clientX, ev.clientY - 6); });
+  el.addEventListener('pointermove', ev => { if (ev.pointerType === 'mouse' && bulleCible === el) montrerBulle(el, fnHtml(), ev.clientX, ev.clientY - 6); });
+  el.addEventListener('pointerleave', ev => { if (ev.pointerType === 'mouse') cacherBulle(); });
+  el.addEventListener('focus', () => montrerBulle(el, fnHtml()));
+  el.addEventListener('blur', cacherBulle);
+  el.addEventListener('click', ev => { if (onClick) onClick(); montrerBulle(el, fnHtml(), ev.clientX || undefined, ev.clientY ? ev.clientY - 6 : undefined); });
+  el.addEventListener('keydown', ev => { if ((ev.key === 'Enter' || ev.key === ' ') && onClick) { ev.preventDefault(); onClick(); montrerBulle(el, fnHtml()); } });
+}
+const ligneBulle = (lib, val) => `<span class="l"><span>${typo(lib)}</span><b>${typo(val)}</b></span>`;
+
+/* ======================================================================
+   2. Graphique du plan de charge (SVG, largeur réelle du conteneur)
+   cfg : { valeurs[], couleurs[] ('acier'|'or'), avance[], capacite[] , max, pas,
+           valeurs: bool, accolades: [{i0,i1,texte}], fin: index, sel: index,
+           coef: [] (étiquettes sous les mois), tip(i), clic(i), hauteur }
+   ====================================================================== */
+function graphique(cont, cfg) {
+  const W = Math.max(300, Math.round(cont.clientWidth || 600));
+  const etroit = W < 520;
+  const H = cfg.hauteur || (etroit ? 250 : 290);
+  const ml = etroit ? 34 : 42, mr = 6, mt = cfg.accolades && cfg.accolades.length ? (cfg.fin !== undefined ? 50 : 38) : (cfg.fin !== undefined ? 32 : 14);
+  const mb = cfg.coef ? (etroit ? 42 : 46) : (etroit ? 24 : 28);
+  const pw = W - ml - mr, ph = H - mt - mb, slot = pw / 12, bw = Math.min(32, slot * 0.6);
+  const y = v => mt + ph - ph * v / cfg.max;
+  const svg = sv('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, 'aria-hidden': 'true' });
+  const fsTxt = etroit ? 10.5 : 12;
+  // sélection
+  if (cfg.sel !== undefined && cfg.sel !== null) svg.appendChild(sv('rect', { x: ml + cfg.sel * slot + 1, y: mt - 4, width: slot - 2, height: ph + 4, class: 'g-sel', rx: 3 }));
+  // grille
+  for (let v = 0; v <= cfg.max + 1e-9; v += cfg.pas) {
+    svg.appendChild(sv('line', { x1: ml, x2: W - mr, y1: y(v), y2: y(v), class: v === 0 ? 'g-axe' : 'g-grille' }));
+    svg.appendChild(sv('text', { x: ml - 6, y: y(v) + 4, 'text-anchor': 'end', 'font-size': fsTxt - 1, class: 'g-txt' }, String(v)));
+  }
+  const lettres = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+  for (let i = 0; i < 12; i++) {
+    const xc = ml + (i + .5) * slot, v = cfg.valeurs[i];
+    svg.appendChild(sv('text', { x: xc, y: mt + ph + (etroit ? 15 : 17), 'text-anchor': 'middle', 'font-size': fsTxt, class: 'g-mois' }, slot < 40 ? lettres[i] : COURS.mois[i]));
+    if (cfg.coef) svg.appendChild(sv('text', { x: xc, y: mt + ph + (etroit ? 32 : 36), 'text-anchor': 'middle', 'font-size': fsTxt - 1, class: 'g-coef' }, '×' + k1(cfg.coef[i])));
+    // barre principale
+    const cap = cfg.capacite ? cfg.capacite[i] : null;
+    const cls = 'b-' + (cfg.couleurs ? cfg.couleurs[i] : 'acier');
+    if (v > 0) {
+      const haut = (cap !== null && cfg.depassement && v > cap) ? cap : v;
+      svg.appendChild(sv('rect', { x: xc - bw / 2, y: y(haut), width: bw, height: y(0) - y(haut), class: cls }));
+      if (cap !== null && cfg.depassement && v > cap) svg.appendChild(sv('rect', { x: xc - bw / 2, y: y(v), width: bw, height: y(cap) - y(v), class: 'b-depasse' }));
+    }
+    const av = cfg.avance ? cfg.avance[i] : 0;
+    if (av > 0) svg.appendChild(sv('rect', { x: xc - bw / 2, y: y(v + av), width: bw, height: y(v) - y(v + av), class: 'b-avance' }));
+    if (cfg.afficherValeurs && slot >= 28) {
+      const tot = v + av;
+      let yt = y(tot) - 5;
+      if (cap !== null && Math.abs(y(tot) - y(cap)) < 14 && tot <= cap) yt = y(cap) - 6;
+      svg.appendChild(sv('text', { x: xc, y: yt, 'text-anchor': 'middle', 'font-size': fsTxt - 1, class: 'g-val' }, nf(tot, 0)));
+    }
+  }
+  // capacité : un segment par mois
+  if (cfg.capacite) for (let i = 0; i < 12; i++) {
+    const x0 = ml + i * slot + slot * 0.1, x1 = ml + (i + 1) * slot - slot * 0.1, yc = y(cfg.capacite[i]);
+    svg.appendChild(sv('line', { x1: x0, x2: x1, y1: yc, y2: yc, class: 'l-capa' }));
+    if (i < 11 && cfg.capacite[i + 1] !== cfg.capacite[i]) { /* pas de liaison : capacité propre à chaque mois */ }
+    else if (i < 11) svg.appendChild(sv('line', { x1: x1, x2: x1 + slot * 0.2, y1: yc, y2: yc, class: 'l-capa' }));
+  }
+  // fin du réalisé
+  if (cfg.fin !== undefined) {
+    const xf = ml + (cfg.fin + 1) * slot;
+    svg.appendChild(sv('line', { x1: xf, x2: xf, y1: mt - 16, y2: mt + ph, class: 'l-fin' }));
+    svg.appendChild(sv('text', { x: xf, y: mt - 20, 'text-anchor': 'middle', 'font-size': fsTxt, class: 'g-fin-txt' }, 'Fin juin'));
+  }
+  // accolades
+  (cfg.accolades || []).forEach(a => {
+    const x0 = ml + a.i0 * slot + slot * 0.12, x1 = ml + (a.i1 + 1) * slot - slot * 0.12, ya = mt - (cfg.fin !== undefined ? 4 : 10);
+    svg.appendChild(sv('path', { d: `M${x0},${ya + 7} V${ya} H${x1} V${ya + 7} M${(x0 + x1) / 2},${ya} V${ya - 5}`, class: 'g-acc' }));
+    svg.appendChild(sv('text', { x: (x0 + x1) / 2, y: ya - 9, 'text-anchor': 'middle', 'font-size': fsTxt, class: 'g-acc-txt' }, a.texte));
+  });
+  // zones actives (ligne entière de chaque mois)
+  if (cfg.tip) for (let i = 0; i < 12; i++) {
+    const r = sv('rect', { x: ml + i * slot, y: 0, width: slot, height: H, class: 'g-hit', tabindex: '0', role: 'button', 'aria-label': COURS.moisLong[i] });
+    attacherBulle(r, () => cfg.tip(i), cfg.clic ? () => cfg.clic(i) : null);
+    svg.appendChild(r);
+  }
+  svg.removeAttribute('aria-hidden');
+  cont.innerHTML = ''; cont.appendChild(svg);
+}
+const RENDUS = [];
+function surRedimension(fn) { RENDUS.push(fn); }
+let attente = null;
+function toutRedessiner() { RENDUS.forEach(fn => { try { fn(); } catch (e) { console.error(e); } }); }
+window.addEventListener('resize', () => { clearTimeout(attente); attente = setTimeout(() => { appliquerAffichage(); toutRedessiner(); }, 120); });
+
+/* ======================================================================
+   3. Graphiques de la théorie (exemples du support)
+   ====================================================================== */
+function tipPlan(i, charge, cap, unite) {
+  const t = charge / cap * 100;
+  const sit = Math.abs(charge - cap) < 1e-9 ? '<span class="sit-ok">Adéquation</span>' : charge < cap ? '<span class="sit-ok">Surcapacité</span>' : '<span class="sit-err">Sous-capacité</span>';
+  const ecart = charge > cap ? ligneBulle('Au-delà de la capacité', nf(charge - cap, 0) + ' ' + unite) : charge < cap ? ligneBulle('Capacité inutilisée', nf(cap - charge, 0) + ' ' + unite) : '';
+  return `<strong>${maj1(COURS.moisLong[i])}</strong>${ligneBulle('Charge', nf(charge, 0) + ' ' + unite)}${ligneBulle('Capacité', nf(cap, 0) + ' ' + unite)}${ligneBulle('Taux de charge', pc(t))}${ecart}<span class="calc">${typo(nf(charge, 0) + ' ÷ ' + nf(cap, 0) + ' × 100 ≈ ' + pc(t))}</span>${sit}`;
+}
+const GRAPHES = {
+  demandeA() {
+    const v = COURS.demandeModeleA.valeurs;
+    return { valeurs: v, couleurs: v.map((_, i) => i === 11 ? 'or' : 'acier'), max: 20, pas: 5, afficherValeurs: true,
+      tip: i => `<strong>${maj1(COURS.moisLong[i])}</strong>${ligneBulle('Montres A demandées', String(v[i]))}` };
+  },
+  comparer() { return planPose([], [{ i0: 0, i1: 3, texte: 'Surcapacité' }, { i0: 4, i1: 6, texte: 'Sous-capacité' }, { i0: 7, i1: 11, texte: 'Adéquation' }]); },
+  surcap() { return planPose([0, 1, 2, 3], [{ i0: 0, i1: 3, texte: 'Surcapacité' }]); },
+  souscap() { return planPose([4, 5, 6], [{ i0: 4, i1: 6, texte: 'Sous-capacité' }]); },
+  planRemontage() {
+    const r = COURS.remontage; const v = r.chargeRealisee.concat(r.chargePrevue);
+    return { valeurs: v, couleurs: v.map((_, i) => i >= 6 ? 'or' : 'acier'), capacite: r.capacite, max: 500, pas: 100, afficherValeurs: true, fin: 5,
+      accolades: [{ i0: 9, i1: 11, texte: 'Sous-capacité prévue' }],
+      tip: i => tipPlan(i, v[i], r.capacite[i], 'h') + (i < 6 ? '<span class="note">Charge réalisée</span>' : '<span class="note">Charge prévue</span>') };
+  },
+};
+function planPose(or, acc) {
+  const p = COURS.poseCadran; const cap = Array(12).fill(p.capacite);
+  return { valeurs: p.charge, couleurs: p.charge.map((_, i) => or.includes(i) ? 'or' : 'acier'), capacite: cap, max: 200, pas: 50, afficherValeurs: true, accolades: acc,
+    tip: i => tipPlan(i, p.charge[i], p.capacite, 'montres') };
+}
+function dessinerTheorie() {
+  $$('[data-graphe]').forEach(c => {
+    if (c.offsetParent === null) return; // invisible : dessiné à l'ouverture
+    const f = GRAPHES[c.dataset.graphe]; if (f) graphique(c, f());
+  });
+}
+// Étape 4 « Comparer, mois par mois » : tableau des mois prévus, calculé à partir des données du cours
+(function tableauComparer() {
+  const r = COURS.remontage, mois = [6, 7, 8, 9, 10, 11];
+  const sit = m => { const c = r.chargePrevue[m - 6], k = r.capacite[m]; return c > k ? ['Sous-capacité', 'err'] : c < k ? ['Surcapacité', ''] : ['Adéquation', '']; };
+  const t = $('#th-comparer');
+  t.appendChild(h('thead', {}, h('tr', {}, ['Mois', 'Charge (h)', 'Capacité (h)', 'Taux de charge', 'Situation'].map(x => h('th', { scope: 'col', text: x })))));
+  t.appendChild(h('tbody', {}, mois.map(m => h('tr', {}, [
+    h('th', { scope: 'row', text: COURS.mois[m] }),
+    h('td', { text: String(r.chargePrevue[m - 6]) }),
+    h('td', { text: String(r.capacite[m]) }),
+    h('td', { text: pc(r.chargePrevue[m - 6] / r.capacite[m] * 100) }),
+    h('td', { class: 'sit' + (sit(m)[1] ? ' err' : ''), text: sit(m)[0] }),
+  ]))));
+  const sous = mois.filter(m => sit(m)[1] === 'err');
+  $('#th-comparer-conclusion').innerHTML = typo(sous.length ? `<b>${maj1(COURS.moisLong[sous[0]])} à ${COURS.moisLong[sous[sous.length - 1]]} :</b> sous-capacité prévue.` : '<b>Aucune sous-capacité prévue.</b>');
+})();
+$$('[data-legende]').forEach(p => { const k = p.dataset.legende; const src = COURS[k]; if (src && src.legende) p.textContent = typo(src.legende); });
+surRedimension(dessinerTheorie);
+$$('details.notion').forEach(d => d.addEventListener('toggle', () => { if (d.open) dessinerTheorie(); majBoutonsTout(); }));
+function majBoutonsTout() {
+  $$('.js-tout').forEach(b => { const p = b.closest('.sous-panneau'); const ds = $$('details.notion', p); b.textContent = ds.every(d => d.open) ? 'Tout fermer' : 'Tout ouvrir'; });
+}
+$$('.js-tout').forEach(b => b.addEventListener('click', () => {
+  const p = b.closest('.sous-panneau'); const ds = $$('details.notion', p); const ouvrir = !ds.every(d => d.open);
+  ds.forEach(d => { d.open = ouvrir; }); majBoutonsTout(); dessinerTheorie();
+}));
+
+/* ======================================================================
+   4. Simulateurs 1 et 2 · ventes, saisonnalité
+   ====================================================================== */
+const sv1 = { visites: SIMV.visites, taux: SIMV.tauxConversion, q: SIMV.quantiteMoisMoyen, sel: 11 };
+const elVis = $('#sv-visites'), elTaux = $('#sv-taux');
+Object.assign(elVis, { min: SIMV.visitesMin, max: SIMV.visitesMax, step: 1, value: sv1.visites });
+Object.assign(elTaux, { min: SIMV.tauxMin, max: SIMV.tauxMax, step: 1, value: sv1.taux });
+$('#sv-leviers').appendChild(h('button', { type: 'button', class: 'btn btn--secondaire btn--petit', 'data-l': 'depart', 'aria-pressed': 'false',
+  onclick: () => { sv1.visites = SIMV.visites; sv1.taux = SIMV.tauxConversion; elVis.value = sv1.visites; elTaux.value = sv1.taux; majVentes(); } }, 'Situation de départ'));
+elVis.addEventListener('input', () => { sv1.visites = +elVis.value; majVentes(); });
+elTaux.addEventListener('input', () => { sv1.taux = +elTaux.value; majVentes(); });
+function majVentes() {
+  const ventes = sv1.visites * sv1.taux / 100;
+  $('#sv-visites-o').textContent = typo(sv1.visites + ' visites');
+  $('#sv-taux-o').textContent = typo(sv1.taux + ' %');
+  $('#sv-ventes').textContent = typo((Number.isInteger(ventes) ? '' : '≈ ') + nf(ventes, 1) + ' achats');
+  $('#sv-ventes-m').textContent = $('#sv-ventes').textContent;
+  $('#sv-calc').innerHTML = typo(`${sv1.visites} × ${sv1.taux} % = <b>${nf(ventes, 1)} achats</b>`);
+  $$('#sv-leviers button').forEach(b => {
+    b.setAttribute('aria-pressed', sv1.visites === SIMV.visites && sv1.taux === SIMV.tauxConversion ? 'true' : 'false');
+  });
+  // points : un point par visiteur, les acheteurs en or
+  const n = sv1.visites, ach = Math.round(ventes), cols = 20, r = 6, pas = 17, rows = Math.ceil(n / cols);
+  const svgP = $('#sv-points'); svgP.setAttribute('viewBox', `0 0 ${cols * pas} ${Math.max(1, rows) * pas}`); svgP.innerHTML = '';
+  for (let i = 0; i < n; i++) svgP.appendChild(sv('circle', { cx: (i % cols) * pas + pas / 2, cy: Math.floor(i / cols) * pas + pas / 2, r, class: i < ach ? 'p-ach' : 'p-vis' }));
+  svgP.setAttribute('aria-label', typo(`${n} visiteurs, dont ${ach} acheteurs (points pleins).`));
+}
+// quantité de chaque mois : quantité d'un mois moyen et coefficient saisonnier de chaque mois (modifiables)
+sv1.k = SIMV.coefficients.slice();
+const K_MIN = 0.1, K_MAX = 3, K_PAS = 0.1;
+const kModifie = j => Math.abs(sv1.k[j] - SIMV.coefficients[j]) > 1e-9;
+const ligneSim = (nom, ctl, aide) => h('div', { class: 'levier' }, [nom, ctl, aide ? h('span', { class: 'levier__aide', html: aide }) : null]);
+const stepQ = creerStepper({ min: 1, max: 60, pas: 1, valeur: () => sv1.q, poser: v => { sv1.q = v; majQuantites(); }, texte: v => v + ' montres', etiquette: 'quantité d’un mois moyen' });
+const stepK = creerStepper({ min: K_MIN, max: K_MAX, pas: K_PAS, valeur: () => sv1.k[sv1.sel], poser: v => { sv1.k[sv1.sel] = v; majQuantites(); }, texte: v => '× ' + k1(v), etiquette: 'coefficient saisonnier du mois choisi' });
+const nomQ = h('span', { class: 'levier__nom', text: 'Quantité d’un mois moyen' });
+const nomK = h('span', { class: 'levier__nom' });
+const ligneQ = ligneSim(nomQ, stepQ.el, 'Montres A demandées un mois moyen, sans effet de saison.');
+const ligneK = ligneSim(nomK, stepK.el, 'Coefficient saisonnier = <span class="bleu">ventes habituelles du mois ÷ ventes d’un mois moyen</span>.');
+$('#sv-ligne-q').replaceWith(ligneQ); $('#sv-ligne-k').replaceWith(ligneK);
+// puces des 12 mois : mois et coefficient ; la puce choisie est encadrée, une puce modifiée est colorée
+const pucesK = COURS.mois.map((mo, j) => {
+  const k = h('span', { class: 'k' });
+  const b = h('button', { type: 'button', onclick: () => { sv1.sel = j; majQuantites(); } }, [h('span', { class: 'm', text: mo }), k]);
+  $('#sv-mois').appendChild(b);
+  return { b, k };
+});
+$('#sv-reinit').addEventListener('click', () => { sv1.q = SIMV.quantiteMoisMoyen; sv1.k = SIMV.coefficients.slice(); sv1.sel = 11; majQuantites(); });
+function majQuantites() {
+  stepQ.maj(); stepK.maj();
+  const k = sv1.k, vals = k.map(c => sv1.q * c), i = sv1.sel;
+  nomK.textContent = typo('Coefficient saisonnier ' + (/^[aeiou]/.test(COURS.moisLong[i]) ? 'd’' : 'de ') + COURS.moisLong[i]);
+  ligneQ.classList.toggle('rempli', sv1.q !== SIMV.quantiteMoisMoyen);
+  ligneK.classList.toggle('rempli', kModifie(i));
+  pucesK.forEach((p, j) => {
+    p.k.textContent = '×' + NB + k1(k[j]);
+    p.b.setAttribute('aria-pressed', j === i ? 'true' : 'false');
+    p.b.classList.toggle('modifie', kModifie(j));
+    p.b.setAttribute('aria-label', typo(`${maj1(COURS.moisLong[j])} : coefficient ${k1(k[j])}${kModifie(j) ? ', modifié' : ''}`));
+  });
+  const ex = vals[i];
+  const calc = `${maj1(COURS.moisLong[i])} : ${sv1.q} × ${k1(k[i])} = <b>${nf(ex, 1)} montres ${SIMV.modele}</b>${Number.isInteger(Math.round(ex * 10) / 10) ? '' : ' (environ ' + Math.round(ex) + ')'}.`;
+  $('#sv-q-calc').innerHTML = typo(calc);
+  $('#sv-statut').innerHTML = typo(calc);
+  if (!$('#sim2').offsetParent) return;
+  const etroit = document.body.classList.contains('mobile');
+  const mx = Math.max(...vals); const pas = mx <= 20 ? 5 : mx <= 50 ? 10 : mx <= 100 ? 20 : 50;
+  graphique($('#sv-graphe'), { valeurs: vals, couleurs: vals.map((_, j) => j === i ? 'or' : 'acier'), max: Math.ceil(mx / pas) * pas + (mx % pas === 0 ? pas : 0), pas, afficherValeurs: true, sel: i,
+    hauteur: etroit ? (window.innerHeight < 700 ? 150 : 200) : undefined,
+    tip: j => `<strong>${maj1(COURS.moisLong[j])}</strong>${ligneBulle('Coefficient saisonnier', '× ' + k1(k[j]))}${ligneBulle('Quantité demandée', nf(vals[j], 1) + ' montres')}<span class="calc">${typo(sv1.q + ' × ' + k1(k[j]) + ' = ' + nf(vals[j], 1))}</span>`,
+    clic: j => { sv1.sel = j; majQuantites(); } });
+}
+surRedimension(() => { if ($('#sim2').offsetParent) majQuantites(); });
+
+/* ======================================================================
+   5. Stepper générique (− valeur +), champ coloré quand il est renseigné
+   ====================================================================== */
+function creerStepper(o) {
+  const out = h('output', { 'aria-live': 'polite' });
+  const moins = h('button', { type: 'button', 'aria-label': 'Diminuer : ' + o.etiquette, text: '−' });
+  const plus = h('button', { type: 'button', 'aria-label': 'Augmenter : ' + o.etiquette, text: '+' });
+  const el = h('span', { class: 'stepper' }, [moins, out, plus]);
+  const borne = () => (typeof o.max === 'function' ? o.max() : o.max);
+  function maj() {
+    const v = o.valeur(); out.textContent = typo(o.texte(v));
+    moins.disabled = v <= o.min + 1e-9; plus.disabled = v >= borne() - 1e-9;
+  }
+  moins.addEventListener('click', () => { o.poser(Math.max(o.min, Math.round((o.valeur() - o.pas) * 100) / 100)); maj(); });
+  plus.addEventListener('click', () => { o.poser(Math.min(borne(), Math.round((o.valeur() + o.pas) * 100) / 100)); maj(); });
+  maj();
+  return { el, maj };
+}
+
+/* ======================================================================
+   6. Simulateur 3 · plan de charge et flexibilité quantitative
+   ====================================================================== */
+const P0 = SIMP.premierMoisPrevu;
+const leviersVides = () => COURS.mois.map(() => ({ hs: 0, tmp: 0, st: 0, rep: 0, av: 0 }));
+const sp = {
+  ventes: SIMP.ventesMoisMoyen, tu: SIMP.tempsUnitaire, ops: SIMP.operateurs, sel: SIMP.moisSelectionne,
+  L: leviersVides(),
+};
+function calculerPlan() {
+  const hpj = SIMP.heuresParJour, J = SIMP.joursTravail, K = SIMP.coefficients;
+  const r = { qte: [], chargeBase: [], capBase: [], cap: [], hsH: [], tmpH: [], stH: [], repH: [], avOut: [], avIn: COURS.mois.map(() => 0), allocs: [], manque: COURS.mois.map(() => 0) };
+  for (let m = 0; m < 12; m++) {
+    if (m < P0) {
+      r.qte[m] = null; r.chargeBase[m] = SIMP.chargeRealisee[m];
+      r.capBase[m] = r.cap[m] = SIMP.operateurs * hpj * J[m];
+      r.hsH[m] = r.tmpH[m] = r.stH[m] = r.repH[m] = 0; r.avOut[m] = 0;
+      continue;
+    }
+    const L = sp.L[m];
+    r.qte[m] = sp.ventes * K[m];
+    r.chargeBase[m] = r.qte[m] * sp.tu;
+    r.capBase[m] = sp.ops * hpj * J[m];
+    r.hsH[m] = sp.ops * L.hs * J[m];
+    r.tmpH[m] = L.tmp * hpj * J[m];
+    r.stH[m] = L.st * sp.tu;
+    const brut = r.capBase[m] + r.hsH[m] + r.tmpH[m] + r.stH[m];
+    const repMax = Math.floor(r.capBase[m] / 2 / 8) * 8;
+    if (L.rep > repMax) L.rep = repMax;
+    r.repH[m] = L.rep;
+    r.cap[m] = brut - L.rep;
+    r.avOut[m] = 0;
+  }
+  // produire plus tôt : la charge d'un mois est produite dans la capacité inutilisée des mois prévus précédents
+  const chargeOwn = m => r.chargeBase[m] - r.avOut[m] * sp.tu;
+  for (let m = P0; m < 12; m++) {
+    const L = sp.L[m];
+    let reste = Math.min(L.av, Math.floor(r.qte[m] + 1e-9));
+    const voulu = L.av;
+    for (let k = m - 1; k >= P0 && reste > 0; k--) {
+      const libre = r.cap[k] - chargeOwn(k) - r.avIn[k] * sp.tu;
+      const possible = Math.max(0, Math.floor(libre / sp.tu + 1e-9));
+      const pris = Math.min(possible, reste);
+      if (pris > 0) { r.avIn[k] += pris; r.allocs.push({ de: k, pour: m, montres: pris }); reste -= pris; }
+    }
+    r.avOut[m] = Math.min(voulu, Math.floor(r.qte[m] + 1e-9)) - reste;
+    r.manque[m] = voulu - r.avOut[m];
+    L.av = r.avOut[m];
+  }
+  r.charge = []; r.taux = []; r.ecart = []; r.stock = [];
+  for (let m = 0; m < 12; m++) {
+    r.charge[m] = chargeOwn(m) + r.avIn[m] * sp.tu;
+    r.taux[m] = r.cap[m] > 0 ? r.charge[m] / r.cap[m] * 100 : Infinity;
+    r.ecart[m] = r.charge[m] - r.cap[m];
+    r.stock[m] = somme(r.allocs.filter(a => a.de <= m && m < a.pour).map(a => a.montres));
+  }
+  const prev = [...Array(12).keys()].filter(m => m >= P0);
+  const eps = 1e-6;
+  r.moisSous = prev.filter(m => r.ecart[m] > eps);
+  r.auDela = somme(r.moisSous.map(m => r.ecart[m]));
+  r.moisLibres = prev.filter(m => r.ecart[m] < -eps);
+  r.inutilisee = somme(r.moisLibres.map(m => -r.ecart[m]));
+  r.tauxMax = Math.max(...prev.map(m => r.taux[m]));
+  r.moisTauxMax = prev.find(m => r.taux[m] === r.tauxMax);
+  r.stockMax = Math.max(0, ...r.stock);
+  r.totHs = somme(prev.map(m => r.hsH[m])); r.totTmp = somme(prev.map(m => sp.L[m].tmp));
+  r.totSt = somme(prev.map(m => sp.L[m].st)); r.totRep = somme(prev.map(m => r.repH[m])); r.totAv = somme(prev.map(m => r.avOut[m]));
+  return r;
+}
+let R = null;
+function texteH(n) { return nf(n, 1) + ' h'; }
+function tipSim(m) {
+  const J = SIMP.joursTravail[m], hpj = SIMP.heuresParJour;
+  let s = `<strong>${maj1(COURS.moisLong[m])}${m < P0 ? ' · réalisé' : ' · prévu'}</strong>`;
+  if (m < P0) {
+    s += ligneBulle('Charge réalisée', texteH(R.charge[m])) + ligneBulle('Capacité', texteH(R.cap[m])) + `<span class="calc">${typo(SIMP.operateurs + ' × ' + hpj + ' h × ' + J + ' j = ' + nf(R.cap[m], 1) + ' h')}</span>`;
+  } else {
+    s += ligneBulle('Quantité prévue', nf(R.qte[m], 1) + ' montres') + `<span class="calc">${typo(sp.ventes + ' × ' + k1(SIMP.coefficients[m]) + ' = ' + nf(R.qte[m], 1))}</span>`;
+    s += ligneBulle('Charge prévue', texteH(R.chargeBase[m])) + `<span class="calc">${typo(nf(R.qte[m], 1) + ' × ' + nf(sp.tu, 2) + ' h = ' + nf(R.chargeBase[m], 1) + ' h')}</span>`;
+    if (R.avOut[m]) s += ligneBulle('Produit plus tôt', '− ' + texteH(R.avOut[m] * sp.tu));
+    if (R.avIn[m]) s += ligneBulle('Production avancée', '+ ' + texteH(R.avIn[m] * sp.tu));
+    s += ligneBulle('Capacité', texteH(R.cap[m])) + `<span class="calc">${typo(sp.ops + ' × ' + hpj + ' h × ' + J + ' j = ' + nf(R.capBase[m], 1) + ' h' + (R.cap[m] !== R.capBase[m] ? ' ; leviers : ' + (R.cap[m] - R.capBase[m] >= 0 ? '+ ' : '− ') + nf(Math.abs(R.cap[m] - R.capBase[m]), 1) + ' h' : ''))}</span>`;
+  }
+  s += ligneBulle('Taux de charge', pc(R.taux[m]));
+  if (R.ecart[m] > 1e-6) s += `<span class="sit-err">${typo('Au-delà de la capacité : ' + texteH(R.ecart[m]))}</span>`;
+  else if (R.ecart[m] < -1e-6) s += `<span class="sit-ok">${typo('Capacité inutilisée : ' + texteH(-R.ecart[m]))}</span>`;
+  else s += '<span class="sit-ok">Adéquation</span>';
+  if (R.stock[m]) s += ligneBulle('Stock en fin de mois', R.stock[m] + ' montres');
+  return s;
+}
+function dessinerPlan() {
+  if (!$('#sim3').offsetParent) return;
+  const etroit = document.body.classList.contains('mobile');
+  const own = COURS.mois.map((_, m) => R.chargeBase[m] - R.avOut[m] * sp.tu);
+  const mx = Math.max(...R.charge, ...R.cap); const pas = mx > 600 ? 200 : 100;
+  graphique($('#sp-graphe'), {
+    valeurs: own, avance: R.avIn.map(n => n * sp.tu), couleurs: own.map((_, m) => m < P0 ? 'acier' : 'or'), capacite: R.cap,
+    max: Math.ceil((mx + 1) / pas) * pas, pas, afficherValeurs: true, depassement: true, fin: P0 - 1, sel: sp.sel,
+    hauteur: etroit ? (window.innerHeight < 700 ? 150 : 200) : undefined,
+    tip: tipSim, clic: m => { if (m >= P0) { sp.sel = m; majPlan(true); } },
+  });
+}
+function kpi(val, lib, mod) { return h('div', { class: 'kpi' + (mod ? ' kpi--' + mod : '') }, [h('span', { class: 'kpi__val', text: val }), h('span', { class: 'kpi__lib', text: lib })]); }
+function majKpis() {
+  const k = $('#sp-kpis'); k.innerHTML = '';
+  k.append(
+    kpi(texteH(R.auDela), 'au-delà de la capacité' + (R.moisSous.length ? ' (' + R.moisSous.map(m => COURS.mois[m]).join(', ') + ')' : ''), R.auDela > 1e-6 ? 'err' : 'ok'),
+    kpi(texteH(R.inutilisee), 'de capacité inutilisée' + (R.moisLibres.length ? ' (' + R.moisLibres.map(m => COURS.mois[m]).join(', ') + ')' : '')),
+    kpi(pc(R.tauxMax), 'taux de charge le plus élevé (' + COURS.mois[R.moisTauxMax] + ')', R.tauxMax > 100 + 1e-6 ? 'err' : null),
+    kpi(R.stockMax + ' montres', 'en stock au plus haut (produites plus tôt)'),
+  );
+  // ligne d'état compacte sous le graphique (affichée sur smartphone)
+  const m = sp.sel, e = R.ecart[m];
+  const etatMois = e > 1e-6 ? `<span class="err">${texteH(e)} au-delà de la capacité</span>` : e < -1e-6 ? `<span class="ok">${texteH(-e)} de capacité inutilisée</span>` : '<span class="ok">adéquation</span>';
+  const etatAn = R.auDela > 1e-6 ? `<span class="err">Juillet à décembre : ${texteH(R.auDela)} au-delà de la capacité</span>` : '<span class="ok">Juillet à décembre : aucun mois au-delà de la capacité</span>';
+  $('#sp-statut').innerHTML = typo(`<b>${maj1(COURS.moisLong[m])}</b> · taux de charge ${pc(R.taux[m])} · ${etatMois}<br>${etatAn}`);
+  const v = $('#sp-verdict'); v.innerHTML = '';
+  const couts = [];
+  if (R.totHs) couts.push(`${texteH(R.totHs)} supplémentaires : des heures majorées`);
+  if (R.totTmp) couts.push(`${R.totTmp} renfort${R.totTmp > 1 ? 's' : ''} mensuel${R.totTmp > 1 ? 's' : ''} de personnel temporaire : du personnel à former`);
+  if (R.totSt) couts.push(`${R.totSt} montres confiées à un sous-traitant`);
+  if (R.totAv) couts.push(`${R.totAv} montres produites plus tôt : un stock à financer, un risque d’invendus`);
+  if (R.totRep) couts.push(`${texteH(R.totRep)} de reprise des heures et des vacances`);
+  const listeCouts = couts.length ? h('ul', {}, couts.map(c => h('li', { text: c }))) : null;
+  if (R.auDela > 1e-6) {
+    v.appendChild(h('div', { class: 'encadre encadre--err', role: 'status' }, [h('span', { class: 'encadre__icone', text: '!', 'aria-hidden': 'true' }), h('div', {}, [
+      h('p', { html: `<b>Sous-capacité en ${listeMois(R.moisSous)}.</b> La charge dépasse la capacité de ${texteH(R.auDela)}.` }),
+      h('p', { text: 'Choisissez un mois, puis ajoutez un levier.' }),
+      couts.length ? h('p', { text: 'Leviers déjà choisis :' }) : null, listeCouts])]));
+  } else {
+    v.appendChild(h('div', { class: 'encadre encadre--ok', role: 'status' }, [h('span', { class: 'encadre__icone', text: '✓', 'aria-hidden': 'true' }), h('div', {}, [
+      h('p', { html: '<b>Aucun mois au-delà de la capacité.</b> La manufacture fournit la quantité prévue chaque mois.' }),
+      couts.length ? h('p', { text: 'Le coût de vos choix :' }) : null, listeCouts,
+      R.inutilisee > 1e-6 ? h('p', { text: `Capacité inutilisée : ${texteH(R.inutilisee)}. Ce sont des ressources payées, mais inutilisées.` }) : null])]));
+  }
+}
+const sel = { steppers: [] };
+function construireLeviers() {
+  const z = $('#sp-leviers'); z.innerHTML = ''; sel.steppers = [];
+  const m = sp.sel, L = sp.L[m], J = SIMP.joursTravail[m], hpj = SIMP.heuresParJour;
+  $('#sp-titre-mois').textContent = typo('Leviers du mois ' +(/^[aeiou]/.test(COURS.moisLong[m]) ? 'd’' : 'de ') + COURS.moisLong[m]);
+  const ligne = (nom, aide, st, cle, inactif) => {
+    const row = h('div', { class: 'levier' + (inactif ? ' inactif' : '') }, [h('span', { class: 'levier__nom', text: nom }), st.el, h('span', { class: 'levier__aide', html: aide() })]);
+    sel.steppers.push({ st, row, aide, cle });
+    return row;
+  };
+  const famille = t => h('div', { class: 'famille', text: t });
+  z.append(famille('Adapter la capacité à la charge · augmenter'));
+  z.append(ligne('Heures supplémentaires', () => `Par opérateur et par jour. Effet : <span class="bleu">${sp.ops} × ${nf(L.hs, 1)} h × ${J} j = + ${nf(sp.ops * L.hs * J, 1)} h</span>`,
+    creerStepper({ min: 0, max: 2, pas: .5, valeur: () => L.hs, poser: v => { L.hs = v; majPlan(); }, texte: v => nf(v, 1) + ' h', etiquette: 'heures supplémentaires' }), 'hs'));
+  z.append(ligne('Personnel temporaire', () => `Opérateurs en renfort pour le mois. Effet : <span class="bleu">${L.tmp} × ${hpj} h × ${J} j = + ${nf(L.tmp * hpj * J, 1)} h</span>`,
+    creerStepper({ min: 0, max: 3, pas: 1, valeur: () => L.tmp, poser: v => { L.tmp = v; majPlan(); }, texte: v => v + ' opér.', etiquette: 'personnel temporaire' }), 'tmp'));
+  z.append(ligne('Sous-traitance', () => `Montres confiées à un sous-traitant. Effet : <span class="bleu">${L.st} × ${nf(sp.tu, 2)} h = + ${nf(L.st * sp.tu, 1)} h</span>`,
+    creerStepper({ min: 0, max: 300, pas: 10, valeur: () => L.st, poser: v => { L.st = v; majPlan(); }, texte: v => v + ' montres', etiquette: 'sous-traitance' }), 'st'));
+  z.append(famille('Adapter la capacité à la charge · réduire'));
+  z.append(ligne('Reprise des heures et des vacances', () => `Heures non travaillées dans le mois. Effet : <span class="bleu">− ${nf(L.rep, 0)} h</span>`,
+    creerStepper({ min: 0, max: () => Math.floor(R.capBase[m] / 2 / 8) * 8, pas: 8, valeur: () => L.rep, poser: v => { L.rep = v; majPlan(); }, texte: v => nf(v, 0) + ' h', etiquette: 'reprise des heures' }), 'rep'));
+  z.append(famille('Adapter la charge à la capacité'));
+  const premier = m === P0;
+  z.append(ligne('Produire plus tôt', () => premier
+      ? `${maj1(COURS.moisLong[m])} est le premier mois prévu : rien à avancer.`
+      : `Montres de ce mois produites dans la capacité inutilisée des mois précédents. Effet : <span class="bleu">− ${nf(L.av * sp.tu, 1)} h ce mois-ci</span>${R && R.manque[m] ? '<br><b>Capacité inutilisée insuffisante avant ce mois.</b>' : ''}`,
+    creerStepper({ min: 0, max: () => premier ? 0 : Math.floor(R.qte[m] + 1e-9), pas: 10, valeur: () => L.av, poser: v => { L.av = v; majPlan(); }, texte: v => v + ' montres', etiquette: 'produire plus tôt' }), 'av', premier));
+  rafraichirLeviers();
+}
+function rafraichirLeviers() {
+  const L = sp.L[sp.sel];
+  sel.steppers.forEach(s => { s.st.maj(); s.row.classList.toggle('rempli', L[s.cle] > 0); s.row.querySelector('.levier__aide').innerHTML = typo(s.aide()); });
+}
+function construirePuces() {
+  const z = $('#sp-mois'); z.innerHTML = '';
+  for (let m = P0; m < 12; m++) {
+    z.appendChild(h('button', { type: 'button', 'aria-pressed': m === sp.sel ? 'true' : 'false', 'data-m': m, onclick: () => { sp.sel = m; majPlan(true); } }, [h('span', { class: 'pt' + (R.ecart[m] > 1e-6 ? ' err' : ''), 'aria-hidden': 'true' }), COURS.mois[m]]));
+  }
+}
+function construirePrevision() {
+  const z = $('#sp-prevision'); z.innerHTML = '';
+  const ligneP = (nom, aide, ctl) => h('div', { class: 'levier' }, [h('span', { class: 'levier__nom', text: nom }), ctl, h('span', { class: 'levier__aide', html: aide })]);
+  const stV = creerStepper({ min: 200, max: 600, pas: 20, valeur: () => sp.ventes, poser: v => { sp.ventes = v; majPlan(); }, texte: v => v + ' montres', etiquette: 'ventes d’un mois moyen' });
+  const stO = creerStepper({ min: 1, max: 4, pas: 1, valeur: () => sp.ops, poser: v => { sp.ops = v; majPlan(); }, texte: v => v + ' opér.', etiquette: 'nombre d’opérateurs' });
+  const chips = h('span', { class: 'choix-chips', role: 'group', 'aria-label': 'Temps unitaire' }, [0.5, 0.75, 1].map(t => h('button', { type: 'button', 'aria-pressed': t === sp.tu ? 'true' : 'false', onclick: () => { sp.tu = t; construirePrevision(); majPlan(); } }, nf(t, 2) + ' h')));
+  z.append(
+    ligneP('Ventes d’un mois moyen', 'Prévision du marketing, sans effet de saison.', stV.el),
+    ligneP('Temps unitaire', 'Temps pour remonter une montre. Il vient de la gamme.', chips),
+    ligneP('Nombre d’opérateurs', `Temps disponible : ${SIMP.heuresParJour} h par jour, selon les jours de travail du mois.`, stO.el),
+  );
+  sel.prev = [stV, stO];
+}
+function majTableau() {
+  const hpj = SIMP.heuresParJour;
+  const th = COURS.mois.map((mo, m) => h('th', { class: m === sp.sel ? 'sel' : null, scope: 'col', title: m < P0 ? 'Mois réalisé' : 'Sélectionner ce mois', onclick: () => { if (m >= P0) { sp.sel = m; majPlan(true); } } }, mo));
+  const lignes = [
+    ['Coefficient saisonnier', m => m < P0 ? '—' : '× ' + k1(SIMP.coefficients[m])],
+    ['Quantité prévue (montres)', m => m < P0 ? '—' : nf(R.qte[m], 1)],
+    ['Charge (h)', m => nf(R.charge[m], 1)],
+    ['Jours de travail', m => String(SIMP.joursTravail[m])],
+    ['Capacité (h)', m => nf(R.cap[m], 1)],
+    ['Taux de charge', m => pc(R.taux[m])],
+    ['Charge − capacité (h)', m => nf(R.ecart[m], 1)],
+    ['Stock en fin de mois (montres)', m => R.stock[m] ? String(R.stock[m]) : '—'],
+  ];
+  const tb = h('tbody', {}, lignes.map(([lib, f]) => h('tr', {}, [h('th', { scope: 'row', text: lib })].concat(COURS.mois.map((_, m) => {
+    let cls = m === sp.sel ? 'sel' : '';
+    if (m < P0) cls += ' passe';
+    if (lib.startsWith('Charge −')) cls += R.ecart[m] > 1e-6 ? ' err' : ' ok';
+    return h('td', { class: cls.trim() || null, text: f(m) });
+  })))));
+  const t = h('table', { class: 'tableau tab-calc' }, [h('thead', {}, h('tr', {}, [h('th', { text: 'Mois' })].concat(th))), tb]);
+  const z = $('#sp-tableau'); z.innerHTML = '';
+  z.append(t, h('p', { class: 'note', style: 'margin:.5rem 0 0', text: `Janvier à juin : charge réalisée, capacité de ${SIMP.operateurs} opérateurs × ${hpj} h par jour. Juillet à décembre : charge prévue = ventes d’un mois moyen × coefficient saisonnier × temps unitaire.` }));
+}
+function majPlan(reconstruire) {
+  R = calculerPlan();
+  if (reconstruire || !sel.steppers.length) { construireLeviers(); }
+  construirePuces(); rafraichirLeviers(); (sel.prev || []).forEach(s => s.maj());
+  dessinerPlan(); majKpis(); majTableau();
+}
+$('#sp-effacer-mois').addEventListener('click', () => { sp.L[sp.sel] = { hs: 0, tmp: 0, st: 0, rep: 0, av: 0 }; majPlan(true); });
+$('#sp-reinit').addEventListener('click', () => {
+  sp.ventes = SIMP.ventesMoisMoyen; sp.tu = SIMP.tempsUnitaire; sp.ops = SIMP.operateurs; sp.sel = SIMP.moisSelectionne; sp.L = leviersVides();
+  construirePrevision(); majPlan(true);
+});
+surRedimension(dessinerPlan);
+
+/* ======================================================================
+   7. Onglets et sous-onglets
+   ====================================================================== */
+const etatNav = { theorie: 'th1', simulateur: 'sim1' };
+// hauteur de la barre de sous-onglets collante : le graphique du plan se colle juste dessous
+function majHauteurSous() {
+  const b = $('#panneau-simulateur .sous-onglets');
+  if (b && b.offsetParent) document.documentElement.style.setProperty('--h-sous', Math.ceil(b.getBoundingClientRect().height) + 'px');
+}
+surRedimension(majHauteurSous);
+function activerOnglet(nom, maj = true) {
+  $$('.onglets [role="tab"]').forEach(b => b.setAttribute('aria-selected', b.dataset.onglet === nom ? 'true' : 'false'));
+  $('#panneau-theorie').hidden = nom !== 'theorie';
+  $('#panneau-simulateur').hidden = nom !== 'simulateur';
+  document.body.dataset.onglet = nom;
+  activerSous(nom, etatNav[nom], maj);
+}
+function activerSous(groupe, cible, majHash = true) {
+  etatNav[groupe] = cible;
+  const barre = $(`.sous-onglets[data-groupe="${groupe}"]`);
+  $$('button', barre).forEach(b => b.setAttribute('aria-selected', b.dataset.cible === cible ? 'true' : 'false'));
+  $$('.sous-panneau', barre.parentNode).forEach(p => { p.hidden = p.id !== cible; });
+  cacherBulle();
+  majHauteurSous();
+  if (cible === 'sim1') { majVentes(); }
+  if (cible === 'sim2') { majQuantites(); }
+  if (cible === 'sim3') { majPlan(true); }
+  if (groupe === 'theorie') dessinerTheorie();
+  if (majHash) { try { history.replaceState(null, '', '#' + cible); } catch (e) { /* aperçu isolé */ } }
+}
+$$('.onglets [role="tab"]').forEach((b, i, arr) => {
+  b.addEventListener('click', () => { activerOnglet(b.dataset.onglet); try { window.scrollTo({ top: 0 }); } catch (e) { } });
+  b.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const j = (i + (e.key === 'ArrowRight' ? 1 : -1) + arr.length) % arr.length; arr[j].focus(); activerOnglet(arr[j].dataset.onglet); } });
+});
+$$('.sous-onglets').forEach(barre => {
+  const g = barre.dataset.groupe; const btns = $$('button', barre);
+  btns.forEach((b, i) => {
+    b.addEventListener('click', () => activerSous(g, b.dataset.cible));
+    b.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const j = (i + (e.key === 'ArrowRight' ? 1 : -1) + btns.length) % btns.length; btns[j].focus(); activerSous(g, btns[j].dataset.cible); } });
+  });
+});
+
+/* ======================================================================
+   8. Réglages : thème, affichage, confort de lecture
+   ====================================================================== */
+const CLE = 'ehg-cph-hop-01-flexibilite-quantitative';
+const reglages = Object.assign({ theme: 'auto', affichage: 'auto', confort: 'non' }, stock.lire(CLE, {}));
+const mqSombre = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+function appliquerTheme() {
+  const sombre = reglages.theme === 'sombre' || (reglages.theme === 'auto' && mqSombre && mqSombre.matches);
+  document.documentElement.dataset.theme = sombre ? 'sombre' : 'clair';
+  const m = $('meta[name="theme-color"]'); if (m) m.content = sombre ? '#121212' : '#141414';
+}
+function appliquerAffichage() {
+  const mobile = reglages.affichage === 'mobile' || (reglages.affichage === 'auto' && window.innerWidth < 760);
+  document.body.classList.toggle('mobile', mobile);
+}
+function appliquerConfort() {
+  const on = reglages.confort === 'oui';
+  document.body.classList.toggle('confort', on);
+  $('#btn-confort').setAttribute('aria-pressed', on ? 'true' : 'false');
+}
+function appliquerReglages(redessiner = true) {
+  appliquerTheme(); appliquerAffichage(); appliquerConfort();
+  $$('.segmente').forEach(s => $$('button', s).forEach(b => b.setAttribute('aria-pressed', reglages[s.dataset.reglage] === b.dataset.v ? 'true' : 'false')));
+  stock.ecrire(CLE, reglages);
+  if (redessiner) toutRedessiner();
+}
+if (mqSombre && mqSombre.addEventListener) mqSombre.addEventListener('change', () => appliquerReglages());
+$$('.segmente').forEach(s => $$('button', s).forEach(b => b.addEventListener('click', () => { reglages[s.dataset.reglage] = b.dataset.v; appliquerReglages(); })));
+$('#btn-confort').addEventListener('click', () => { reglages.confort = reglages.confort === 'oui' ? 'non' : 'oui'; appliquerReglages(); });
+
+/* ======================================================================
+   9. Modales (réglages, QR code)
+   ====================================================================== */
+function ouvrirModale(m) { m._retour = document.activeElement; m.hidden = false; document.body.classList.add('modale-ouverte'); const f = m.querySelector('.modale__fermer'); if (f) f.focus(); }
+function fermerModale(m) {
+  m.hidden = true;
+  if (!document.querySelector('.modale:not([hidden])')) document.body.classList.remove('modale-ouverte');
+  if (typeof m._onClose === 'function') m._onClose();
+  if (m._retour && m._retour.focus) m._retour.focus();
+}
+$$('.modale').forEach(m => {
+  m.querySelectorAll('[data-fermer]').forEach(b => b.addEventListener('click', () => fermerModale(m)));
+  m.addEventListener('keydown', ev => {
+    if (ev.key !== 'Tab') return;
+    const f = Array.from(m.querySelectorAll('button, input, summary')).filter(x => !x.disabled && x.offsetParent !== null);
+    if (!f.length) return;
+    const i = f.indexOf(document.activeElement);
+    if (ev.shiftKey && i <= 0) { ev.preventDefault(); f[f.length - 1].focus(); }
+    else if (!ev.shiftKey && i === f.length - 1) { ev.preventDefault(); f[0].focus(); }
+  });
+});
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { const m = document.querySelector('.modale:not([hidden])'); if (m) fermerModale(m); } });
+$('#btn-reglages').addEventListener('click', () => ouvrirModale($('#modale-reglages')));
+{
+  const modale = $('#modale-qr'), zone = $('#qr-zone'), urlEl = $('#qr-url'), note = $('#qr-note'), input = $('#qr-input');
+  // Adresse publique de la page sur GitHub Pages (fournie par l'enseignant le 12.10.2026).
+  const ADRESSE_EN_LIGNE = 'https://nicolas-derobert.github.io/ligne-de-production/charge-capa.html';
+  const adresseCourante = () => { try { return location.href.replace(/#.*$/, ''); } catch (e) { return ''; } };
+  function dessinerQr(texte) {
+    const t = (texte || '').trim(); zone.innerHTML = '';
+    if (!t) { zone.appendChild(h('p', { class: 'note', text: 'Saisissez une adresse à encoder.' })); urlEl.textContent = ''; return; }
+    try { zone.innerHTML = QR.svg(t); } catch (e) { zone.appendChild(h('p', { class: 'note', text: 'Adresse trop longue pour un QR code.' })); }
+    urlEl.textContent = t;
+    const local = /^(file|about|blob|data):/i.test(t);
+    note.hidden = !local;
+    if (local) { note.textContent = typo('Cette page est ouverte depuis un fichier local. Un téléphone ne peut pas l’ouvrir avec ce QR code. Saisissez l’adresse de la page en ligne.'); $('#qr-options').open = true; }
+  }
+  $('#btn-qr').addEventListener('click', () => { if (!input.value) input.value = ADRESSE_EN_LIGNE || adresseCourante(); dessinerQr(input.value); ouvrirModale(modale); });
+  modale._onClose = () => { modale.classList.remove('modale--plein'); $('#qr-agrandir').setAttribute('aria-pressed', 'false'); $('#qr-agrandir').textContent = 'Agrandir pour projeter'; };
+  input.addEventListener('input', () => dessinerQr(input.value));
+  $('#qr-agrandir').addEventListener('click', e => { const on = !modale.classList.contains('modale--plein'); modale.classList.toggle('modale--plein', on); e.currentTarget.setAttribute('aria-pressed', on ? 'true' : 'false'); e.currentTarget.textContent = on ? 'Taille normale' : 'Agrandir pour projeter'; });
+  $('#qr-copier').addEventListener('click', e => {
+    const b = e.currentTarget, t = (input.value || adresseCourante()).trim();
+    const ok = () => { b.textContent = 'Adresse copiée ✓'; setTimeout(() => { b.textContent = typo('Copier l’adresse'); }, 1800); };
+    try { navigator.clipboard.writeText(t).then(ok, () => { input.select(); ok(); }); } catch (err) { input.select(); ok(); }
+  });
+}
+
+/* ======================================================================
+   10. Démarrage
+   ====================================================================== */
+typoDom(document.body);
+document.title = typo(document.title);
+appliquerReglages(false);
+construirePrevision();
+function lireAdresse() {
+  let d = { onglet: 'theorie', sous: etatNav.theorie };
+  try {
+    const hsh = location.hash.replace('#', '');
+    if (/^th[1-6]$/.test(hsh)) d = { onglet: 'theorie', sous: hsh };
+    else if (/^sim[123]$/.test(hsh)) d = { onglet: 'simulateur', sous: hsh };
+    else if (hsh === 'simulateur') d = { onglet: 'simulateur', sous: etatNav.simulateur };
+  } catch (e) { /* aperçu isolé */ }
+  return d;
+}
+const depart = lireAdresse();
+etatNav[depart.onglet] = depart.sous;
+activerOnglet(depart.onglet, false);
+// une adresse avec #sim3 ou #th2 ouvre l'onglet voulu, en haut de page (pas de saut vers l'ancre)
+try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) { }
+if (location.hash) { window.scrollTo(0, 0); window.addEventListener('load', () => { window.scrollTo(0, 0); setTimeout(() => window.scrollTo(0, 0), 0); requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, 0))); }); }
+window.addEventListener('hashchange', () => { const d = lireAdresse(); etatNav[d.onglet] = d.sous; activerOnglet(d.onglet, false); window.scrollTo(0, 0); });
+majBoutonsTout();
+window.__flexq = { calculerPlan: () => calculerPlan(), sp, activerOnglet, activerSous, reglages };
+})();
+</script>
+</body>
+</html>
